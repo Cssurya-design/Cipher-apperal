@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'https://cipherapparel.pythonanywhere.com';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api',
+  baseURL: `${API_BASE}/api`,
 });
 
 // Add a request interceptor to attach JWT token
@@ -16,4 +18,5 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+export { API_BASE };
 export default api;

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
+import Footer from '../components/Footer';
+import api from '../api';
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
 
   useEffect(() => {
-    // Fetch featured products from Django API
-    axios.get('https://cipherapparel.pythonanywhere.com/api/featured/')
+    api.get('/featured/')
       .then(res => setFeatured(res.data.featured))
       .catch(err => console.error("Error fetching featured products", err));
   }, []);
@@ -51,6 +51,8 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 };
