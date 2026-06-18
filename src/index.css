@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #9256ce;
+  --color-primary-dark: #4a00e0;
+  --color-secondary: #088178;
+}
+
+body {
+  font-family: "Inter", "Spartan", sans-serif;
+  overflow-x: hidden;
+}
+
+/* Base custom styles for animations and layout */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
