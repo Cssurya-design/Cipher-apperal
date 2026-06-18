@@ -36,7 +36,7 @@ const Contact = () => {
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-[#1a1a1a] text-white py-24 text-center bg-cover bg-center"
+        className="w-full min-h-[40vh] bg-[#1a1a1a] text-white flex flex-col justify-center items-center text-center bg-cover bg-center"
         style={{ backgroundImage: `url('${API_BASE}/static/store/images/about/banner.png')` }}
       >
         <h1 className="text-4xl md:text-5xl font-bold mb-2">#Let's_<span className="text-gray-300">Talk</span></h1>

@@ -90,11 +90,11 @@ const Home = () => {
 
       {/* Main Banner */}
       <section 
-        className="py-24 text-center bg-cover bg-center text-white my-12"
+        className="py-20 md:py-24 text-center bg-cover bg-center text-white my-12 flex flex-col justify-center items-center w-full min-h-[40vh]"
         style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b2.jpg')` }}
       >
-        <h4 className="text-2xl font-semibold mb-4">Repair Services</h4>
-        <h2 className="text-4xl md:text-5xl font-bold mb-6">Up to <span className="text-red-500">70% off</span> All t-shirts and accessories</h2>
+        <h4 className="text-xl md:text-2xl font-semibold mb-4">Repair Services</h4>
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">Up to <span className="text-red-500">70% off</span> All t-shirts and accessories</h2>
         <button className="bg-white text-gray-900 px-8 py-3 rounded-md font-bold hover:bg-primary hover:text-white transition-colors">
           Explore more
         </button>
@@ -136,49 +136,49 @@ const Home = () => {
       </section>
 
       {/* Small Banners */}
-      <section className="px-6 py-12 max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
+      <section className="px-4 md:px-10 lg:px-20 py-12 w-full flex flex-col md:flex-row gap-6 justify-between">
         <div 
-          className="bg-cover bg-center p-12 text-white flex flex-col justify-center items-start min-h-[50vh]"
+          className="w-full md:w-[48%] bg-cover bg-center p-8 md:p-12 text-white flex flex-col justify-center items-start min-h-[40vh] md:min-h-[50vh]"
           style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b17.jpg')` }}
         >
           <h4 className="text-xl font-light mb-2">crazy deals</h4>
           <h2 className="text-3xl font-bold mb-4">buy 1 get 1 free</h2>
           <span className="text-sm font-medium mb-6">The best classic dress is on sale at cipher apparel</span>
-          <button className="border border-white px-6 py-2 hover:bg-primary hover:border-primary transition-colors">Learn More</button>
+          <button className="border border-white px-6 py-2 hover:bg-primary hover:border-primary transition-colors text-sm font-semibold rounded">Learn More</button>
         </div>
         <div 
-          className="bg-cover bg-center p-12 text-white flex flex-col justify-center items-start min-h-[50vh]"
+          className="w-full md:w-[48%] bg-cover bg-center p-8 md:p-12 text-white flex flex-col justify-center items-start min-h-[40vh] md:min-h-[50vh]"
           style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b10.jpg')` }}
         >
           <h4 className="text-xl font-light mb-2">spring/summer</h4>
           <h2 className="text-3xl font-bold mb-4">upcoming season</h2>
           <span className="text-sm font-medium mb-6">The best classic dress is on sale at cipher apparel</span>
-          <button className="border border-white px-6 py-2 hover:bg-primary hover:border-primary transition-colors">Learn More</button>
+          <button className="border border-white px-6 py-2 hover:bg-primary hover:border-primary transition-colors text-sm font-semibold rounded">Learn More</button>
         </div>
       </section>
 
       {/* Bottom 3 Banners */}
-      <section className="px-6 pb-16 max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
+      <section className="px-4 md:px-10 lg:px-20 pb-16 w-full flex flex-wrap justify-between gap-y-6">
         <div 
-          className="bg-cover bg-center p-8 text-white flex flex-col justify-center min-h-[30vh]"
+          className="w-full md:w-[48%] lg:w-[32%] bg-cover bg-center p-8 text-white flex flex-col justify-center items-start min-h-[30vh]"
           style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b7.jpg')` }}
         >
           <h2 className="text-2xl font-bold mb-2 uppercase">SEASONAL SALE</h2>
-          <h3 className="text-red-500 font-bold">Winter Collection -50% OFF</h3>
+          <h3 className="text-red-500 font-bold text-lg">Winter Collection -50% OFF</h3>
         </div>
         <div 
-          className="bg-cover bg-center p-8 text-white flex flex-col justify-center min-h-[30vh]"
+          className="w-full md:w-[48%] lg:w-[32%] bg-cover bg-center p-8 text-white flex flex-col justify-center items-start min-h-[30vh]"
           style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b4.jpg')` }}
         >
           <h2 className="text-2xl font-bold mb-2 uppercase">NEW FOOTWEAR COLLECTION</h2>
-          <h3 className="text-red-500 font-bold">Spring/Summer 2026</h3>
+          <h3 className="text-red-500 font-bold text-lg">Spring/Summer 2026</h3>
         </div>
         <div 
-          className="bg-cover bg-center p-8 text-white flex flex-col justify-center min-h-[30vh]"
+          className="w-full md:w-full lg:w-[32%] bg-cover bg-center p-8 text-white flex flex-col justify-center items-start min-h-[30vh]"
           style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b18.jpg')` }}
         >
           <h2 className="text-2xl font-bold mb-2 uppercase">T-SHIRTS</h2>
-          <h3 className="text-red-500 font-bold">New Trendy Prints</h3>
+          <h3 className="text-red-500 font-bold text-lg">New Trendy Prints</h3>
         </div>
       </section>
 
