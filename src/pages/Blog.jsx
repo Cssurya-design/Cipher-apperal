@@ -1,75 +1,170 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Footer from '../components/Footer';
+import { API_BASE } from '../api';
 
 const posts = [
   {
     id: 1,
-    title: 'The Evolution of Streetwear Fashion',
-    excerpt: 'Explore how streetwear went from underground culture to mainstream fashion and what it means for the future of style.',
-    date: 'Jun 15, 2026',
-    image: '/hero-new.jpg',
+    title: 'The Cotton-Jersey Zip-Up Hoodie',
+    excerpt: 'Kickstarter man braid godard coloring book. Raclette waistcoat selfies yr wolf chartreuse hexagon irony. godard...',
+    date: '13/01',
+    image: `${API_BASE}/static/store/images/blog/b1.jpg`,
   },
   {
     id: 2,
-    title: 'Summer 2026 Trends You Need to Know',
-    excerpt: 'From bold patterns to minimalist designs, discover the hottest trends that will define this summer season.',
-    date: 'Jun 10, 2026',
-    image: '/hero-new.jpg',
+    title: 'How to Style a Quiff',
+    excerpt: 'Kickstarter man braid godard coloring book. Raclette waistcoat selfies yr wolf chartreuse hexagon irony. godard...',
+    date: '13/01',
+    image: `${API_BASE}/static/store/images/blog/b2.jpg`,
   },
   {
     id: 3,
-    title: 'How to Build a Capsule Wardrobe',
-    excerpt: 'Learn the art of creating a versatile wardrobe with fewer pieces that work together perfectly.',
-    date: 'Jun 5, 2026',
-    image: '/hero-new.jpg',
+    title: 'Must-Have Skater Girl Items',
+    excerpt: 'Kickstarter man braid godard coloring book. Raclette waistcoat selfies yr wolf chartreuse hexagon irony. godard...',
+    date: '13/01',
+    image: `${API_BASE}/static/store/images/blog/b3.jpg`,
   },
   {
     id: 4,
-    title: 'Sustainable Fashion: Our Commitment',
-    excerpt: 'Discover how Cipher Apparel is leading the charge in eco-friendly and sustainable fashion practices.',
-    date: 'May 28, 2026',
-    image: '/hero-new.jpg',
+    title: 'Runway-Inspired Trends',
+    excerpt: 'Kickstarter man braid godard coloring book. Raclette waistcoat selfies yr wolf chartreuse hexagon irony. godard...',
+    date: '13/01',
+    image: `${API_BASE}/static/store/images/blog/b4.jpg`,
+  },
+  {
+    id: 5,
+    title: 'AW20 Menswear Trends',
+    excerpt: 'Kickstarter man braid godard coloring book. Raclette waistcoat selfies yr wolf chartreuse hexagon irony. godard...',
+    date: '13/01',
+    image: `${API_BASE}/static/store/images/blog/b6.jpg`,
+  },
+  {
+    id: 6,
+    title: 'Top 10 Casual Outfits for Spring',
+    excerpt: 'Discover the best casual wear for the spring season. From lightweight jackets to trendy sneakers, this guide covers all essentials...',
+    date: '20/02',
+    image: `${API_BASE}/static/store/images/blog/b5.jpg`,
+  },
+  {
+    id: 7,
+    title: 'Street Style Essentials for Men',
+    excerpt: 'Street style has evolved into a global fashion movement. Learn how to incorporate bold prints, layered looks, and statement accessories...',
+    date: '05/03',
+    image: `${API_BASE}/static/store/images/blog/b7.jpg`,
+  },
+  {
+    id: 8,
+    title: 'How to Build a Capsule Wardrobe',
+    excerpt: 'A capsule wardrobe is all about quality over quantity. Learn how to curate a versatile collection that works for every occasion...',
+    date: '12/03',
+    image: `${API_BASE}/static/store/images/blog/b1.jpg`,
+  },
+  {
+    id: 9,
+    title: 'Summer Fashion Lookbook 2026',
+    excerpt: 'Get inspired with our summer 2026 lookbook featuring breezy linens, vibrant prints, and the hottest accessories of the season...',
+    date: '15/03',
+    image: `${API_BASE}/static/store/images/blog/b3.jpg`,
+  },
+  {
+    id: 10,
+    title: 'Sustainable Fashion: A Complete Guide',
+    excerpt: 'Sustainable fashion is more than a trend — it\'s a movement. Discover eco-friendly brands, upcycling tips, and how to shop responsibly...',
+    date: '18/03',
+    image: `${API_BASE}/static/store/images/blog/b4.jpg`,
   },
 ];
 
 const Blog = () => {
+  const POSTS_PER_PAGE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+  const visiblePosts = posts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+
   return (
     <div className="pt-24 min-h-screen bg-gray-50">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-gradient-to-r from-primary/10 to-primary-dark/10 py-16 text-center"
+        className="bg-[#1a1a1a] text-white py-24 text-center bg-cover bg-center"
+        style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b19.jpg')` }}
       >
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">#ReadMore</h1>
-        <p className="text-gray-600">Read all case studies about our products!</p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-2">#Read<span className="text-gray-300">More</span></h1>
+        <p className="text-gray-300">Read all case studies about our products!</p>
       </motion.div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
-        <div className="grid md:grid-cols-2 gap-8">
-          {posts.map((post, i) => (
+        <div className="space-y-12">
+          {visiblePosts.map((post, i) => (
             <motion.article
               key={post.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group hover:shadow-md transition-shadow"
+              className="flex flex-col md:flex-row gap-8 items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative"
             >
-              <div className="overflow-hidden">
+              <div className="w-full md:w-1/2 overflow-hidden rounded-xl">
                 <img 
                   src={post.image} 
                   alt={post.title} 
-                  className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500" 
+                  className="w-full h-[300px] object-cover hover:scale-105 transition-transform duration-500"
+                  onError={(e) => { e.target.src = '/hero-new.jpg'; }}
                 />
               </div>
-              <div className="p-6">
-                <span className="text-xs text-primary font-semibold uppercase tracking-wider">{post.date}</span>
-                <h3 className="text-xl font-bold text-gray-900 mt-2 mb-3">{post.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{post.excerpt}</p>
+              <div className="w-full md:w-1/2 relative">
+                <h1 className="absolute -top-16 md:-top-12 -left-4 md:-left-8 text-5xl md:text-7xl font-bold text-gray-100 -z-10">{post.date}</h1>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">{post.title}</h3>
+                <p className="text-gray-500 leading-relaxed mb-4">{post.excerpt}</p>
+                <a href="#" className="font-bold text-gray-900 text-sm tracking-wider hover:text-primary transition-colors">CONTINUE READING &rarr;</a>
               </div>
             </motion.article>
           ))}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-2 mt-16">
+          {currentPage > 1 && (
+            <button 
+              onClick={() => {
+                setCurrentPage(currentPage - 1);
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+              }}
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold"
+            >
+              &larr;
+            </button>
+          )}
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => {
+                setCurrentPage(page);
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+              }}
+              className={`w-10 h-10 flex items-center justify-center rounded-lg font-bold transition-colors ${
+                currentPage === page ? 'bg-primary text-white' : 'bg-gray-200 text-gray-800 hover:bg-primary hover:text-white'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          {currentPage < totalPages && (
+            <button 
+              onClick={() => {
+                setCurrentPage(currentPage + 1);
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+              }}
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold"
+            >
+              &rarr;
+            </button>
+          )}
         </div>
       </div>
 
