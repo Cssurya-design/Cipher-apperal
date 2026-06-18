@@ -15,6 +15,7 @@ const Wishlist = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "My Wishlist | Cipher Apparel";
     if (!user) {
       setLoading(false);
       return;

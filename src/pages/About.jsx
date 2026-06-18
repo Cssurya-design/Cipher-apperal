@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Footer from '../components/Footer';
 import { API_BASE } from '../api';
@@ -13,6 +13,10 @@ const features = [
 ];
 
 const About = () => {
+  useEffect(() => {
+    document.title = "About Us | Cipher Apparel";
+  }, []);
+
   return (
     <div className="pt-24 min-h-screen bg-gray-50">
       {/* Header Banner */}

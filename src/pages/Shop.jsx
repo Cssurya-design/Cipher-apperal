@@ -19,6 +19,7 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "Shop | Cipher Apparel";
     setLoading(true);
     const params = {};
     if (activeCategory) params.category = activeCategory;

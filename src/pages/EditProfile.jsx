@@ -17,6 +17,7 @@ const EditProfile = () => {
   const [loadingLoc, setLoadingLoc] = useState(false);
 
   useEffect(() => {
+    document.title = "Edit Profile | Cipher Apparel";
     if (user) {
       setProfileData({ name: user.name || '', email: user.email || '' });
       api.get('/location/')

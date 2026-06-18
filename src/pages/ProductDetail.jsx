@@ -16,6 +16,7 @@ const ProductDetail = () => {
   const { user } = useAuth();
 
   useEffect(() => {
+    document.title = product ? `${product.name} | Cipher Apparel` : "Product | Cipher Apparel";
     api.get(`/products/${id}/`)
       .then(res => {
         setProduct(res.data);

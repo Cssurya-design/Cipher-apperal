@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api, { API_BASE } from '../api';
 import Footer from '../components/Footer';
 
 const Contact = () => {
+  useEffect(() => {
+    document.title = "Contact | Cipher Apparel";
+  }, []);
+
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',

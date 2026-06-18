@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Footer from '../components/Footer';
 import { API_BASE } from '../api';
@@ -77,6 +77,10 @@ const posts = [
 ];
 
 const Blog = () => {
+  useEffect(() => {
+    document.title = "Blog | Cipher Apparel";
+  }, []);
+
   const POSTS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, Plus, Minus, X, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -8,6 +8,10 @@ import api from '../api';
 import Footer from '../components/Footer';
 
 const Cart = () => {
+  useEffect(() => {
+    document.title = "Shopping Cart | Cipher Apparel";
+  }, []);
+
   const { cart, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);

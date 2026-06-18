@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
+import { Link } from 'react-router-dom';
 import api, { API_BASE } from '../api';
 
 const features = [
@@ -18,6 +19,7 @@ const Home = () => {
   const [featured, setFeatured] = useState([]);
 
   useEffect(() => {
+    document.title = "Home | Cipher Apparel";
     api.get('/featured/')
       .then(res => setFeatured(res.data.featured))
       .catch(err => console.error("Error fetching featured products", err));

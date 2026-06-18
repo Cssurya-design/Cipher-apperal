@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "My Dashboard | Cipher Apparel";
     if (user) {
       api.get('/orders/')
         .then(res => {
