@@ -71,7 +71,7 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          src="https://cipherapparel.pythonanywhere.com/static/store/images/hero-new.jpg" 
+          src="/hero-new.jpg" 
           alt="Hero" 
           className="w-full max-w-sm md:max-w-md rounded-2xl shadow-2xl object-cover"
         />

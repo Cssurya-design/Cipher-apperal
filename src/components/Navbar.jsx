@@ -14,7 +14,7 @@ const Navbar = () => {
       className="fixed w-full top-0 z-50 glass shadow-sm py-4 px-6 md:px-12 flex justify-between items-center"
     >
       <Link to="/">
-        <img src="https://cipherapparel.pythonanywhere.com/static/store/images/Logo1.png" alt="Logo" className="h-8 md:h-10" />
+        <img src="/Logo1.png" alt="Logo" className="h-8 md:h-10" />
       </Link>
 
       {/* Desktop Menu */}
@@ -23,6 +23,7 @@ const Navbar = () => {
         <li><Link to="/shop" className="hover:text-primary transition-colors">Shop</Link></li>
         <li><Link to="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
         <li><Link to="/about" className="hover:text-primary transition-colors">About</Link></li>
+        <li><Link to="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
       </ul>
 
       {/* Icons */}
@@ -59,6 +60,7 @@ const Navbar = () => {
               <li><Link to="/shop" onClick={() => setIsOpen(false)}>Shop</Link></li>
               <li><Link to="/blog" onClick={() => setIsOpen(false)}>Blog</Link></li>
               <li><Link to="/about" onClick={() => setIsOpen(false)}>About</Link></li>
+              <li><Link to="/contact" onClick={() => setIsOpen(false)}>Contact</Link></li>
             </ul>
           </motion.div>
         )}
