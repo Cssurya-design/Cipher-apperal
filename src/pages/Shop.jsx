@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
-import api from '../api';
+import api, { API_BASE } from '../api';
 
 const categories = [
   { key: '', label: 'All' },
-  { key: 'featured', label: 'Featured' },
-  { key: 'new_arrival', label: 'New Arrivals' },
-  { key: 'regular', label: 'Regular' },
+  { key: 'Shirts', label: 'Shirts' },
+  { key: 'T-Shirts', label: 'T-Shirts' },
+  { key: 'Pants', label: 'Pants' },
+  { key: 'Shorts', label: 'Shorts' },
 ];
 
 const Shop = () => {
@@ -40,10 +41,11 @@ const Shop = () => {
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-gradient-to-r from-primary/10 to-primary-dark/10 py-12 text-center"
+        className="bg-[#1a1a1a] text-white py-24 text-center bg-cover bg-center"
+        style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b1.jpg')` }}
       >
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">#staystylish</h1>
-        <p className="text-gray-600">Save more with coupons & up to 70% off!</p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-2">#Stay<span className="text-gray-300">Home</span></h1>
+        <p className="text-gray-300">Save more with coupons & up to 70% off!</p>
       </motion.div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
@@ -54,10 +56,10 @@ const Shop = () => {
               <button
                 key={cat.key}
                 onClick={() => setActiveCategory(cat.key)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold border transition-all ${
+                className={`px-5 py-2 rounded-md text-sm font-semibold border transition-all ${
                   activeCategory === cat.key
                     ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-primary hover:text-primary'
+                    : 'bg-white text-gray-900 border-[#cce7d0] hover:bg-[#088178] hover:text-white'
                 }`}
               >
                 {cat.label}
@@ -69,7 +71,7 @@ const Shop = () => {
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-5 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-full md:w-72 text-sm"
+            className="px-5 py-2.5 rounded-md border border-[#cce7d0] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-full md:w-72 text-sm text-gray-900"
           />
         </div>
 
