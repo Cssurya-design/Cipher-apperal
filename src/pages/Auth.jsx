@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import Footer from '../components/Footer';
 
 const Auth = () => {
@@ -9,7 +10,7 @@ const Auth = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, signup } = useAuth();
+  const { login, signup, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -36,6 +37,15 @@ const Auth = () => {
       setError(msg);
     }
     setLoading(false);
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse.credential);
+      navigate('/');
+    } catch (err) {
+      setError('Google Login Failed');
+    }
   };
 
   return (
@@ -108,6 +118,19 @@ const Auth = () => {
             >
               {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
             </button>
+            
+            <div className="mt-6 flex items-center justify-center">
+              <span className="w-1/5 border-b border-gray-300"></span>
+              <span className="mx-4 text-sm text-gray-500 font-medium">OR</span>
+              <span className="w-1/5 border-b border-gray-300"></span>
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google Login Failed')}
+              />
+            </div>
           </form>
         </motion.div>
       </div>

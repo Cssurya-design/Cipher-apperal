@@ -11,14 +11,22 @@ import About from './pages/About'
 import Blog from './pages/Blog'
 import Auth from './pages/Auth'
 import Wishlist from './pages/Wishlist'
+import ProductDetail from './pages/ProductDetail'
+import Dashboard from './pages/Dashboard'
+import EditProfile from './pages/EditProfile'
+
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 function App() {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '325983759714-rdm0tqf2t53i8p7r91iug06eut1v2jro.apps.googleusercontent.com';
+
   return (
-    <Router>
-      <AuthProvider>
-        <CartProvider>
-          <div className="font-inter">
-            <Navbar />
+    <GoogleOAuthProvider clientId={clientId}>
+      <Router>
+        <AuthProvider>
+          <CartProvider>
+            <div className="font-inter">
+              <Navbar />
             <main>
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -29,12 +37,16 @@ function App() {
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/edit-profile" element={<EditProfile />} />
               </Routes>
             </main>
-          </div>
-        </CartProvider>
-      </AuthProvider>
-    </Router>
+            </div>
+          </CartProvider>
+        </AuthProvider>
+      </Router>
+    </GoogleOAuthProvider>
   )
 }
 
