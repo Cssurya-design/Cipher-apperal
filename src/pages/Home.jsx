@@ -95,9 +95,9 @@ const Home = () => {
       >
         <h4 className="text-xl md:text-2xl font-semibold mb-4">Repair Services</h4>
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">Up to <span className="text-red-500">70% off</span> All t-shirts and accessories</h2>
-        <button className="bg-white text-gray-900 px-8 py-3 rounded-md font-bold hover:bg-primary hover:text-white transition-colors">
+        <Link to="/shop" className="bg-white text-gray-900 px-8 py-3 rounded-md font-bold hover:bg-primary hover:text-white transition-colors">
           Explore more
-        </button>
+        </Link>
       </section>
 
       {/* New Arrivals (Using same products for demo as django api doesn't have separate endpoint) */}

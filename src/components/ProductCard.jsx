@@ -28,8 +28,8 @@ const ProductCard = ({ product }) => {
         <h5 className="text-gray-800 font-semibold text-base mt-1 mb-2 group-hover:text-primary transition-colors">{product.name}</h5>
       </Link>
       
-      <div className="flex items-center justify-between">
-        <h4 className="text-primary font-bold text-lg">₹{product.price}</h4>
+      <div className="flex items-center justify-between pr-12">
+        <h4 className="text-primary font-bold text-lg truncate mr-2">₹{product.price}</h4>
         <div className="flex text-yellow-400 text-sm mb-2">
           <Star size={14} fill="currentColor" />
           <Star size={14} fill="currentColor" />
