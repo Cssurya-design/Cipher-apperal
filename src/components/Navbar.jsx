@@ -14,7 +14,7 @@ const Navbar = () => {
       className="fixed w-full top-0 z-50 glass shadow-sm py-4 px-6 md:px-12 flex justify-between items-center"
     >
       <Link to="/">
-        <img src="http://127.0.0.1:8000/static/store/images/Logo1.png" alt="Logo" className="h-8 md:h-10" />
+        <img src="https://cipherapparel.pythonanywhere.com/static/store/images/Logo1.png" alt="Logo" className="h-8 md:h-10" />
       </Link>
 
       {/* Desktop Menu */}

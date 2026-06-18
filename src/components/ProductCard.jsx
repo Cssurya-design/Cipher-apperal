@@ -9,7 +9,7 @@ const ProductCard = ({ product }) => {
       className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm transition-all relative group"
     >
       <img 
-        src={`http://127.0.0.1:8000/static/store/images/products/${product.image}`} 
+        src={`https://cipherapparel.pythonanywhere.com/static/store/images/products/${product.image}`} 
         alt={product.name} 
         className="w-full h-64 object-cover rounded-xl mb-4"
       />

@@ -9,7 +9,7 @@ const Home = () => {
 
   useEffect(() => {
     // Fetch featured products from Django API
-    axios.get('http://127.0.0.1:8000/api/featured/')
+    axios.get('https://cipherapparel.pythonanywhere.com/api/featured/')
       .then(res => setFeatured(res.data.featured))
       .catch(err => console.error("Error fetching featured products", err));
   }, []);
