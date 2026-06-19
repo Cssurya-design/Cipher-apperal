@@ -70,6 +70,11 @@ const Navbar = () => {
         </Link>
         {user ? (
           <div className="flex items-center gap-3">
+            {user.is_staff && (
+              <Link to="/admin-dashboard" className="text-sm font-bold text-gray-800 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full transition-colors">
+                Admin Panel
+              </Link>
+            )}
             <Link to="/dashboard" className="text-sm font-medium text-primary hover:underline">
               {user.name || user.email}
             </Link>
@@ -154,6 +159,13 @@ const Navbar = () => {
               <li><Link to="/cart" onClick={() => setIsOpen(false)}>Cart</Link></li>
               {user ? (
                 <>
+                  {user.is_staff && (
+                    <li>
+                      <Link to="/admin-dashboard" onClick={() => setIsOpen(false)} className="text-gray-800 font-bold bg-gray-100 px-3 py-1 rounded-lg">
+                        Admin Panel
+                      </Link>
+                    </li>
+                  )}
                   <li>
                     <Link to="/dashboard" onClick={() => setIsOpen(false)} className="text-primary">
                       Dashboard

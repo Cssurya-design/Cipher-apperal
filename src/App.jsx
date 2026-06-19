@@ -17,6 +17,7 @@ import ProductDetail from './pages/ProductDetail'
 import Dashboard from './pages/Dashboard'
 import EditProfile from './pages/EditProfile'
 import OrderConfirmation from './pages/OrderConfirmation'
+import AdminDashboard from './pages/AdminDashboard'
 
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
@@ -46,6 +47,7 @@ function App() {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/edit-profile" element={<EditProfile />} />
                   <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                  <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 </Routes>
               </main>
               </div>
