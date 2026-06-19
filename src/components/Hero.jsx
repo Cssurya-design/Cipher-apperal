@@ -14,7 +14,7 @@ const Hero = () => {
   useEffect(() => {
     // Parallax effect: Image starts big (scale 1.3) and shrinks to normal (scale 1) on scroll
     gsap.fromTo(imgRef.current, 
-      { scale: 1.3 },
+      { scale: 1.15 },
       {
         scale: 1,
         ease: "none",
@@ -102,7 +102,7 @@ const Hero = () => {
             transition={{ duration: 1, delay: 0.2 }}
             src="/hero-new.jpg" 
             alt="Cipher Apparel Menswear" 
-            className="w-full h-full object-cover object-top origin-center"
+            className="w-full h-full object-cover object-top origin-top"
           />
         </div>
       </div>
