@@ -102,7 +102,7 @@ const Hero = () => {
             transition={{ duration: 1, delay: 0.2 }}
             src="/hero-new.jpg" 
             alt="Cipher Apparel Menswear" 
-            className="w-full h-full object-cover origin-center"
+            className="w-full h-full object-cover object-top origin-center"
           />
         </div>
       </div>

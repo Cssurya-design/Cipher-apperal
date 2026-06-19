@@ -118,7 +118,7 @@ const Blog = () => {
           <div className="absolute -top-20 -left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
           <div className="absolute top-20 -right-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-20 left-1/2 w-72 h-72 bg-primary rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
-          <div className="absolute inset-0 bg-[url('/hero-new.jpg')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-overlay" style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b19.jpg')` }}></div>
         </div>
 
         <motion.div 
