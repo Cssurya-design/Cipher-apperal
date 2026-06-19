@@ -12,7 +12,7 @@ import Footer from '../components/Footer';
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
 // UPI VPA — update this to your actual UPI address
-const UPI_VPA = 'cipherapparel@upi';
+const UPI_VPA = 'cssurya2006@okicici';
 const UPI_PAYEE_NAME = 'Cipher Apparel';
 
 const Cart = () => {
