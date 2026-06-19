@@ -41,8 +41,27 @@ export const AuthProvider = ({ children }) => {
     const res = await api.post('/auth/google/', { credential });
     localStorage.setItem('access_token', res.data.access);
     localStorage.setItem('refresh_token', res.data.refresh);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    setUser(res.data.user);
+    
+    let userData = res.data.user;
+    
+    if (userData.profile_pic && userData.profile_pic.startsWith('http') && !userData.profile_pic.includes('cipherapparel')) {
+      try {
+        const imgRes = await fetch(userData.profile_pic);
+        const blob = await imgRes.blob();
+        const file = new File([blob], 'google_pic.jpg', { type: blob.type });
+        const formData = new FormData();
+        formData.append('profile_pic', file);
+        await api.post('/user/', formData);
+        
+        const updatedRes = await api.get('/user/');
+        userData = updatedRes.data;
+      } catch (e) {
+        console.error("Failed to upload Google pic from frontend", e);
+      }
+    }
+    
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
     return res.data;
   };
 
