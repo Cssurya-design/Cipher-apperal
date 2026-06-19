@@ -75,8 +75,19 @@ const Navbar = () => {
                 Admin Panel
               </Link>
             )}
-            <Link to="/dashboard" className="text-sm font-medium text-primary hover:underline">
-              {user.name || user.email}
+            <Link to="/dashboard" className="flex items-center gap-2 text-sm font-medium text-primary hover:underline group">
+              {user.profile_pic ? (
+                <img 
+                  src={user.profile_pic.startsWith('http') ? user.profile_pic : `http://localhost:8000${user.profile_pic}`} 
+                  alt="Profile" 
+                  className="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-primary transition-all"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+                  {(user.name || user.email).charAt(0).toUpperCase()}
+                </div>
+              )}
+              <span className="hidden lg:block">{user.name || user.email.split('@')[0]}</span>
             </Link>
             <button onClick={handleLogout} className="hover:text-red-500 transition-colors" title="Logout">
               <LogOut size={20} />
@@ -167,8 +178,22 @@ const Navbar = () => {
                     </li>
                   )}
                   <li>
-                    <Link to="/dashboard" onClick={() => setIsOpen(false)} className="text-primary">
-                      Dashboard
+                    <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-primary">
+                      {user.profile_pic ? (
+                        <img 
+                          src={user.profile_pic.startsWith('http') ? user.profile_pic : `http://localhost:8000${user.profile_pic}`} 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover border border-primary/30"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+                          {(user.name || user.email).charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-bold leading-tight">{user.name || user.email.split('@')[0]}</p>
+                        <p className="text-xs text-gray-500 font-normal">Dashboard</p>
+                      </div>
                     </Link>
                   </li>
                   <li>
