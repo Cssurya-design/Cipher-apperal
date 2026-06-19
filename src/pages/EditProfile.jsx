@@ -13,7 +13,7 @@ const EditProfile = () => {
   const { location, saveLocation, autoDetectLocation, detectingLocation } = useLocation();
   const navigate = useNavigate();
 
-  const [profileData, setProfileData] = useState({ name: '', email: '' });
+  const [profileData, setProfileData] = useState({ name: '', email: '', phone: '' });
   const [profilePic, setProfilePic] = useState(null);
   const [locationData, setLocationData] = useState({
     address_line1: '', address_line2: '', city: '', state: '', postal_code: '', country: ''
@@ -25,7 +25,7 @@ const EditProfile = () => {
   useEffect(() => {
     document.title = "Edit Profile | Cipher Apparel";
     if (user) {
-      setProfileData({ name: user.name || '', email: user.email || '' });
+      setProfileData({ name: user.name || '', email: user.email || '', phone: user.phone || '' });
     }
   }, [user]);
 
@@ -102,6 +102,9 @@ const EditProfile = () => {
       // 1. Save Profile Data
       const formData = new FormData();
       formData.append('name', profileData.name);
+      if (profileData.phone) {
+        formData.append('phone', profileData.phone);
+      }
       if (profilePic) {
         formData.append('profile_pic', profilePic);
       }
@@ -169,6 +172,10 @@ const EditProfile = () => {
                 <div>
                   <label className="block text-sm text-gray-500 mb-1">Email</label>
                   <input type="email" name="email" value={profileData.email} disabled className="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-500" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm text-gray-500 mb-1">Phone Number</label>
+                  <input type="tel" name="phone" value={profileData.phone} onChange={handleProfileChange} placeholder="Enter your mobile number" className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary" />
                 </div>
               </div>
               <div className="mb-4">
