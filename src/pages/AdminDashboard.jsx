@@ -20,6 +20,7 @@ const AdminDashboard = () => {
   const [staffList, setStaffList] = useState([]);
   const [staffLoading, setStaffLoading] = useState(true);
   const [newStaffEmail, setNewStaffEmail] = useState('');
+  const [newStaffRole, setNewStaffRole] = useState('staff');
   const [staffError, setStaffError] = useState('');
   const [staffSuccess, setStaffSuccess] = useState('');
 
@@ -73,9 +74,13 @@ const AdminDashboard = () => {
     if (!newStaffEmail) return;
 
     try {
-      const res = await api.post('/admin/staff/add/', { email: newStaffEmail });
+      const res = await api.post('/admin/staff/add/', { 
+        email: newStaffEmail,
+        role: newStaffRole 
+      });
       setStaffSuccess(res.data.message);
       setNewStaffEmail('');
+      setNewStaffRole('staff');
       fetchStaff();
     } catch (err) {
       setStaffError(err.response?.data?.error || "Failed to add staff");
@@ -259,36 +264,48 @@ const AdminDashboard = () => {
         {activeTab === 'staff' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
             
-            {/* Add Staff Form */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
-              <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <UserPlus size={20} className="text-primary" />
-                Add New Staff Member
-              </h2>
-              <p className="text-sm text-gray-500 mb-4">
-                Grant admin access to an employee via their Google email address. If they don't have an account yet, they will be pre-approved for when they log in.
-              </p>
-              
-              <form onSubmit={handleAddStaff} className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="email"
-                  value={newStaffEmail}
-                  onChange={(e) => setNewStaffEmail(e.target.value)}
-                  placeholder="employee@gmail.com"
-                  required
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
-                <button
-                  type="submit"
-                  className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:bg-primary-dark transition-colors"
-                >
-                  Grant Access
-                </button>
-              </form>
-              
-              {staffError && <p className="text-red-500 text-sm font-medium mt-3 bg-red-50 p-2 rounded-lg">{staffError}</p>}
-              {staffSuccess && <p className="text-green-600 text-sm font-medium mt-3 bg-green-50 p-2 rounded-lg">{staffSuccess}</p>}
-            </div>
+            {/* Add Staff Form - Only visible to Owner/Superusers */}
+            {user.is_superuser && (
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <UserPlus size={20} className="text-primary" />
+                  Add New Team Member
+                </h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Grant access to an employee via their Google email address.
+                  <br />
+                  <span className="font-semibold text-gray-700">Admin</span>: Can manage orders AND add/remove staff. <span className="font-semibold text-gray-700">Staff</span>: Can only manage orders.
+                </p>
+                
+                <form onSubmit={handleAddStaff} className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    value={newStaffEmail}
+                    onChange={(e) => setNewStaffEmail(e.target.value)}
+                    placeholder="employee@gmail.com"
+                    required
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                  <select
+                    value={newStaffRole}
+                    onChange={(e) => setNewStaffRole(e.target.value)}
+                    className="px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
+                  >
+                    <option value="staff">Role: Staff</option>
+                    <option value="admin">Role: Admin</option>
+                  </select>
+                  <button
+                    type="submit"
+                    className="bg-primary text-white px-6 py-2.5 rounded-xl font-bold hover:bg-primary-dark transition-colors"
+                  >
+                    Grant Access
+                  </button>
+                </form>
+                
+                {staffError && <p className="text-red-500 text-sm font-medium mt-3 bg-red-50 p-2 rounded-lg">{staffError}</p>}
+                {staffSuccess && <p className="text-green-600 text-sm font-medium mt-3 bg-green-50 p-2 rounded-lg">{staffSuccess}</p>}
+              </div>
+            )}
 
             {/* Staff List */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -302,24 +319,33 @@ const AdminDashboard = () => {
                 {staffList.map((staff) => (
                   <div key={staff.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50/50 transition-colors">
                     <div>
-                      <p className="font-bold text-gray-900">{staff.email}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-gray-900">{staff.email}</p>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                          staff.is_superuser ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {staff.is_superuser ? 'Admin' : 'Staff'}
+                        </span>
+                      </div>
                       <p className="text-sm text-gray-500 mt-1">
                         {staff.name ? `Name: ${staff.name}` : 'Not logged in yet'} • Added: {staff.date_joined}
                       </p>
                     </div>
-                    {staff.email !== user.email ? (
-                      <button
-                        onClick={() => handleRemoveStaff(staff.email)}
-                        className="flex items-center justify-center gap-1.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors border border-red-100"
-                      >
-                        <UserMinus size={16} />
-                        Revoke Access
-                      </button>
-                    ) : (
-                      <span className="text-sm font-bold text-gray-400 bg-gray-100 px-4 py-2 rounded-lg border border-gray-200 text-center">
-                        You (Cannot revoke)
-                      </span>
-                    )}
+                    {user.is_superuser ? (
+                      staff.email !== user.email ? (
+                        <button
+                          onClick={() => handleRemoveStaff(staff.email)}
+                          className="flex items-center justify-center gap-1.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors border border-red-100"
+                        >
+                          <UserMinus size={16} />
+                          Revoke Access
+                        </button>
+                      ) : (
+                        <span className="text-sm font-bold text-gray-400 bg-gray-100 px-4 py-2 rounded-lg border border-gray-200 text-center">
+                          You (Cannot revoke)
+                        </span>
+                      )
+                    ) : null}
                   </div>
                 ))}
                 {staffList.length === 0 && !staffLoading && (
