@@ -112,7 +112,7 @@ const Blog = () => {
   return (
     <div className="pt-20 min-h-screen bg-[#f8f9fa]">
       {/* Hero Section with abstract elements */}
-      <div className="relative w-full min-h-[45vh] bg-gradient-to-br from-indigo-900 via-primary-dark to-purple-900 flex flex-col justify-center items-center text-center overflow-hidden">
+      <div className="relative w-full min-h-[45vh] bg-gray-900 flex flex-col justify-center items-center text-center overflow-hidden">
         {/* Background Decorative Elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
           <div className="absolute -top-20 -left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>

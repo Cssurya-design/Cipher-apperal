@@ -25,8 +25,19 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
-  const signup = async (name, email, password) => {
-    const res = await api.post('/signup/', { name, email, password });
+  const signup = async (name, email, password, profilePic) => {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('password', password);
+    if (profilePic) {
+      formData.append('profile_pic', profilePic);
+    }
+    const res = await api.post('/signup/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   };
 

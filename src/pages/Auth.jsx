@@ -13,6 +13,7 @@ const Auth = () => {
   const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [profilePic, setProfilePic] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, signup, googleLogin, logout } = useAuth();
@@ -51,7 +52,7 @@ const Auth = () => {
           navigate(isAdminLogin ? '/admin-dashboard' : '/');
         }
       } else {
-        await signup(formData.name, formData.email, formData.password);
+        await signup(formData.name, formData.email, formData.password, profilePic);
         // Auto-login after signup
         const res = await login(formData.email, formData.password);
         if (verifyAdminAccess(res.user)) {
@@ -145,6 +146,15 @@ const Auth = () => {
                     required
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all mb-4"
                   />
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture (Optional)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setProfilePic(e.target.files[0])}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all"
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
