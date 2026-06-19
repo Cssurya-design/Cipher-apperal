@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Plus, Minus, X, ShoppingBag, MapPin, Smartphone, Monitor } from 'lucide-react';
+import { Trash2, Plus, Minus, X, ShoppingBag, MapPin, Smartphone, Monitor, CreditCard, Banknote } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +29,10 @@ const Cart = () => {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // New Payment States
+  const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'COD'
+  const [transactionId, setTransactionId] = useState('');
+
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -44,6 +48,12 @@ const Cart = () => {
       navigate('/auth');
       return;
     }
+
+    if (paymentMethod === 'UPI' && (!transactionId || transactionId.trim().length < 6)) {
+      alert('Please enter a valid 12-digit UTR or Transaction ID to verify your payment.');
+      return;
+    }
+
     try {
       const items = cart.map(item => ({
         name: item.name,
@@ -53,7 +63,11 @@ const Cart = () => {
         image: item.image || '',
         description: item.description || '',
       }));
-      await api.post('/save-order/', { items });
+      await api.post('/save-order/', { 
+        items,
+        payment_method: paymentMethod,
+        transaction_id: paymentMethod === 'UPI' ? transactionId : ''
+      });
       setOrderPlaced(true);
       clearCart();
       setTimeout(() => {
@@ -63,6 +77,7 @@ const Cart = () => {
       }, 3000);
     } catch (err) {
       console.error(err);
+      alert('Failed to place order. Please try again.');
     }
   };
 
@@ -73,19 +88,21 @@ const Cart = () => {
 
   const generateUpiUrl = () => {
     const amount = cartTotal.toFixed(2);
-    const note = `Cipher Apparel Order - ${cart.length} items`;
+    const note = `CipherApparel Order`;
     return `upi://pay?pa=${encodeURIComponent(UPI_VPA)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
   };
 
   const openUpiApp = (appScheme) => {
     const upiUrl = generateUpiUrl();
-    // Try deep-link for specific apps
+    const amount = cartTotal.toFixed(2);
+    const note = encodeURIComponent('Cipher Apparel Order');
+    
     if (appScheme === 'gpay') {
-      window.location.href = `tez://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${cartTotal.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Cipher Apparel Order')}`;
+      window.location.href = `tez://upi/pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${note}`;
     } else if (appScheme === 'phonepe') {
-      window.location.href = `phonepe://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${cartTotal.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Cipher Apparel Order')}`;
+      window.location.href = `phonepe://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${note}`;
     } else if (appScheme === 'paytm') {
-      window.location.href = `paytmmp://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${cartTotal.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Cipher Apparel Order')}`;
+      window.location.href = `paytmmp://pay?pa=${UPI_VPA}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${note}`;
     } else {
       window.location.href = upiUrl;
     }
@@ -239,6 +256,7 @@ const Cart = () => {
               onClick={() => {
                 if (!user) { navigate('/auth'); return; }
                 setShowCheckout(true);
+                setTransactionId('');
               }}
               className="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3.5 rounded-xl font-semibold hover:shadow-lg transition-all"
             >
@@ -280,70 +298,105 @@ const Cart = () => {
                 </div>
               ) : (
                 <>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Complete Payment</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Checkout</h3>
                   <p className="text-3xl font-bold text-primary mb-6">₹{cartTotal.toFixed(2)}</p>
 
-                  {/* Desktop: Show QR */}
-                  {!isMobile && (
-                    <div className="mb-6">
-                      <div className="flex items-center justify-center gap-2 text-gray-500 mb-3">
-                        <Monitor size={16} />
-                        <span className="text-sm">Scan QR code to pay</span>
+                  {/* Payment Method Selection */}
+                  <div className="mb-6 space-y-3">
+                    <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'UPI' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50'}`}>
+                      <input type="radio" name="paymentMethod" value="UPI" checked={paymentMethod === 'UPI'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5 text-primary focus:ring-primary" />
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="text-primary" size={20} />
+                        <span className="font-semibold text-gray-800">Pay via UPI / QR</span>
                       </div>
-                      <img
-                        src={`${API_BASE}/static/store/images/upi-qr.jpg`}
-                        alt="UPI QR Code"
-                        className="mx-auto w-48 h-48 rounded-xl border-2 border-gray-200 mb-4"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
+                    </label>
+                    
+                    <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50'}`}>
+                      <input type="radio" name="paymentMethod" value="COD" checked={paymentMethod === 'COD'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-5 h-5 text-primary focus:ring-primary" />
+                      <div className="flex items-center gap-2">
+                        <Banknote className="text-green-600" size={20} />
+                        <span className="font-semibold text-gray-800">Cash on Delivery</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {paymentMethod === 'UPI' && (
+                    <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+                      {/* Desktop: Show QR */}
+                      {!isMobile && (
+                        <div className="mb-6">
+                          <div className="flex items-center justify-center gap-2 text-gray-500 mb-3">
+                            <Monitor size={16} />
+                            <span className="text-sm">Scan QR code to pay exact amount</span>
+                          </div>
+                          {/* Dynamic QR Code from API generating exact total */}
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(generateUpiUrl())}`}
+                            alt="UPI QR Code"
+                            className="mx-auto w-48 h-48 rounded-xl border-2 border-gray-200 mb-4 bg-white p-2"
+                          />
+                        </div>
+                      )}
+
+                      {/* Mobile/Tablet: Show UPI app buttons */}
+                      {isMobile && (
+                        <div className="mb-6">
+                          <div className="flex items-center justify-center gap-2 text-gray-500 mb-4">
+                            <Smartphone size={16} />
+                            <span className="text-sm">Pay directly with your app</span>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3">
+                            <button onClick={() => openUpiApp('gpay')} className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 hover:border-blue-500 hover:bg-blue-50 transition-all">
+                              <span className="text-2xl">💳</span>
+                              <span className="font-semibold text-gray-700">Google Pay</span>
+                            </button>
+                            <button onClick={() => openUpiApp('phonepe')} className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 hover:border-purple-500 hover:bg-purple-50 transition-all">
+                              <span className="text-2xl">📱</span>
+                              <span className="font-semibold text-gray-700">PhonePe</span>
+                            </button>
+                            <button onClick={() => openUpiApp('paytm')} className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 hover:border-sky-500 hover:bg-sky-50 transition-all">
+                              <span className="text-2xl">💰</span>
+                              <span className="font-semibold text-gray-700">Paytm</span>
+                            </button>
+                            <button onClick={() => openUpiApp('generic')} className="flex items-center justify-center gap-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl py-3 px-4 font-semibold">
+                              <span className="text-2xl">🏦</span>
+                              Open Any UPI App
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* UTR Verification Field */}
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
+                          Verify Payment (Required)
+                        </label>
+                        <p className="text-xs text-gray-500 text-left mb-3">
+                          After paying, enter your 12-digit UPI Reference No. (UTR) or Transaction ID below to verify your payment.
+                        </p>
+                        <input
+                          type="text"
+                          placeholder="e.g. 301234567890"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium"
+                        />
+                      </div>
                     </div>
                   )}
 
-                  {/* Mobile/Tablet: Show UPI app buttons */}
-                  {isMobile && (
-                    <div className="mb-6">
-                      <div className="flex items-center justify-center gap-2 text-gray-500 mb-4">
-                        <Smartphone size={16} />
-                        <span className="text-sm">Pay with your UPI app</span>
-                      </div>
-                      <div className="grid grid-cols-1 gap-3">
-                        <button
-                          onClick={() => openUpiApp('gpay')}
-                          className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 hover:border-blue-500 hover:bg-blue-50 transition-all"
-                        >
-                          <span className="text-2xl">💳</span>
-                          <span className="font-semibold text-gray-700">Google Pay</span>
-                        </button>
-                        <button
-                          onClick={() => openUpiApp('phonepe')}
-                          className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 hover:border-purple-500 hover:bg-purple-50 transition-all"
-                        >
-                          <span className="text-2xl">📱</span>
-                          <span className="font-semibold text-gray-700">PhonePe</span>
-                        </button>
-                        <button
-                          onClick={() => openUpiApp('paytm')}
-                          className="flex items-center justify-center gap-3 bg-white border-2 border-gray-200 rounded-xl py-3 px-4 hover:border-sky-500 hover:bg-sky-50 transition-all"
-                        >
-                          <span className="text-2xl">💰</span>
-                          <span className="font-semibold text-gray-700">Paytm</span>
-                        </button>
-                        <button
-                          onClick={() => openUpiApp('generic')}
-                          className="flex items-center justify-center gap-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl py-3 px-4 font-semibold"
-                        >
-                          <span className="text-2xl">🏦</span>
-                          Open Any UPI App
-                        </button>
-                      </div>
+                  {paymentMethod === 'COD' && (
+                    <div className="bg-green-50 text-green-800 rounded-xl p-4 mb-6 text-sm flex items-start gap-2 text-left border border-green-100">
+                      <Banknote className="flex-shrink-0 mt-0.5 text-green-600" size={18} />
+                      <p>You will pay <strong>₹{cartTotal.toFixed(2)}</strong> in cash to the delivery executive when your order arrives.</p>
                     </div>
                   )}
 
                   <button
                     onClick={handleCheckout}
-                    className="w-full bg-green-500 text-white py-3.5 rounded-xl font-semibold hover:bg-green-600 transition-colors"
+                    className="w-full bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-primary-dark transition-colors"
                   >
-                    {isMobile ? "I've Completed UPI Payment" : "I've Completed Payment"}
+                    {paymentMethod === 'UPI' ? 'Verify & Place Order' : 'Confirm Order'}
                   </button>
                 </>
               )}

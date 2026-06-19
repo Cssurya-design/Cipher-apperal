@@ -193,6 +193,14 @@ const Dashboard = () => {
                             <span className="text-xs text-gray-400">|</span>
                             <span className="text-xs text-gray-500">{order.date}</span>
                           </div>
+                          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                            <span className="text-xs font-semibold text-gray-600 border border-gray-200 px-2 py-0.5 rounded">
+                              {order.payment_method === 'COD' ? '💵 COD' : '💳 UPI'}
+                            </span>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded ${order.payment_status === 'Verified' ? 'bg-green-100 text-green-700' : order.payment_status === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                              {order.payment_status}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 sm:text-right flex-shrink-0">
                           <p className="font-bold text-primary">₹{order.price}</p>
