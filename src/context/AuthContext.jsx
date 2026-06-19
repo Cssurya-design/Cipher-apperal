@@ -43,11 +43,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
+    localStorage.removeItem('user_location');
     setUser(null);
   };
 
+  const updateUser = (updatedData) => {
+    const newUser = { ...user, ...updatedData };
+    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser(newUser);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, googleLogin, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, signup, googleLogin, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

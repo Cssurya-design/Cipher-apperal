@@ -42,30 +42,30 @@ const Hero = () => {
   return (
     <section 
       ref={heroRef} 
-      className="relative w-full min-h-[85vh] flex flex-col md:flex-row items-center justify-between px-6 md:px-20 pt-24 pb-12 bg-gradient-to-br from-[#f8f9fc] to-[#e0eafc] overflow-hidden"
+      className="relative w-full min-h-[60vh] sm:min-h-[75vh] md:min-h-[85vh] flex flex-col md:flex-row items-center justify-between px-4 sm:px-6 md:px-20 pt-24 pb-8 sm:pb-12 bg-gradient-to-br from-[#f8f9fc] to-[#e0eafc] overflow-hidden"
     >
       <motion.div 
-        className="z-10 flex flex-col items-start max-w-xl"
+        className="z-10 flex flex-col items-start max-w-xl w-full"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.h4 variants={itemVariants} className="text-gray-600 font-semibold text-lg mb-2">Trade-in-offer</motion.h4>
-        <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">Super value deals</motion.h2>
-        <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark mb-4">
+        <motion.h4 variants={itemVariants} className="text-gray-600 font-semibold text-sm sm:text-lg mb-2">Trade-in-offer</motion.h4>
+        <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-2">Super value deals</motion.h2>
+        <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark mb-3 sm:mb-4">
           On all products
         </motion.h1>
-        <motion.p variants={itemVariants} className="text-gray-500 text-lg mb-8">
+        <motion.p variants={itemVariants} className="text-gray-500 text-sm sm:text-lg mb-6 sm:mb-8">
           Save more with coupons & up to 70% off!
         </motion.p>
         <motion.div variants={itemVariants}>
-          <Link to="/shop" className="bg-gradient-to-r from-primary to-primary-dark text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all">
+          <Link to="/shop" className="bg-gradient-to-r from-primary to-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all text-sm sm:text-base">
             Shop Now
           </Link>
         </motion.div>
       </motion.div>
 
-      <div className="z-0 mt-12 md:mt-0 md:w-1/2 flex justify-center items-center">
+      <div className="z-0 mt-8 md:mt-0 md:w-1/2 flex justify-center items-center">
         <motion.img 
           ref={imgRef}
           initial={{ opacity: 0, scale: 0.8 }}
@@ -73,7 +73,7 @@ const Hero = () => {
           transition={{ duration: 1, delay: 0.5 }}
           src="/hero-new.jpg" 
           alt="Hero" 
-          className="w-full max-w-sm md:max-w-md rounded-2xl shadow-2xl object-cover"
+          className="w-full max-w-[280px] sm:max-w-sm md:max-w-md rounded-2xl shadow-2xl object-cover"
         />
       </div>
     </section>

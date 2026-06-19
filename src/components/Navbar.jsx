@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Heart, Menu, X, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Heart, Menu, X, User, LogOut, MapPin, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useLocation } from '../context/LocationContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
+  const { displayLocation, setShowLocationModal, location } = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -21,11 +23,28 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed w-full top-0 z-50 glass shadow-sm py-3 px-6 md:px-12 flex justify-between items-center"
+      className="fixed w-full top-0 z-50 glass shadow-sm py-3 px-4 sm:px-6 md:px-12 flex justify-between items-center"
     >
-      <Link to="/">
-        <img src="/Logo1.png" alt="Logo" className="h-8 md:h-10" />
-      </Link>
+      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+        <Link to="/">
+          <img src="/Logo1.png" alt="Logo" className="h-7 sm:h-8 md:h-10" />
+        </Link>
+
+        {/* Location indicator — Amazon style */}
+        <button
+          onClick={() => setShowLocationModal(true)}
+          className="hidden sm:flex items-center gap-1 text-left hover:outline hover:outline-1 hover:outline-gray-300 rounded-lg px-2 py-1 transition-all group"
+          title="Change delivery location"
+        >
+          <MapPin size={16} className="text-gray-500 group-hover:text-primary flex-shrink-0" />
+          <div className="flex flex-col leading-tight">
+            <span className="text-[10px] text-gray-400 font-medium">Deliver to</span>
+            <span className="text-xs font-bold text-gray-700 group-hover:text-primary max-w-[100px] truncate">
+              {displayLocation || 'Select location'}
+            </span>
+          </div>
+        </button>
+      </div>
 
       {/* Desktop Menu */}
       <ul className="hidden md:flex space-x-8 items-center font-semibold text-gray-800">
@@ -51,7 +70,9 @@ const Navbar = () => {
         </Link>
         {user ? (
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-primary">{user.name || user.email}</span>
+            <Link to="/dashboard" className="text-sm font-medium text-primary hover:underline">
+              {user.name || user.email}
+            </Link>
             <button onClick={handleLogout} className="hover:text-red-500 transition-colors" title="Logout">
               <LogOut size={20} />
             </button>
@@ -63,8 +84,20 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Mobile Hamburger */}
-      <div className="md:hidden flex items-center space-x-4 text-gray-800">
+      {/* Mobile: Location + Cart + Hamburger */}
+      <div className="md:hidden flex items-center space-x-3 text-gray-800">
+        {/* Mobile location button */}
+        <button
+          onClick={() => setShowLocationModal(true)}
+          className="sm:hidden flex items-center gap-0.5 text-gray-600 hover:text-primary transition-colors"
+          title="Set delivery location"
+        >
+          <MapPin size={18} />
+          {displayLocation && (
+            <span className="text-[10px] font-bold max-w-[50px] truncate">{location?.city || ''}</span>
+          )}
+        </button>
+
         <Link to="/cart" className="relative">
           <ShoppingCart size={24} />
           {cartCount > 0 && (
@@ -78,7 +111,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div 
@@ -91,6 +124,26 @@ const Navbar = () => {
             <button className="self-end mb-8 text-gray-800" onClick={() => setIsOpen(false)}>
               <X size={32} />
             </button>
+
+            {/* Location in mobile menu */}
+            <button
+              onClick={() => { setShowLocationModal(true); setIsOpen(false); }}
+              className="flex items-center gap-3 mb-6 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+            >
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <MapPin size={20} className="text-primary" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs text-gray-400 font-medium">Deliver to</p>
+                <p className="text-sm font-bold text-gray-800">
+                  {displayLocation || 'Select your location'}
+                </p>
+                {location?.address_line1 && (
+                  <p className="text-xs text-gray-500 truncate max-w-[180px]">{location.address_line1}</p>
+                )}
+              </div>
+            </button>
+
             <ul className="flex flex-col space-y-6 text-xl font-semibold text-gray-800">
               <li><Link to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
               <li><Link to="/shop" onClick={() => setIsOpen(false)}>Shop</Link></li>
@@ -100,11 +153,23 @@ const Navbar = () => {
               <li><Link to="/wishlist" onClick={() => setIsOpen(false)}>Wishlist</Link></li>
               <li><Link to="/cart" onClick={() => setIsOpen(false)}>Cart</Link></li>
               {user ? (
-                <li>
-                  <button onClick={() => { handleLogout(); setIsOpen(false); }} className="text-red-500">
-                    Logout ({user.name || user.email})
-                  </button>
-                </li>
+                <>
+                  <li>
+                    <Link to="/dashboard" onClick={() => setIsOpen(false)} className="text-primary">
+                      Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/edit-profile" onClick={() => setIsOpen(false)} className="text-primary">
+                      Edit Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <button onClick={() => { handleLogout(); setIsOpen(false); }} className="text-red-500">
+                      Logout ({user.name || user.email})
+                    </button>
+                  </li>
+                </>
               ) : (
                 <li><Link to="/auth" onClick={() => setIsOpen(false)}>Login / Sign Up</Link></li>
               )}

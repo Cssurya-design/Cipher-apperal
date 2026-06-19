@@ -9,6 +9,8 @@
 body {
   font-family: "Inter", "Spartan", sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Base custom styles for animations and layout */
@@ -16,4 +18,71 @@ body {
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Status badge styles */
+.status-placed {
+  background: #fef3c7;
+  color: #92400e;
+}
+.status-processing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.status-shipped {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+.status-delivered {
+  background: #d1fae5;
+  color: #065f46;
+}
+.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Star rating interactive */
+.star-rating button:hover ~ button {
+  color: #d1d5db !important;
+}
+
+/* Prevent layout shift from scrollbar */
+@supports (scrollbar-gutter: stable) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Mobile-first responsive helpers */
+@media (max-width: 639px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .hide-tablet {
+    display: none !important;
+  }
 }
