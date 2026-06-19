@@ -120,10 +120,14 @@ const EditProfile = () => {
         setTimeout(() => navigate('/dashboard'), 1200);
       } else {
         setStatus('error');
+        if (profileRes.data.error) {
+          setLocationMsg(profileRes.data.error);
+        }
       }
     } catch (err) {
-      console.error(err);
+      console.error("Profile save error:", err.response?.data || err.message);
       setStatus('error');
+      setLocationMsg(err.response?.data?.error || err.message || "Failed to save");
     }
   };
 
