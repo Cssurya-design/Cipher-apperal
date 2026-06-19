@@ -80,8 +80,16 @@ const Dashboard = () => {
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
             {/* Avatar */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold backdrop-blur-sm flex-shrink-0">
-              {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold backdrop-blur-sm flex-shrink-0 overflow-hidden">
+              {user.profile_pic ? (
+                <img 
+                  src={user.profile_pic.startsWith('http') ? user.profile_pic : `${API_BASE}${user.profile_pic}`} 
+                  alt={user.name} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold truncate">{user.name || 'User'}</h1>
