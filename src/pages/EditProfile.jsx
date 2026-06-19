@@ -9,11 +9,12 @@ import api from '../api';
 import Footer from '../components/Footer';
 
 const EditProfile = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { location, saveLocation, autoDetectLocation, detectingLocation } = useLocation();
   const navigate = useNavigate();
 
   const [profileData, setProfileData] = useState({ name: '', email: '' });
+  const [profilePic, setProfilePic] = useState(null);
   const [locationData, setLocationData] = useState({
     address_line1: '', address_line2: '', city: '', state: '', postal_code: '', country: ''
   });
@@ -98,9 +99,25 @@ const EditProfile = () => {
     setStatus('saving');
 
     try {
-      // Save location via global context (syncs everywhere including navbar)
+      // 1. Save Profile Data
+      const formData = new FormData();
+      formData.append('name', profileData.name);
+      if (profilePic) {
+        formData.append('profile_pic', profilePic);
+      }
+      
+      const profileRes = await api.post('/user/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      
+      if (profileRes.data.status === 'success') {
+        updateUser(profileRes.data.user);
+      }
+
+      // 2. Save location via global context (syncs everywhere including navbar)
       const result = await saveLocation(locationData);
-      if (result.success) {
+      
+      if (result.success && profileRes.data.status === 'success') {
         setStatus('success');
         setTimeout(() => navigate('/dashboard'), 1200);
       } else {
@@ -142,16 +159,24 @@ const EditProfile = () => {
             {/* Basic Info */}
             <div>
               <h2 className="text-lg font-semibold mb-4 text-gray-700">Basic Information</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm text-gray-500 mb-1">Name</label>
-                  <input type="text" name="name" value={profileData.name} onChange={handleProfileChange} disabled className="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
-                  <span className="text-xs text-gray-400">Name editing requires backend support</span>
+                  <input type="text" name="name" value={profileData.name} onChange={handleProfileChange} required className="w-full px-4 py-2 rounded-lg border border-gray-200" />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-500 mb-1">Email</label>
                   <input type="email" name="email" value={profileData.email} disabled className="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-500" />
                 </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm text-gray-500 mb-1">Profile Picture</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setProfilePic(e.target.files[0])}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all"
+                />
               </div>
             </div>
 
