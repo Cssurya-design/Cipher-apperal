@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useLocation } from '../context/LocationContext';
+import { API_BASE } from '../api';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +79,7 @@ const Navbar = () => {
             <Link to="/dashboard" className="flex items-center gap-2 text-sm font-medium text-primary hover:underline group">
               {user.profile_pic ? (
                 <img 
-                  src={user.profile_pic.startsWith('http') ? user.profile_pic : `http://localhost:8000${user.profile_pic}`} 
+                  src={user.profile_pic.startsWith('http') ? user.profile_pic : `${API_BASE}${user.profile_pic}`} 
                   alt="Profile" 
                   className="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-primary transition-all"
                 />
@@ -181,7 +182,7 @@ const Navbar = () => {
                     <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center gap-3 text-primary">
                       {user.profile_pic ? (
                         <img 
-                          src={user.profile_pic.startsWith('http') ? user.profile_pic : `http://localhost:8000${user.profile_pic}`} 
+                          src={user.profile_pic.startsWith('http') ? user.profile_pic : `${API_BASE}${user.profile_pic}`} 
                           alt="Profile" 
                           className="w-10 h-10 rounded-full object-cover border border-primary/30"
                         />

@@ -106,9 +106,7 @@ const EditProfile = () => {
         formData.append('profile_pic', profilePic);
       }
       
-      const profileRes = await api.post('/user/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const profileRes = await api.post('/user/', formData);
       
       if (profileRes.data.status === 'success') {
         updateUser(profileRes.data.user);

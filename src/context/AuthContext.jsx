@@ -33,11 +33,7 @@ export const AuthProvider = ({ children }) => {
     if (profilePic) {
       formData.append('profile_pic', profilePic);
     }
-    const res = await api.post('/signup/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const res = await api.post('/signup/', formData);
     return res.data;
   };
 
