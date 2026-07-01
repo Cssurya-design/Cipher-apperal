@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /admin-dashboard
+Disallow: /edit-profile
+Disallow: /cart
+Disallow: /wishlist
+
+Sitemap: https://cipher-apparel.vercel.app/sitemap.xml
