@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext'
 import { LocationProvider } from './context/LocationContext'
 import Navbar from './components/Navbar'
 import LocationModal from './components/LocationModal'
+import ScrollToTop from './components/ScrollToTop'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import Cart from './pages/Cart'
@@ -29,6 +30,7 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <Router>
+        <ScrollToTop />
         <AuthProvider>
           <CartProvider>
             <LocationProvider>
