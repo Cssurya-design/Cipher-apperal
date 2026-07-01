@@ -18,6 +18,8 @@ import Dashboard from './pages/Dashboard'
 import EditProfile from './pages/EditProfile'
 import OrderConfirmation from './pages/OrderConfirmation'
 import AdminDashboard from './pages/AdminDashboard'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsOfService from './pages/TermsOfService'
 
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
@@ -48,6 +50,8 @@ function App() {
                   <Route path="/edit-profile" element={<EditProfile />} />
                   <Route path="/order-confirmation" element={<OrderConfirmation />} />
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
                 </Routes>
               </main>
               </div>
