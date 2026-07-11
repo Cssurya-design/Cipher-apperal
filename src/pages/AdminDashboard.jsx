@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus } from 'lucide-react';
-import api from '../api';
+import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus, Plus } from 'lucide-react';
+import api, { API_BASE } from '../api';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
 
@@ -517,6 +517,17 @@ const AdminDashboard = () => {
         {/* --- BANNERS TAB --- */}
         {activeTab === 'banners' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Promotional Banners</h2>
+              {!editingBanner && (
+                <button 
+                  onClick={() => setEditingBanner({ position: 'main', is_active: true })} 
+                  className="bg-primary text-white px-4 py-2 rounded-full font-bold flex items-center gap-2"
+                >
+                  <Plus size={20} /> Create Banner
+                </button>
+              )}
+            </div>
             {editingBanner ? (
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
                 <h2 className="text-xl font-bold mb-4">{editingBanner.id ? 'Edit Banner' : 'Create Banner'}</h2>
