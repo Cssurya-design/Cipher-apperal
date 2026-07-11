@@ -127,7 +127,7 @@ const Blog = () => {
         >
           <span className="text-gray-300 font-semibold tracking-widest text-sm uppercase mb-3 block">Our Journal</span>
           <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
-            #ReadMore
+            #Read<span className="text-primary">More</span>
           </h1>
           <p className="text-gray-200 text-lg md:text-xl font-medium max-w-xl mx-auto drop-shadow-md">
             Dive into our latest styling tips, trend reports, and behind-the-scenes stories.

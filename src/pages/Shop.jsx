@@ -72,7 +72,7 @@ const Shop = () => {
         className="w-full min-h-[30vh] sm:min-h-[40vh] bg-[#1a1a1a] text-white flex flex-col justify-center items-center text-center bg-cover bg-center px-4"
         style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b1.jpg')` }}
       >
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">#Stay<span className="text-gray-300">Home</span></h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2">#Stay<span className="text-primary">Home</span></h1>
         <p className="text-gray-300 text-sm sm:text-base">Save more with coupons & up to 70% off!</p>
       </motion.div>
 
