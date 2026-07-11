@@ -12,7 +12,7 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, quantity = 1, size = 'M') => {
+  const addToCart = (product, quantity = 1, size = 'XL') => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id && item.size === size);
       if (existing) {

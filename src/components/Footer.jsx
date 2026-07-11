@@ -21,7 +21,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300 pt-12 sm:pt-16 pb-6 sm:pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
+        <div className="grid grid-cols-1 min-[450px]:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
             <h3 className="text-white text-lg sm:text-xl font-bold mb-3 sm:mb-4">Cipher Apparel</h3>

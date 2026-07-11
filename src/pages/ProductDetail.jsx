@@ -18,12 +18,13 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ratingLoading, setRatingLoading] = useState(false);
-  const [selectedSize, setSelectedSize] = useState('M');
+  const [selectedSize, setSelectedSize] = useState('XL');
   const [quantity, setQuantity] = useState(1);
   const [showReviews, setShowReviews] = useState(false);
   const [reviewText, setReviewText] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { displayLocation, setShowLocationModal } = useLocation();
@@ -34,6 +35,7 @@ const ProductDetail = () => {
     api.get(`/products/${id}/`)
       .then(res => {
         setProduct(res.data);
+        setIsWishlisted(res.data.is_wishlisted || false);
         setLoading(false);
       })
       .catch(err => {
@@ -62,6 +64,26 @@ const ProductDetail = () => {
       console.error(err);
     }
     setRatingLoading(false);
+  };
+
+  const handleWishlist = async () => {
+    if (!user) {
+      toast.error('Please log in to add to wishlist');
+      navigate('/auth');
+      return;
+    }
+    try {
+      const res = await api.post('/wishlist/', { product_id: product.id });
+      if (res.data.status === 'added') {
+        setIsWishlisted(true);
+        toast.success('Added to wishlist');
+      } else {
+        setIsWishlisted(false);
+        toast.success('Removed from wishlist');
+      }
+    } catch (err) {
+      toast.error('Failed to update wishlist');
+    }
   };
 
   const handleAddToCart = () => {
@@ -118,8 +140,22 @@ const ProductDetail = () => {
           
           {/* Product Info */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col">
-            <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">{product.category}</span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-3">{product.name}</h1>
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">{product.category}</span>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-3">{product.name}</h1>
+              </div>
+              <button 
+                onClick={handleWishlist}
+                className={`p-3 rounded-full flex items-center justify-center transition-all border shadow-sm ${
+                  isWishlisted
+                    ? 'bg-pink-50 border-pink-100 text-pink-500'
+                    : 'bg-white border-gray-100 text-gray-400 hover:text-pink-500 hover:bg-pink-50'
+                }`}
+              >
+                <Heart size={24} fill={isWishlisted ? "currentColor" : "none"} />
+              </button>
+            </div>
             
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
@@ -319,7 +355,7 @@ const ProductDetail = () => {
         {product.related_products && product.related_products.length > 0 && (
           <div className="mt-8 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {product.related_products.map(p => (
                 <ProductCard key={p.id} product={p} />
               ))}

@@ -1,17 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Star, Heart, Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { API_BASE, getImageUrl } from '../api';
+import { useAuth } from '../context/AuthContext';
+import api, { API_BASE, getImageUrl } from '../api';
+import toast from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const imageUrl = getImageUrl(product.image, 'products');
 
   const avgRating = product.avg_rating || 0;
   const totalReviews = product.total_reviews || 0;
+
+  const handleWishlist = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please log in to add to wishlist');
+      navigate('/auth');
+      return;
+    }
+    try {
+      const res = await api.post('/wishlist/', { product_id: product.id });
+      if (res.data.status === 'added') {
+        setIsWishlisted(true);
+        toast.success('Added to wishlist');
+      } else {
+        setIsWishlisted(false);
+        toast.success('Removed from wishlist');
+      }
+    } catch (err) {
+      toast.error('Failed to update wishlist');
+    }
+  };
 
   return (
     <motion.div 
@@ -59,9 +85,14 @@ const ProductCard = ({ product }) => {
       </div>
 
       <button 
-        className="absolute top-5 right-5 w-9 h-9 bg-pink-50 text-pink-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-pink-500 hover:text-white"
+        onClick={handleWishlist}
+        className={`absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+          isWishlisted
+            ? 'bg-pink-500 text-white opacity-100'
+            : 'bg-pink-50 text-pink-500 opacity-0 group-hover:opacity-100 hover:bg-pink-500 hover:text-white'
+        }`}
       >
-        <Heart size={18} />
+        <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
       </button>
 
       <button 

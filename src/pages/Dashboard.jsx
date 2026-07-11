@@ -43,7 +43,7 @@ const Dashboard = () => {
     if (user) {
       api.get('/orders/')
         .then(res => {
-          setOrders(res.data.orders || []);
+          setOrders(res.data.grouped_orders || res.data.orders || []);
           setSummary(res.data.summary || { total_orders: 0, total_spent: '0' });
           setLoading(false);
         })
@@ -182,108 +182,102 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {orders.map((order, i) => (
+              {orders.map((group, i) => (
                 <motion.div
-                  key={order.id}
+                  key={group.group_id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
                   className="p-4 sm:p-6 hover:bg-gray-50/50 transition-colors"
                 >
-                  <div className="flex gap-3 sm:gap-4">
-                    {/* Product Image */}
-                    <img
-                      src={getImageUrl(order.product_img)}
-                      alt={order.product_name}
-                      className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl flex-shrink-0"
-                      onError={(e) => { e.target.src = '/hero-new.jpg'; }}
-                    />
-                    
-                    {/* Order Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate">
-                            {order.product_name}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2 mt-1">
-                            {order.size && (
-                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">
-                                Size: {order.size}
-                              </span>
-                            )}
-                            <span className="text-xs text-gray-500">Qty: {order.quantity}</span>
-                            <span className="text-xs text-gray-400">|</span>
-                            <span className="text-xs text-gray-500">{order.date}</span>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                            <span className="text-xs font-semibold text-gray-600 border border-gray-200 px-2 py-0.5 rounded">
-                              {order.payment_method === 'COD' ? '💵 COD' : '💳 UPI'}
-                            </span>
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded ${order.payment_status === 'Verified' ? 'bg-green-100 text-green-700' : order.payment_status === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                              {order.payment_status}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 sm:text-right flex-shrink-0">
-                          <p className="font-bold text-primary">₹{order.price}</p>
-                          <span className={`text-xs px-2 py-1 rounded-full font-semibold ${STATUS_STYLES[order.status] || 'bg-gray-100'}`}>
-                            {order.status_display || order.status}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Progress bar */}
-                      {order.status !== 'cancelled' && (
-                        <div className="order-progress-bar mt-3">
-                          <div
-                            className="order-progress-fill"
-                            style={{ width: `${STATUS_PROGRESS[order.status] || 0}%` }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Estimated delivery for active orders */}
-                      {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                        <div className="flex items-center gap-1 mt-2">
-                          <Truck size={12} className="text-primary flex-shrink-0" />
-                          <span className="text-xs text-gray-500">
-                            Est. delivery: <span className="font-medium text-gray-700">{getEstimatedDelivery(order.date)}</span>
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Bottom row: rating + track button */}
-                      <div className="flex items-center justify-between gap-2 mt-3">
-                        {/* Rating */}
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-500">Rate:</span>
-                          <div className="flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map(star => (
-                              <button
-                                key={star}
-                                onClick={() => handleRateOrder(order, star)}
-                                disabled={ratingLoading === order.id}
-                                className={`transition-colors ${
-                                  star <= order.user_rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
-                                }`}
-                              >
-                                <Star size={14} fill="currentColor" />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Track Order button */}
-                        <Link
-                          to={`/orders/${order.id}`}
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-dark border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-all"
-                        >
-                          <ExternalLink size={12} />
-                          Track Order
-                        </Link>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-gray-100">
+                    <div>
+                      <h3 className="font-bold text-gray-800">Order #{group.group_id}</h3>
+                      <p className="text-xs text-gray-500 mt-1">{group.date} • {group.items?.length || 0} items</p>
+                    </div>
+                    <div className="flex flex-col sm:items-end mt-2 sm:mt-0">
+                      <p className="font-bold text-primary">₹{group.total_price}</p>
+                      <div className="flex gap-2 mt-1">
+                        <span className={`text-xs px-2 py-1 rounded-full font-semibold ${STATUS_STYLES[group.status] || 'bg-gray-100'}`}>
+                          {group.status_display || group.status}
+                        </span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded ${group.payment_status === 'Verified' ? 'bg-green-100 text-green-700' : group.payment_status === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                          {group.payment_status}
+                        </span>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {group.items?.map(item => (
+                      <div key={item.id} className="flex gap-3 sm:gap-4 items-center">
+                        <img
+                          src={getImageUrl(item.product_img)}
+                          alt={item.product_name}
+                          className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-xl flex-shrink-0"
+                          onError={(e) => { e.target.src = '/hero-new.jpg'; }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-800 text-sm truncate">{item.product_name}</h4>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            {item.size && (
+                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">
+                                Size: {item.size}
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-500">Qty: {item.quantity}</span>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                           <p className="font-semibold text-sm text-gray-800">₹{item.price}</p>
+                           <div className="flex gap-0.5 justify-end mt-1">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <button
+                                  key={star}
+                                  onClick={() => handleRateOrder(item, star)}
+                                  disabled={ratingLoading === item.id}
+                                  className={`transition-colors ${
+                                    star <= item.user_rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
+                                  }`}
+                                >
+                                  <Star size={12} fill="currentColor" />
+                                </button>
+                              ))}
+                           </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Progress bar for the group */}
+                  {group.status !== 'cancelled' && (
+                    <div className="order-progress-bar mt-5">
+                      <div
+                        className="order-progress-fill"
+                        style={{ width: `${STATUS_PROGRESS[group.status] || 0}%` }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t border-gray-50">
+                    {group.status !== 'delivered' && group.status !== 'cancelled' ? (
+                      <div className="flex items-center gap-1">
+                        <Truck size={14} className="text-primary flex-shrink-0" />
+                        <span className="text-xs text-gray-500">
+                          Est. delivery: <span className="font-medium text-gray-700">{getEstimatedDelivery(group.date)}</span>
+                        </span>
+                      </div>
+                    ) : (
+                      <div />
+                    )}
+                    
+                    <Link
+                      to={`/orders/${group.group_id}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-dark border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-all"
+                    >
+                      <ExternalLink size={12} />
+                      Track Order
+                    </Link>
                   </div>
                 </motion.div>
               ))}

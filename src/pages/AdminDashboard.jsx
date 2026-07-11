@@ -55,11 +55,6 @@ const AdminDashboard = () => {
   const [settings, setSettings] = useState({});
   const [settingsLoading, setSettingsLoading] = useState(false);
 
-  // Database State
-  const [dbTables, setDbTables] = useState([]);
-  const [dbLoading, setDbLoading] = useState(false);
-  const [activeDbTab, setActiveDbTab] = useState('');
-
   // Confirm Dialog State
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -98,9 +93,6 @@ const AdminDashboard = () => {
     if (activeTab === 'settings') {
       fetchSettings();
     }
-    if (activeTab === 'database') {
-      fetchDatabaseTables();
-    }
   }, [activeTab, user]);
 
 
@@ -133,20 +125,6 @@ const AdminDashboard = () => {
     } catch (err) {
       toast.error('Failed to update settings');
     }
-  };
-
-  const fetchDatabaseTables = async () => {
-    setDbLoading(true);
-    try {
-      const res = await api.get('/admin/database/');
-      setDbTables(res.data.tables || []);
-      if (res.data.tables?.length > 0 && !activeDbTab) {
-        setActiveDbTab(res.data.tables[0].name);
-      }
-    } catch (err) {
-      toast.error('Failed to load database tables');
-    }
-    setDbLoading(false);
   };
 
   const fetchProducts = async () => {
@@ -272,7 +250,7 @@ const AdminDashboard = () => {
     setUpdatingId(orderId);
     try {
       await api.post(`/admin/orders/${orderId}/update/`, { [field]: value });
-      setOrders(orders.map(o => o.id === orderId ? { ...o, [field]: value } : o));
+      setOrders(orders.map(o => o.group_id === orderId ? { ...o, [field]: value } : o));
     } catch (err) {
       toast.error('Failed to update order. Please try again.');
     }
@@ -288,7 +266,7 @@ const AdminDashboard = () => {
         setUpdatingId(orderId);
         try {
           await api.delete(`/admin/orders/${orderId}/delete/`);
-          setOrders(prev => prev.filter(o => o.id !== orderId));
+          setOrders(prev => prev.filter(o => o.group_id !== orderId));
           toast.success('Order deleted successfully');
         } catch (err) {
           toast.error('Failed to delete order.');
@@ -551,12 +529,6 @@ const AdminDashboard = () => {
             >
               Settings
             </button>
-            <button
-              onClick={() => setActiveTab('database')}
-              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'database' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-            >
-              Database Tables
-            </button>
           </div>
         </div>
 
@@ -600,20 +572,26 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {(showAllOrders ? orders : orders.slice(0, 5)).map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-gray-900">#{order.id}</div>
+                      <tr key={order.group_id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4 align-top">
+                          <div className="font-bold text-gray-900">#{order.group_id}</div>
                           <div className="text-xs text-gray-500 mt-1">{order.date}</div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 align-top">
                           <span className="font-medium text-gray-800">{order.user_email}</span>
+                          <div className="text-xs text-gray-500 mt-1">{order.user_name}</div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-gray-800 max-w-[200px] truncate">{order.product_name}</div>
-                          <div className="text-xs text-gray-500 mt-1">Qty: {order.quantity} {order.size && `| Size: ${order.size}`}</div>
+                        <td className="px-6 py-4 align-top">
+                          <div className="text-xs text-gray-700 space-y-1">
+                            {order.items?.map(item => (
+                              <div key={item.id} className="truncate max-w-[200px]">
+                                <span className="font-semibold">{item.quantity}x</span> {item.product_name} {item.size && `(${item.size})`}
+                              </div>
+                            ))}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 font-bold text-primary">₹{order.price}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 font-bold text-primary align-top">₹{order.total_price}</td>
+                        <td className="px-6 py-4 align-top">
                           <div className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-semibold bg-gray-100 px-2 py-0.5 rounded">
@@ -628,8 +606,8 @@ const AdminDashboard = () => {
                             
                             <select
                               value={order.payment_status}
-                              onChange={(e) => updateOrder(order.id, 'payment_status', e.target.value)}
-                              disabled={updatingId === order.id}
+                              onChange={(e) => updateOrder(order.group_id, 'payment_status', e.target.value)}
+                              disabled={updatingId === order.group_id}
                               className={`text-xs font-bold rounded-lg px-2 py-1.5 border focus:outline-none ${
                                 order.payment_status === 'Verified' ? 'bg-green-50 border-green-200 text-green-700' :
                                 order.payment_status === 'Failed' ? 'bg-red-50 border-red-200 text-red-700' :
@@ -642,11 +620,11 @@ const AdminDashboard = () => {
                             </select>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 align-top">
                           <select
                             value={order.status}
-                            onChange={(e) => updateOrder(order.id, 'status', e.target.value)}
-                            disabled={updatingId === order.id}
+                            onChange={(e) => updateOrder(order.group_id, 'status', e.target.value)}
+                            disabled={updatingId === order.group_id}
                             className="text-xs font-bold rounded-lg px-3 py-1.5 border border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-primary"
                           >
                             <option value="placed">Placed</option>
@@ -656,24 +634,25 @@ const AdminDashboard = () => {
                             <option value="cancelled">Cancelled ❌</option>
                           </select>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
+                        <td className="px-6 py-4 align-top">
+                          <div className="flex items-center gap-2">
                             <button
-                              onClick={() => setSelectedOrder(order)}
-                              className="text-gray-500 hover:text-primary transition-colors"
-                              title="View Order Details"
+                              onClick={() => {
+                                setSelectedOrder(order);
+                              }}
+                              className="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                              title="View Details"
                             >
                               <Eye size={18} />
                             </button>
-                            {user.is_superuser && (
-                              <button
-                                onClick={() => deleteOrder(order.id)}
-                                className="text-gray-500 hover:text-red-600 transition-colors"
-                                title="Delete Order"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            )}
+                            <button
+                              onClick={() => deleteOrder(order.group_id)}
+                              disabled={updatingId === order.group_id}
+                              className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                              title="Delete Order"
+                            >
+                              <Trash2 size={18} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1211,84 +1190,6 @@ const AdminDashboard = () => {
                     <button type="submit" className="bg-primary text-white px-6 py-2 rounded font-semibold">Save Settings</button>
                   </div>
                 </form>
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* Database Tables Tab */}
-        {activeTab === 'database' && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Database Tables Viewer</h2>
-            <p className="text-sm text-gray-500">Showing the latest 50 records for each table.</p>
-            {dbLoading ? (
-              <p>Loading database tables...</p>
-            ) : dbTables.length === 0 ? (
-              <p>No tables found.</p>
-            ) : (
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Table Navigation (Sidebar) */}
-                <div className="w-full md:w-64 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                  <h3 className="font-bold text-gray-800 mb-4 px-2">Tables</h3>
-                  <div className="space-y-1">
-                    {dbTables.map(table => (
-                      <button
-                        key={table.name}
-                        onClick={() => setActiveDbTab(table.name)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          activeDbTab === table.name 
-                            ? 'bg-primary/10 text-primary' 
-                            : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                      >
-                        {table.name}
-                        <span className="float-right text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">
-                          {table.total_count}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Table Data View */}
-                <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                  {dbTables.map(table => (
-                    table.name === activeDbTab && (
-                      <div key={table.name} className="overflow-x-auto w-full">
-                        <table className="w-full text-left border-collapse min-w-max">
-                          <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100">
-                              {table.fields.map(field => (
-                                <th key={field} className="p-3 font-semibold text-gray-600 text-xs uppercase tracking-wider">
-                                  {field}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                            {table.rows.length === 0 ? (
-                              <tr>
-                                <td colSpan={table.fields.length} className="p-8 text-center text-gray-500">
-                                  No data available in {table.name}.
-                                </td>
-                              </tr>
-                            ) : (
-                              table.rows.map((row, i) => (
-                                <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                                  {table.fields.map(field => (
-                                    <td key={field} className="p-3 text-sm text-gray-700 max-w-xs truncate" title={row[field]}>
-                                      {row[field] || '-'}
-                                    </td>
-                                  ))}
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    )
-                  ))}
-                </div>
               </div>
             )}
           </motion.div>
