@@ -63,18 +63,20 @@ const Cart = () => {
         image: item.image || '',
         description: item.description || '',
       }));
-      await api.post('/save-order/', { 
+      const res = await api.post('/save-order/', { 
         items,
         payment_method: paymentMethod,
         transaction_id: paymentMethod === 'UPI' ? transactionId : ''
       });
+      const createdOrderIds = res.data.orders?.map(o => o.id) || [];
+      const firstOrderId = createdOrderIds[0] || null;
       setOrderPlaced(true);
       clearCart();
       setTimeout(() => {
         setShowCheckout(false);
         setOrderPlaced(false);
-        navigate('/dashboard');
-      }, 3000);
+        navigate('/order-confirmation', { state: { orderIds: createdOrderIds, firstOrderId } });
+      }, 2000);
     } catch (err) {
       console.error(err);
       alert('Failed to place order. Please try again.');

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLocation as useLocationCtx } from '../context/LocationContext';
-import { Star, Package, CreditCard, MapPin, Edit3, ShoppingBag, Heart } from 'lucide-react';
+import { Star, Package, CreditCard, MapPin, Edit3, ShoppingBag, Heart, Truck, ExternalLink } from 'lucide-react';
 import api, { API_BASE } from '../api';
 import Footer from '../components/Footer';
 
@@ -13,6 +13,21 @@ const STATUS_STYLES = {
   shipped: 'status-shipped',
   delivered: 'status-delivered',
   cancelled: 'status-cancelled',
+};
+
+// Progress percentage for the mini status bar
+const STATUS_PROGRESS = {
+  placed: 20,
+  processing: 45,
+  shipped: 75,
+  delivered: 100,
+  cancelled: 0,
+};
+
+const getEstimatedDelivery = (dateStr) => {
+  const est = new Date();
+  est.setDate(est.getDate() + 5);
+  return est.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
 };
 
 const Dashboard = () => {
@@ -218,30 +233,55 @@ const Dashboard = () => {
                         </div>
                       </div>
 
-                      {/* Description snippet */}
-                      {order.product_description && (
-                        <p className="text-xs text-gray-500 mt-2 line-clamp-2">
-                          {order.product_description}
-                        </p>
+                      {/* Progress bar */}
+                      {order.status !== 'cancelled' && (
+                        <div className="order-progress-bar mt-3">
+                          <div
+                            className="order-progress-fill"
+                            style={{ width: `${STATUS_PROGRESS[order.status] || 0}%` }}
+                          />
+                        </div>
                       )}
 
-                      {/* Rating for this order */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs text-gray-500">Your rating:</span>
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <button
-                              key={star}
-                              onClick={() => handleRateOrder(order, star)}
-                              disabled={ratingLoading === order.id}
-                              className={`transition-colors ${
-                                star <= order.user_rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
-                              }`}
-                            >
-                              <Star size={16} fill="currentColor" />
-                            </button>
-                          ))}
+                      {/* Estimated delivery for active orders */}
+                      {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                        <div className="flex items-center gap-1 mt-2">
+                          <Truck size={12} className="text-primary flex-shrink-0" />
+                          <span className="text-xs text-gray-500">
+                            Est. delivery: <span className="font-medium text-gray-700">{getEstimatedDelivery(order.date)}</span>
+                          </span>
                         </div>
+                      )}
+
+                      {/* Bottom row: rating + track button */}
+                      <div className="flex items-center justify-between gap-2 mt-3">
+                        {/* Rating */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-500">Rate:</span>
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <button
+                                key={star}
+                                onClick={() => handleRateOrder(order, star)}
+                                disabled={ratingLoading === order.id}
+                                className={`transition-colors ${
+                                  star <= order.user_rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
+                                }`}
+                              >
+                                <Star size={14} fill="currentColor" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Track Order button */}
+                        <Link
+                          to={`/orders/${order.id}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-dark border border-primary/30 hover:border-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-all"
+                        >
+                          <ExternalLink size={12} />
+                          Track Order
+                        </Link>
                       </div>
                     </div>
                   </div>

@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { CheckCircle2, Package, ArrowRight } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { CheckCircle2, Package, ArrowRight, Truck } from 'lucide-react';
 import Footer from '../components/Footer';
 
 const OrderConfirmation = () => {
+  const { state } = useLocation();
+  const firstOrderId = state?.firstOrderId || null;
+  const orderIds = state?.orderIds || [];
+
   useEffect(() => {
     document.title = "Order Confirmed | Cipher Apparel";
   }, []);
@@ -18,6 +22,7 @@ const OrderConfirmation = () => {
   return (
     <div className="pt-24 min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
+        {/* Success icon */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -31,10 +36,23 @@ const OrderConfirmation = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3"
+          className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
         >
           Order Confirmed! 🎉
         </motion.h1>
+
+        {/* Order number */}
+        {firstOrderId && (
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="text-gray-400 text-sm mb-1"
+          >
+            Order #{orderIds.join(', #')}
+          </motion.p>
+        )}
+
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,26 +62,53 @@ const OrderConfirmation = () => {
           Thank you for your purchase. Your order has been placed successfully.
         </motion.p>
 
+        {/* Delivery card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
           className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8"
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-3">
             <Package size={20} className="text-primary" />
             <p className="font-semibold text-gray-800">Estimated Delivery</p>
           </div>
           <p className="text-lg font-bold text-primary">{deliveryStr}</p>
-          <p className="text-sm text-gray-500 mt-2">You can track your order from the Dashboard</p>
+          <p className="text-sm text-gray-500 mt-2">You can track your order status in real-time</p>
+
+          {/* Live tracker hint */}
+          {firstOrderId && (
+            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center gap-2 text-sm text-gray-500">
+              <Truck size={16} className="text-primary" />
+              <span>Tracking updates will appear as your order progresses</span>
+            </div>
+          )}
         </motion.div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        {/* CTA buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="flex flex-col sm:flex-row gap-3 justify-center"
+        >
+          {firstOrderId && (
+            <Link
+              to={`/orders/${firstOrderId}`}
+              className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+            >
+              Track Your Order <ArrowRight size={18} />
+            </Link>
+          )}
           <Link
             to="/dashboard"
-            className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+            className={`px-6 py-3 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 ${
+              firstOrderId
+                ? 'bg-white text-gray-700 hover:bg-gray-50'
+                : 'bg-primary text-white hover:bg-primary-dark'
+            }`}
           >
-            View My Orders <ArrowRight size={18} />
+            View My Orders {!firstOrderId && <ArrowRight size={18} />}
           </Link>
           <Link
             to="/shop"
@@ -71,7 +116,7 @@ const OrderConfirmation = () => {
           >
             Continue Shopping
           </Link>
-        </div>
+        </motion.div>
       </div>
       <Footer />
     </div>
@@ -79,3 +124,4 @@ const OrderConfirmation = () => {
 };
 
 export default OrderConfirmation;
+

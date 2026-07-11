@@ -21,6 +21,7 @@ import OrderConfirmation from './pages/OrderConfirmation'
 import AdminDashboard from './pages/AdminDashboard'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
+import OrderTracking from './pages/OrderTracking'
 
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
@@ -54,6 +55,7 @@ function App() {
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/orders/:id" element={<OrderTracking />} />
                 </Routes>
               </main>
               </div>
