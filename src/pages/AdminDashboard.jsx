@@ -70,12 +70,21 @@ const AdminDashboard = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    if (activeTab === 'banners' && user?.is_staff) {
+    if (!user?.is_staff) return;
+
+    if (activeTab === 'banners') {
       fetchBanners();
       fetchProducts();
     }
-    if (activeTab === 'coupons' && user?.is_staff) {
+    if (activeTab === 'coupons') {
       fetchCoupons();
+    }
+    if (activeTab === 'categories') {
+      fetchCategories();
+    }
+    if (activeTab === 'products') {
+      fetchProducts();
+      fetchCategories();
     }
   }, [activeTab, user]);
 
