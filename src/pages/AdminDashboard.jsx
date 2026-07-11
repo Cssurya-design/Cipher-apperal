@@ -966,13 +966,7 @@ const AdminDashboard = () => {
                       <input type="text" value={editingCategory.slug} onChange={e => setEditingCategory({...editingCategory, slug: e.target.value})} className="w-full p-2 border border-gray-200 rounded" placeholder="Auto-generated if empty" />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Category Image (Optional)</label>
-                    <input type="file" accept="image/*" onChange={e => setEditingCategory({...editingCategory, imageFile: e.target.files[0]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
-                    {editingCategory.image && !editingCategory.imageFile && (
-                      <img src={editingCategory.image.startsWith('http') ? editingCategory.image : `${API_BASE}${editingCategory.image}`} alt="Preview" className="mt-2 h-20 rounded shadow" />
-                    )}
-                  </div>
+
                   <div className="flex gap-4 pt-4">
                     <button type="button" onClick={() => setEditingCategory(null)} className="flex-1 bg-gray-100 py-2 rounded font-semibold">Cancel</button>
                     <button type="submit" className="flex-1 bg-primary text-white py-2 rounded font-semibold">Save Category</button>
@@ -985,7 +979,6 @@ const AdminDashboard = () => {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-100">
-                        <th className="p-4 font-semibold text-gray-600 text-sm w-16">Image</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Slug</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
@@ -993,17 +986,10 @@ const AdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {categories.length === 0 ? (
-                        <tr><td colSpan="4" className="p-8 text-center text-gray-500">No categories found.</td></tr>
+                        <tr><td colSpan="3" className="p-8 text-center text-gray-500">No categories found.</td></tr>
                       ) : (
                         categories.map(cat => (
                           <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
-                            <td className="p-4">
-                              {cat.image ? (
-                                <img src={cat.image.startsWith('http') ? cat.image : `${API_BASE}${cat.image}`} alt={cat.name} className="w-12 h-12 rounded object-cover border border-gray-200" />
-                              ) : (
-                                <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center text-gray-400 text-xs">No Img</div>
-                              )}
-                            </td>
                             <td className="p-4 font-medium text-gray-900">{cat.name}</td>
                             <td className="p-4 text-sm text-gray-500">{cat.slug}</td>
                             <td className="p-4 text-right">
