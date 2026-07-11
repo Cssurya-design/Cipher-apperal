@@ -7,6 +7,13 @@ import api, { API_BASE, getImageUrl } from '../api';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
 
+const formatDateTimeLocal = (isoString) => {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  const pad = n => n.toString().padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -220,11 +227,19 @@ const AdminDashboard = () => {
   const handleSaveCoupon = async (e) => {
     e.preventDefault();
     try {
+      const payload = { ...editingCoupon };
+      if (payload.valid_from) {
+        payload.valid_from = new Date(payload.valid_from).toISOString();
+      }
+      if (payload.valid_to) {
+        payload.valid_to = new Date(payload.valid_to).toISOString();
+      }
+
       if (editingCoupon.id) {
-        await api.put(`/admin/coupons/${editingCoupon.id}/`, editingCoupon);
+        await api.put(`/admin/coupons/${editingCoupon.id}/`, payload);
         toast.success('Coupon updated');
       } else {
-        await api.post('/admin/coupons/', editingCoupon);
+        await api.post('/admin/coupons/', payload);
         toast.success('Coupon created');
       }
       setEditingCoupon(null);
@@ -530,7 +545,6 @@ const AdminDashboard = () => {
                       <option value="main">Main (Center)</option>
                       <option value="small">Small (Half Width)</option>
                       <option value="bottom">Bottom (Third Width)</option>
-                      <option value="promo">Promo Code Bar (Top Announcement)</option>
                     </select>
                   </div>
                   <div>
@@ -642,21 +656,37 @@ const AdminDashboard = () => {
                   <div>
                     <label className="block text-sm font-semibold mb-1">Maximum Uses</label>
                     <input type="number" min="1" required value={editingCoupon.max_uses} onChange={e => setEditingCoupon({...editingCoupon, max_uses: e.target.value})} className="w-full p-2 border rounded" />
+                    <p className="text-xs text-gray-500 mt-1">E.g., 100 means this coupon can be applied a total of 100 times across all customers.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold mb-1">Valid From (Optional)</label>
-                      <input type="datetime-local" value={editingCoupon.valid_from ? editingCoupon.valid_from.slice(0,16) : ''} onChange={e => setEditingCoupon({...editingCoupon, valid_from: e.target.value})} className="w-full p-2 border rounded" />
+                      <input type="datetime-local" value={formatDateTimeLocal(editingCoupon.valid_from)} onChange={e => setEditingCoupon({...editingCoupon, valid_from: e.target.value})} className="w-full p-2 border rounded" />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold mb-1">Valid To (Optional)</label>
-                      <input type="datetime-local" value={editingCoupon.valid_to ? editingCoupon.valid_to.slice(0,16) : ''} onChange={e => setEditingCoupon({...editingCoupon, valid_to: e.target.value})} className="w-full p-2 border rounded" />
+                      <input type="datetime-local" value={formatDateTimeLocal(editingCoupon.valid_to)} onChange={e => setEditingCoupon({...editingCoupon, valid_to: e.target.value})} className="w-full p-2 border rounded" />
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mt-4">
                     <input type="checkbox" checked={editingCoupon.is_active} onChange={e => setEditingCoupon({...editingCoupon, is_active: e.target.checked})} id="coupon_active" />
                     <label htmlFor="coupon_active" className="text-sm font-semibold">Active</label>
                   </div>
+                  
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 mt-4 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" checked={editingCoupon.show_on_popup || false} onChange={e => setEditingCoupon({...editingCoupon, show_on_popup: e.target.checked})} id="coupon_popup" />
+                      <label htmlFor="coupon_popup" className="text-sm font-bold text-purple-900">Show on Top Announcement Bar & Startup Popup</label>
+                    </div>
+                    {editingCoupon.show_on_popup && (
+                      <div>
+                        <label className="block text-sm font-semibold text-purple-900 mb-1">Announcement Text (Optional)</label>
+                        <input type="text" value={editingCoupon.popup_text || ''} onChange={e => setEditingCoupon({...editingCoupon, popup_text: e.target.value})} className="w-full p-2 border border-purple-200 rounded" placeholder="E.g., Use code SUMMER10 for 10% OFF!" />
+                        <p className="text-xs text-purple-700 mt-1">Leave blank to use default text.</p>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-4 pt-4">
                     <button type="button" onClick={() => setEditingCoupon(null)} className="flex-1 bg-gray-100 py-2 rounded font-semibold">Cancel</button>
                     <button type="submit" className="flex-1 bg-primary text-white py-2 rounded font-semibold">Save Coupon</button>

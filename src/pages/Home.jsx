@@ -21,7 +21,8 @@ const features = [
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
-  const [banners, setBanners] = useState({ main: [], small: [], bottom: [], promo: [] });
+  const [banners, setBanners] = useState({ main: [], small: [], bottom: [] });
+  const [promoCoupons, setPromoCoupons] = useState([]);
   const [selectedOffer, setSelectedOffer] = useState(null);
   const { addToCart } = useCart();
   const navigate = useNavigate();
@@ -41,29 +42,34 @@ const Home = () => {
           main: fetched.filter(b => b.position === 'main'),
           small: fetched.filter(b => b.position === 'small'),
           bottom: fetched.filter(b => b.position === 'bottom'),
-          promo: promoBanners,
         });
+      })
+      .catch(err => console.error("Error fetching banners", err));
+
+    api.get('/public-coupons/')
+      .then(res => {
+        const coupons = res.data.coupons || [];
+        setPromoCoupons(coupons);
         
         // Show promo as startup popup if it exists
-        if (promoBanners.length > 0 && !sessionStorage.getItem('startupPopupShown')) {
+        if (coupons.length > 0 && !sessionStorage.getItem('startupPopupShown')) {
           setTimeout(() => {
-            setSelectedOffer(promoBanners[0]);
+            setSelectedOffer({ type: 'coupon', data: coupons[0] });
             sessionStorage.setItem('startupPopupShown', 'true');
           }, 1000);
         }
       })
-      .catch(err => console.error("Error fetching banners", err));
+      .catch(err => console.error("Error fetching coupons", err));
   }, []);
 
   return (
     <div className="w-full">
       {/* Promo Bar */}
-      {banners.promo.length > 0 && banners.promo.map(banner => (
-        <div key={banner.id} className="bg-primary text-white text-center py-2 px-4 text-xs sm:text-sm font-semibold flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-4 relative z-20 shadow-md">
-          <div dangerouslySetInnerHTML={{ __html: banner.title }} />
-          {banner.subtitle && <span className="text-yellow-300 ml-1">{banner.subtitle}</span>}
+      {promoCoupons.length > 0 && promoCoupons.map((coupon, idx) => (
+        <div key={`coupon-${idx}`} className="bg-primary text-white text-center py-2 px-4 text-xs sm:text-sm font-semibold flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-4 relative z-20 shadow-md">
+          <div>{coupon.popup_text || `Use code ${coupon.code} for ${coupon.discount_percentage}% OFF!`}</div>
           <button 
-            onClick={() => setSelectedOffer(banner)} 
+            onClick={() => setSelectedOffer({ type: 'coupon', data: coupon })} 
             className="ml-0 sm:ml-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-[10px] sm:text-xs transition-colors mt-1 sm:mt-0 uppercase tracking-wider"
           >
             Learn More
@@ -237,52 +243,81 @@ const Home = () => {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col z-10"
             >
-              <div 
-                className="h-48 sm:h-64 bg-cover bg-center" 
-                style={{ backgroundImage: `url('${getImageUrl(selectedOffer.image)}')` }}
-              />
-              <button 
-                onClick={() => setSelectedOffer(null)}
-                className="absolute top-4 right-4 bg-black/50 hover:bg-black/80 text-white rounded-full p-2 transition-colors"
-              >
-                <X size={20} />
-              </button>
-              
-              <div className="p-6 sm:p-8">
-                {selectedOffer.subtitle && <h4 className="text-sm font-bold text-primary mb-2 uppercase tracking-wide">{selectedOffer.subtitle}</h4>}
-                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: (selectedOffer.title || '').replace(/<[^>]*>?/gm, '') }}></h3>
-                <p className="text-gray-600 mb-8 whitespace-pre-wrap leading-relaxed">{selectedOffer.description || "Grab this exclusive offer now!"}</p>
-                
-                <div className="flex gap-4">
-                  {selectedOffer.product ? (
-                    <button 
-                      onClick={() => {
-                        addToCart(selectedOffer.product);
-                        toast.success(`Discount Applied! ${selectedOffer.product.name} added to cart.`);
-                        setSelectedOffer(null);
-                        navigate('/cart');
-                      }}
-                      className="inline-block bg-primary text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-purple-900 transition-colors shadow-lg shadow-purple-200"
-                    >
-                      Get Discount & Add to Cart
-                    </button>
-                  ) : (
+              {selectedOffer.type === 'coupon' ? (
+                <div className="p-8 text-center bg-gradient-to-br from-purple-600 to-indigo-700 text-white">
+                  <h3 className="text-3xl font-bold mb-2">Special Offer!</h3>
+                  <p className="text-purple-100 mb-6 text-lg">
+                    {selectedOffer.data.popup_text || `Use code below for ${selectedOffer.data.discount_percentage}% OFF your entire order!`}
+                  </p>
+                  <div className="bg-white/20 backdrop-blur border border-white/30 rounded-xl p-4 inline-block mb-8">
+                    <span className="font-mono text-4xl font-bold tracking-widest">{selectedOffer.data.code}</span>
+                  </div>
+                  <div className="flex gap-4 mt-4">
                     <Link 
-                      to={selectedOffer.link || '/shop'}
+                      to="/shop"
                       onClick={() => setSelectedOffer(null)}
-                      className="inline-block bg-primary text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-purple-900 transition-colors shadow-lg shadow-purple-200"
+                      className="flex-1 bg-white text-purple-700 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors shadow-lg"
                     >
-                      Go to Offer
+                      Shop Now
                     </Link>
-                  )}
+                    <button 
+                      onClick={() => setSelectedOffer(null)}
+                      className="flex-1 bg-white/20 text-white py-3 rounded-full font-bold hover:bg-white/30 transition-colors border border-white/30"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div 
+                    className="h-48 sm:h-64 bg-cover bg-center" 
+                    style={{ backgroundImage: `url('${getImageUrl(selectedOffer.image)}')` }}
+                  />
                   <button 
                     onClick={() => setSelectedOffer(null)}
-                    className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                    className="absolute top-4 right-4 bg-black/50 hover:bg-black/80 text-white rounded-full p-2 transition-colors"
                   >
-                    Close
+                    <X size={20} />
                   </button>
-                </div>
-              </div>
+                  
+                  <div className="p-6 sm:p-8">
+                    {selectedOffer.subtitle && <h4 className="text-sm font-bold text-primary mb-2 uppercase tracking-wide">{selectedOffer.subtitle}</h4>}
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: (selectedOffer.title || '').replace(/<[^>]*>?/gm, '') }}></h3>
+                    <p className="text-gray-600 mb-8 whitespace-pre-wrap leading-relaxed">{selectedOffer.description || "Grab this exclusive offer now!"}</p>
+                    
+                    <div className="flex gap-4">
+                      {selectedOffer.product ? (
+                        <button 
+                          onClick={() => {
+                            addToCart(selectedOffer.product);
+                            toast.success(`Discount Applied! ${selectedOffer.product.name} added to cart.`);
+                            setSelectedOffer(null);
+                            navigate('/cart');
+                          }}
+                          className="inline-block bg-primary text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-purple-900 transition-colors shadow-lg shadow-purple-200"
+                        >
+                          Get Discount & Add to Cart
+                        </button>
+                      ) : (
+                        <Link 
+                          to={selectedOffer.link || '/shop'}
+                          onClick={() => setSelectedOffer(null)}
+                          className="inline-block bg-primary text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-purple-900 transition-colors shadow-lg shadow-purple-200"
+                        >
+                          Go to Offer
+                        </Link>
+                      )}
+                      <button 
+                        onClick={() => setSelectedOffer(null)}
+                        className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </motion.div>
           </div>
         )}
