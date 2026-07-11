@@ -90,7 +90,7 @@ const ProductCard = ({ product }) => {
         className={`absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
           isWishlisted
             ? 'bg-pink-500 text-white opacity-100'
-            : 'bg-pink-50 text-pink-500 opacity-0 group-hover:opacity-100 hover:bg-pink-500 hover:text-white'
+            : 'bg-pink-50 text-pink-500 opacity-100 sm:opacity-0 group-hover:opacity-100 hover:bg-pink-500 hover:text-white'
         }`}
       >
         <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
@@ -98,7 +98,7 @@ const ProductCard = ({ product }) => {
 
       <button 
         onClick={(e) => { e.preventDefault(); addToCart(product, 1, 'XL'); }}
-        className="absolute bottom-14 sm:bottom-16 right-5 w-9 h-9 bg-green-50 text-secondary rounded-full flex items-center justify-center hover:bg-secondary hover:text-white transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100"
+        className="absolute bottom-14 sm:bottom-16 right-5 w-9 h-9 bg-green-50 text-secondary rounded-full flex items-center justify-center hover:bg-secondary hover:text-white transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100"
       >
         <ShoppingCart size={18} />
       </button>
