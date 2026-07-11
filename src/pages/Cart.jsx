@@ -194,7 +194,12 @@ const Cart = () => {
                       <div className="flex justify-between items-start gap-2">
                         <div className="min-w-0">
                           <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate">{item.name}</h3>
-                          <p className="text-primary font-bold mt-1">₹{item.price}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-primary font-bold">₹{item.discount_price || item.price}</p>
+                            {item.discount_price && (
+                              <p className="text-xs text-gray-400 line-through">₹{item.price}</p>
+                            )}
+                          </div>
                         </div>
                         <button onClick={() => removeFromCart(item.id, item.size)} className="text-red-400 hover:text-red-600 transition-colors flex-shrink-0 p-1">
                           <Trash2 size={18} />
@@ -234,7 +239,7 @@ const Cart = () => {
 
                         {/* Subtotal */}
                         <p className="font-bold text-gray-800 ml-auto text-sm sm:text-base">
-                          ₹{(parseFloat(item.price) * item.quantity).toFixed(2)}
+                          ₹{(parseFloat(item.discount_price || item.price) * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>

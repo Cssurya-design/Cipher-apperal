@@ -163,8 +163,8 @@ const AdminDashboard = () => {
       if (editingBanner.title) formData.append('title', editingBanner.title);
       if (editingBanner.subtitle) formData.append('subtitle', editingBanner.subtitle);
       if (editingBanner.description) formData.append('description', editingBanner.description);
-      formData.append('link', editingBanner.link || '');
       if (editingBanner.product_id) formData.append('product_id', editingBanner.product_id);
+      if (editingBanner.discount_price !== undefined && editingBanner.discount_price !== '') formData.append('discount_price', editingBanner.discount_price);
       formData.append('is_active', editingBanner.is_active ?? true);
       
       if (editingBanner.imageFile) {
@@ -555,10 +555,7 @@ const AdminDashboard = () => {
                       )}
                     </div>
                   )}
-                  <div>
-                    <label className="block text-sm font-semibold mb-1">Target Link</label>
-                    <input type="text" value={editingBanner.link || ''} onChange={e => setEditingBanner({...editingBanner, link: e.target.value})} className="w-full p-2 border rounded" placeholder="/shop" />
-                  </div>
+
                   <div>
                     <label className="block text-sm font-semibold mb-1">Linked Discount Product (Optional)</label>
                     <select 
@@ -568,11 +565,25 @@ const AdminDashboard = () => {
                     >
                       <option value="">-- No Product Linked --</option>
                       {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} - ${p.price}</option>
+                        <option key={p.id} value={p.id}>{p.name} - ₹{p.price}</option>
                       ))}
                     </select>
                     <p className="text-xs text-gray-500 mt-1">If a product is linked, clicking the offer will automatically apply a discount / add it to cart.</p>
                   </div>
+                  {editingBanner.product_id && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                      <label className="block text-sm font-semibold mb-1">Discount Price for this Product (₹)</label>
+                      <input 
+                        type="number" 
+                        step="0.01" 
+                        value={editingBanner.discount_price || ''} 
+                        onChange={e => setEditingBanner({...editingBanner, discount_price: e.target.value})} 
+                        className="w-full p-2 border rounded" 
+                        placeholder="e.g. 499.00" 
+                      />
+                      <p className="text-xs text-green-600 font-semibold mt-1">This will update the product's price sitewide to show a strikethrough sale price.</p>
+                    </motion.div>
+                  )}
                   <div className="flex items-center gap-2 mt-4">
                     <input type="checkbox" checked={editingBanner.is_active ?? true} onChange={e => setEditingBanner({...editingBanner, is_active: e.target.checked})} id="is_active" />
                     <label htmlFor="is_active" className="text-sm font-semibold">Active</label>
@@ -593,8 +604,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="p-4">
                       <h3 className="font-bold text-lg mb-1 line-clamp-1">{(banner.title || '').replace(/<[^>]*>?/gm, '')}</h3>
-                      <p className="text-xs text-gray-500 mb-4">{banner.link}</p>
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center mt-4">
                         <button onClick={() => setEditingBanner(banner)} className="text-sm font-semibold text-blue-600 hover:underline">Edit</button>
                         <button onClick={() => handleDeleteBanner(banner.id)} className="text-sm font-semibold text-red-600 hover:underline">Delete</button>
                       </div>

@@ -42,12 +42,21 @@ const Home = () => {
     api.get('/banners/')
       .then(res => {
         const fetched = res.data.banners || [];
+        const promoBanners = fetched.filter(b => b.position === 'promo');
         setBanners({
           main: fetched.filter(b => b.position === 'main'),
           small: fetched.filter(b => b.position === 'small'),
           bottom: fetched.filter(b => b.position === 'bottom'),
-          promo: fetched.filter(b => b.position === 'promo'),
+          promo: promoBanners,
         });
+        
+        // Show promo as startup popup if it exists
+        if (promoBanners.length > 0 && !sessionStorage.getItem('startupPopupShown')) {
+          setTimeout(() => {
+            setSelectedOffer(promoBanners[0]);
+            sessionStorage.setItem('startupPopupShown', 'true');
+          }, 1000);
+        }
       })
       .catch(err => console.error("Error fetching banners", err));
   }, []);

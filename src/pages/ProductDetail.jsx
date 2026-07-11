@@ -134,7 +134,12 @@ const ProductDetail = () => {
             </div>
 
             {/* Price */}
-            <p className="text-3xl font-bold text-primary mb-4">₹{product.price}</p>
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-3xl font-bold text-primary">₹{product.discount_price || product.price}</p>
+              {product.discount_price && (
+                <p className="text-xl text-gray-400 line-through">₹{product.price}</p>
+              )}
+            </div>
 
             {/* Delivery location */}
             <button

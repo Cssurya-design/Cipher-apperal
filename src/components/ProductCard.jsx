@@ -40,7 +40,14 @@ const ProductCard = ({ product }) => {
       </Link>
       
       <div className="flex items-center justify-between">
-        <h4 className="text-primary font-bold text-base sm:text-lg truncate mr-2">₹{product.price}</h4>
+        <div className="flex flex-col mr-2">
+          <h4 className="text-primary font-bold text-base sm:text-lg truncate">
+            ₹{product.discount_price || product.price}
+          </h4>
+          {product.discount_price && (
+            <span className="text-xs text-gray-400 line-through">₹{product.price}</span>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           <div className="flex text-yellow-400">
             {[1, 2, 3, 4, 5].map(star => (
