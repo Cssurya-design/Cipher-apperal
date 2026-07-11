@@ -4,8 +4,10 @@ import { X } from 'lucide-react';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api, { API_BASE } from '../api';
+import { useCart } from '../context/CartContext';
+import toast from 'react-hot-toast';
 
 const features = [
   { img: 'f1.png', label: 'Free Shipping' },
@@ -16,10 +18,19 @@ const features = [
   { img: 'f6.png', label: '24/7 Support' },
 ];
 
+const getImageUrl = (image) => {
+  if (!image) return '';
+  if (image.startsWith('http')) return image;
+  if (image.startsWith('/media/')) return `${API_BASE}${image}`;
+  return `${API_BASE}/static/store/images/banner/${image}`;
+};
+
 const Home = () => {
   const [featured, setFeatured] = useState([]);
-  const [banners, setBanners] = useState({ main: [], small: [], bottom: [] });
+  const [banners, setBanners] = useState({ main: [], small: [], bottom: [], promo: [] });
   const [selectedOffer, setSelectedOffer] = useState(null);
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Home | Cipher Apparel";
@@ -34,6 +45,7 @@ const Home = () => {
           main: fetched.filter(b => b.position === 'main'),
           small: fetched.filter(b => b.position === 'small'),
           bottom: fetched.filter(b => b.position === 'bottom'),
+          promo: fetched.filter(b => b.position === 'promo'),
         });
       })
       .catch(err => console.error("Error fetching banners", err));
@@ -41,6 +53,20 @@ const Home = () => {
 
   return (
     <div className="w-full">
+      {/* Promo Bar */}
+      {banners.promo.length > 0 && banners.promo.map(banner => (
+        <div key={banner.id} className="bg-primary text-white text-center py-2 px-4 text-xs sm:text-sm font-semibold flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-4 relative z-20 shadow-md">
+          <div dangerouslySetInnerHTML={{ __html: banner.title }} />
+          {banner.subtitle && <span className="text-yellow-300 ml-1">{banner.subtitle}</span>}
+          <button 
+            onClick={() => setSelectedOffer(banner)} 
+            className="ml-0 sm:ml-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-[10px] sm:text-xs transition-colors mt-1 sm:mt-0 uppercase tracking-wider"
+          >
+            Learn More
+          </button>
+        </div>
+      ))}
+
       <Hero />
       
       {/* Features Section */}
@@ -109,7 +135,7 @@ const Home = () => {
         <section 
           key={banner.id}
           className="py-12 sm:py-20 md:py-24 text-center bg-cover bg-center text-white my-6 sm:my-12 flex flex-col justify-center items-center w-full min-h-[30vh] sm:min-h-[40vh] px-4"
-          style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}
+          style={{ backgroundImage: `url('${getImageUrl(banner.image)}')` }}
         >
           {banner.subtitle && <h4 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">{banner.subtitle}</h4>}
           {banner.title && <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6" dangerouslySetInnerHTML={{ __html: banner.title }}></h2>}
@@ -162,7 +188,7 @@ const Home = () => {
             <div 
               key={banner.id}
               className="w-full md:flex-1 bg-cover bg-center p-6 sm:p-8 md:p-12 text-white flex flex-col justify-center items-start min-h-[30vh] sm:min-h-[40vh] md:min-h-[50vh] rounded-xl"
-              style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}
+              style={{ backgroundImage: `url('${getImageUrl(banner.image)}')` }}
             >
               {banner.subtitle && <h4 className="text-lg sm:text-xl font-light mb-2">{banner.subtitle}</h4>}
               {banner.title && <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" dangerouslySetInnerHTML={{ __html: banner.title }}></h2>}
@@ -180,7 +206,7 @@ const Home = () => {
             <div 
               key={banner.id}
               className={`bg-cover bg-center p-6 sm:p-8 text-white flex flex-col justify-center items-start min-h-[25vh] sm:min-h-[30vh] rounded-xl ${index === 2 && banners.bottom.length === 3 ? 'sm:col-span-2 lg:col-span-1' : ''}`}
-              style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}
+              style={{ backgroundImage: `url('${getImageUrl(banner.image)}')` }}
             >
               {banner.title && <h2 className="text-xl sm:text-2xl font-bold mb-2 uppercase" dangerouslySetInnerHTML={{ __html: banner.title }}></h2>}
               {banner.subtitle && <h3 className="text-red-500 font-bold text-base sm:text-lg">{banner.subtitle}</h3>}
@@ -209,7 +235,7 @@ const Home = () => {
             >
               <div 
                 className="h-48 sm:h-64 bg-cover bg-center" 
-                style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${selectedOffer.image}')` }}
+                style={{ backgroundImage: `url('${getImageUrl(selectedOffer.image)}')` }}
               />
               <button 
                 onClick={() => setSelectedOffer(null)}
@@ -224,13 +250,27 @@ const Home = () => {
                 <p className="text-gray-600 mb-8 whitespace-pre-wrap leading-relaxed">{selectedOffer.description || "Grab this exclusive offer now!"}</p>
                 
                 <div className="flex gap-4">
-                  <Link 
-                    to={selectedOffer.link || '/shop'} 
-                    onClick={() => setSelectedOffer(null)}
-                    className="flex-1 bg-primary text-white text-center py-3 rounded-xl font-bold hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30"
-                  >
-                    Go to Offer
-                  </Link>
+                  {selectedOffer.product ? (
+                    <button 
+                      onClick={() => {
+                        addToCart(selectedOffer.product);
+                        toast.success(`Discount Applied! ${selectedOffer.product.name} added to cart.`);
+                        setSelectedOffer(null);
+                        navigate('/cart');
+                      }}
+                      className="inline-block bg-primary text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-purple-900 transition-colors shadow-lg shadow-purple-200"
+                    >
+                      Get Discount & Add to Cart
+                    </button>
+                  ) : (
+                    <Link 
+                      to={selectedOffer.link || '/shop'}
+                      onClick={() => setSelectedOffer(null)}
+                      className="inline-block bg-primary text-white px-6 sm:px-8 py-3 rounded-full font-bold hover:bg-purple-900 transition-colors shadow-lg shadow-purple-200"
+                    >
+                      Go to Offer
+                    </Link>
+                  )}
                   <button 
                     onClick={() => setSelectedOffer(null)}
                     className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"

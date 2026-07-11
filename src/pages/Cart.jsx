@@ -35,6 +35,14 @@ const Cart = () => {
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'COD'
   const [transactionId, setTransactionId] = useState('');
 
+  // Coupon States
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  // Derived Total
+  const finalTotal = appliedCoupon ? cartTotal * (1 - appliedCoupon.discount_percentage / 100) : cartTotal;
+
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -68,7 +76,8 @@ const Cart = () => {
       const res = await api.post('/save-order/', { 
         items,
         payment_method: paymentMethod,
-        transaction_id: paymentMethod === 'UPI' ? transactionId : ''
+        transaction_id: paymentMethod === 'UPI' ? transactionId : '',
+        coupon_code: appliedCoupon ? appliedCoupon.code : ''
       });
       const createdOrderIds = res.data.orders?.map(o => o.id) || [];
       const firstOrderId = createdOrderIds[0] || null;
@@ -91,14 +100,14 @@ const Cart = () => {
   };
 
   const generateUpiUrl = () => {
-    const amount = cartTotal.toFixed(2);
+    const amount = finalTotal.toFixed(2);
     const note = `CipherApparel Order`;
     return `upi://pay?pa=${encodeURIComponent(UPI_VPA)}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
   };
 
   const openUpiApp = (appScheme) => {
     const upiUrl = generateUpiUrl();
-    const amount = cartTotal.toFixed(2);
+    const amount = finalTotal.toFixed(2);
     const note = encodeURIComponent('Cipher Apparel Order');
     
     if (appScheme === 'gpay') {
@@ -253,9 +262,60 @@ const Cart = () => {
               </div>
               <div className="border-t pt-3 flex justify-between font-bold text-lg text-gray-900">
                 <span>Total</span>
-                <span className="text-primary">₹{cartTotal.toFixed(2)}</span>
+                <span className="text-primary">₹{finalTotal.toFixed(2)}</span>
               </div>
             </div>
+
+            {/* Promo Code Section */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Have a promo code?</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Enter code" 
+                  className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-primary font-mono uppercase"
+                  disabled={appliedCoupon !== null}
+                />
+                {!appliedCoupon ? (
+                  <button 
+                    onClick={async () => {
+                      if(!couponCode) return;
+                      setCouponLoading(true);
+                      try {
+                        const res = await api.post('/validate-coupon/', { code: couponCode });
+                        setAppliedCoupon(res.data);
+                        toast.success(res.data.message);
+                      } catch (err) {
+                        toast.error(err.response?.data?.error || "Invalid coupon");
+                      }
+                      setCouponLoading(false);
+                    }}
+                    disabled={couponLoading || !couponCode}
+                    className="bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-black transition-colors disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      setAppliedCoupon(null);
+                      setCouponCode('');
+                    }}
+                    className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-100 transition-colors"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {appliedCoupon && (
+                <p className="text-sm text-green-600 font-semibold mt-2">
+                  ✅ {appliedCoupon.code} applied! (-{appliedCoupon.discount_percentage}%)
+                </p>
+              )}
+            </div>
+
             <button
               onClick={() => {
                 if (!user) { navigate('/auth'); return; }
@@ -303,7 +363,7 @@ const Cart = () => {
               ) : (
                 <>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Checkout</h3>
-                  <p className="text-3xl font-bold text-primary mb-6">₹{cartTotal.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-primary mb-6">₹{finalTotal.toFixed(2)}</p>
 
                   {/* Payment Method Selection */}
                   <div className="mb-6 space-y-3">
@@ -392,7 +452,7 @@ const Cart = () => {
                   {paymentMethod === 'COD' && (
                     <div className="bg-green-50 text-green-800 rounded-xl p-4 mb-6 text-sm flex items-start gap-2 text-left border border-green-100">
                       <Banknote className="flex-shrink-0 mt-0.5 text-green-600" size={18} />
-                      <p>You will pay <strong>₹{cartTotal.toFixed(2)}</strong> in cash to the delivery executive when your order arrives.</p>
+                      <p>You will pay <strong>₹{finalTotal.toFixed(2)}</strong> in cash to the delivery executive when your order arrives.</p>
                     </div>
                   )}
 

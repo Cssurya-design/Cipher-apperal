@@ -11,7 +11,7 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'staff' | 'banners'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'staff' | 'banners' | 'coupons'
   
   // Orders State
   const [orders, setOrders] = useState([]);
@@ -28,8 +28,14 @@ const AdminDashboard = () => {
 
   // Banners State
   const [banners, setBanners] = useState([]);
-  const [bannersLoading, setBannersLoading] = useState(true);
+  const [bannersLoading, setBannersLoading] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
+  const [products, setProducts] = useState([]);
+
+  // Coupons State
+  const [coupons, setCoupons] = useState([]);
+  const [couponsLoading, setCouponsLoading] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState(null);
 
   useEffect(() => {
     document.title = "Admin Dashboard | Cipher Apparel";
@@ -39,8 +45,26 @@ const AdminDashboard = () => {
     }
     fetchOrders();
     fetchStaff();
-    fetchBanners();
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (activeTab === 'banners' && user?.is_staff) {
+      fetchBanners();
+      fetchProducts();
+    }
+    if (activeTab === 'coupons' && user?.is_staff) {
+      fetchCoupons();
+    }
+  }, [activeTab, user]);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await api.get('/products/');
+      setProducts(res.data.products || res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchOrders = async () => {
     setOrdersLoading(true);
@@ -134,17 +158,74 @@ const AdminDashboard = () => {
   const handleSaveBanner = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      if (editingBanner.position) formData.append('position', editingBanner.position);
+      if (editingBanner.title) formData.append('title', editingBanner.title);
+      if (editingBanner.subtitle) formData.append('subtitle', editingBanner.subtitle);
+      if (editingBanner.description) formData.append('description', editingBanner.description);
+      if (editingBanner.link) formData.append('link', editingBanner.link);
+      if (editingBanner.product_id) formData.append('product_id', editingBanner.product_id);
+      formData.append('is_active', editingBanner.is_active ?? true);
+      
+      if (editingBanner.imageFile) {
+        formData.append('image', editingBanner.imageFile);
+      } else if (editingBanner.image) {
+        formData.append('image', editingBanner.image);
+      } else if (editingBanner.position !== 'promo') {
+        toast.error('An image is required for this banner type');
+        return;
+      }
+
       if (editingBanner.id) {
-        await api.put(`/admin/banners/${editingBanner.id}/`, editingBanner);
+        await api.put(`/admin/banners/${editingBanner.id}/`, formData);
         toast.success('Banner updated');
       } else {
-        await api.post('/admin/banners/', editingBanner);
+        await api.post('/admin/banners/', formData);
         toast.success('Banner created');
       }
       setEditingBanner(null);
       fetchBanners();
     } catch (err) {
       toast.error('Failed to save banner');
+    }
+  };
+
+  const fetchCoupons = async () => {
+    setCouponsLoading(true);
+    try {
+      const res = await api.get('/admin/coupons/');
+      setCoupons(res.data.coupons);
+    } catch (err) {
+      console.error(err);
+    }
+    setCouponsLoading(false);
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this coupon?')) return;
+    try {
+      await api.delete(`/admin/coupons/${id}/`);
+      toast.success('Coupon deleted');
+      fetchCoupons();
+    } catch (err) {
+      toast.error('Failed to delete coupon');
+    }
+  };
+
+  const handleSaveCoupon = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingCoupon.id) {
+        await api.put(`/admin/coupons/${editingCoupon.id}/`, editingCoupon);
+        toast.success('Coupon updated');
+      } else {
+        await api.post('/admin/coupons/', editingCoupon);
+        toast.success('Coupon created');
+      }
+      setEditingCoupon(null);
+      fetchCoupons();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to save coupon');
     }
   };
 
@@ -182,6 +263,11 @@ const AdminDashboard = () => {
                 + Add Banner
               </button>
             )}
+            {activeTab === 'coupons' && (
+              <button onClick={() => setEditingCoupon({ code: '', discount_percentage: 10, max_uses: 100, is_active: true })} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-dark self-start sm:self-auto">
+                + Add Coupon
+              </button>
+            )}
           </div>
 
           <div className="flex border-b border-gray-200 gap-6">
@@ -202,6 +288,12 @@ const AdminDashboard = () => {
               className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'banners' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             >
               Promotions & Banners
+            </button>
+            <button
+              onClick={() => setActiveTab('coupons')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'coupons' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Coupons
             </button>
           </div>
         </div>
@@ -430,6 +522,7 @@ const AdminDashboard = () => {
                       <option value="main">Main (Center)</option>
                       <option value="small">Small (Half Width)</option>
                       <option value="bottom">Bottom (Third Width)</option>
+                      <option value="promo">Promo Code Bar (Top Announcement)</option>
                     </select>
                   </div>
                   <div>
@@ -444,13 +537,41 @@ const AdminDashboard = () => {
                     <label className="block text-sm font-semibold mb-1">Full Description (Shown in Offer Popup Modal)</label>
                     <textarea value={editingBanner.description || ''} onChange={e => setEditingBanner({...editingBanner, description: e.target.value})} className="w-full p-2 border rounded min-h-[100px]" placeholder="Enter the full offer details, terms, or descriptions here..." />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-1">Image Name (e.g. b2.jpg)</label>
-                    <input type="text" value={editingBanner.image || ''} onChange={e => setEditingBanner({...editingBanner, image: e.target.value})} className="w-full p-2 border rounded" required />
-                  </div>
+                  {editingBanner.position !== 'promo' && (
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">Banner Image (Upload File)</label>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={e => {
+                          if (e.target.files.length > 0) {
+                            setEditingBanner({...editingBanner, imageFile: e.target.files[0]});
+                          }
+                        }} 
+                        className="w-full p-2 border rounded bg-gray-50" 
+                      />
+                      {editingBanner.image && !editingBanner.imageFile && (
+                        <p className="text-xs text-gray-500 mt-2 font-medium">Current Image: {editingBanner.image}</p>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-semibold mb-1">Target Link</label>
                     <input type="text" value={editingBanner.link || ''} onChange={e => setEditingBanner({...editingBanner, link: e.target.value})} className="w-full p-2 border rounded" placeholder="/shop" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Linked Discount Product (Optional)</label>
+                    <select 
+                      value={editingBanner.product_id || ''} 
+                      onChange={e => setEditingBanner({...editingBanner, product_id: e.target.value})} 
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value="">-- No Product Linked --</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id}>{p.name} - ${p.price}</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">If a product is linked, clicking the offer will automatically apply a discount / add it to cart.</p>
                   </div>
                   <div className="flex items-center gap-2 mt-4">
                     <input type="checkbox" checked={editingBanner.is_active ?? true} onChange={e => setEditingBanner({...editingBanner, is_active: e.target.checked})} id="is_active" />
@@ -485,6 +606,88 @@ const AdminDashboard = () => {
           </motion.div>
         )}
 
+        {/* --- COUPONS TAB --- */}
+        {activeTab === 'coupons' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            {editingCoupon ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-2xl">
+                <h2 className="text-xl font-bold mb-6">{editingCoupon.id ? 'Edit Coupon' : 'Create Coupon'}</h2>
+                <form onSubmit={handleSaveCoupon} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Coupon Code</label>
+                    <input type="text" required value={editingCoupon.code} onChange={e => setEditingCoupon({...editingCoupon, code: e.target.value.toUpperCase()})} className="w-full p-2 border rounded font-mono uppercase" placeholder="e.g. SUMMER20" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Discount Percentage (%)</label>
+                    <input type="number" min="1" max="100" required value={editingCoupon.discount_percentage} onChange={e => setEditingCoupon({...editingCoupon, discount_percentage: e.target.value})} className="w-full p-2 border rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Maximum Uses</label>
+                    <input type="number" min="1" required value={editingCoupon.max_uses} onChange={e => setEditingCoupon({...editingCoupon, max_uses: e.target.value})} className="w-full p-2 border rounded" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">Valid From (Optional)</label>
+                      <input type="datetime-local" value={editingCoupon.valid_from ? editingCoupon.valid_from.slice(0,16) : ''} onChange={e => setEditingCoupon({...editingCoupon, valid_from: e.target.value})} className="w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">Valid To (Optional)</label>
+                      <input type="datetime-local" value={editingCoupon.valid_to ? editingCoupon.valid_to.slice(0,16) : ''} onChange={e => setEditingCoupon({...editingCoupon, valid_to: e.target.value})} className="w-full p-2 border rounded" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-4">
+                    <input type="checkbox" checked={editingCoupon.is_active} onChange={e => setEditingCoupon({...editingCoupon, is_active: e.target.checked})} id="coupon_active" />
+                    <label htmlFor="coupon_active" className="text-sm font-semibold">Active</label>
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                    <button type="button" onClick={() => setEditingCoupon(null)} className="flex-1 bg-gray-100 py-2 rounded font-semibold">Cancel</button>
+                    <button type="submit" className="flex-1 bg-primary text-white py-2 rounded font-semibold">Save Coupon</button>
+                  </div>
+                </form>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-100">
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Code</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Discount</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Usage</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Status</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {couponsLoading ? (
+                        <tr><td colSpan="5" className="p-8 text-center text-gray-500">Loading coupons...</td></tr>
+                      ) : coupons.length === 0 ? (
+                        <tr><td colSpan="5" className="p-8 text-center text-gray-500">No coupons found.</td></tr>
+                      ) : (
+                        coupons.map(coupon => (
+                          <tr key={coupon.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="p-4"><span className="font-mono font-bold text-primary bg-primary/5 px-2 py-1 rounded">{coupon.code}</span></td>
+                            <td className="p-4 font-semibold">{coupon.discount_percentage}% OFF</td>
+                            <td className="p-4 text-sm text-gray-600">{coupon.current_uses} / {coupon.max_uses} used</td>
+                            <td className="p-4">
+                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${coupon.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                {coupon.is_active ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right">
+                              <button onClick={() => setEditingCoupon(coupon)} className="text-blue-600 text-sm font-semibold hover:underline mr-4">Edit</button>
+                              <button onClick={() => handleDeleteCoupon(coupon.id)} className="text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
       </div>
       <Footer />
     </div>
