@@ -20,11 +20,6 @@ const STATUSES = [
 
 const STATUS_ORDER = { placed: 0, processing: 1, shipped: 2, delivered: 3, cancelled: -1 };
 
-const getEstimatedDelivery = () => {
-  const est = new Date();
-  est.setDate(est.getDate() + 5);
-  return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
-};
 
 const OrderTracking = () => {
   const { id } = useParams();
@@ -37,11 +32,21 @@ const OrderTracking = () => {
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [ratingLoading, setRatingLoading] = useState(false);
+  const [deliveryDays, setDeliveryDays] = useState(5);
 
   useEffect(() => {
     document.title = `Order #${id} | Cipher Apparel`;
     if (!user) { navigate('/auth'); return; }
     fetchOrder();
+    
+    // Fetch delivery setting
+    api.get('/api/settings/')
+      .then(res => {
+        if (res.data?.settings?.delivery_days) {
+          setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
+        }
+      })
+      .catch(err => console.error("Error fetching settings:", err));
   }, [id, user]);
 
   const fetchOrder = async () => {
@@ -113,6 +118,13 @@ const OrderTracking = () => {
 
   const isCancelled = order.status === 'cancelled';
   const currentIdx = STATUS_ORDER[order.status] ?? 0;
+  
+  const estimatedDeliveryDate = new Date(order.created_at || order.date || new Date());
+  if (isNaN(estimatedDeliveryDate.getTime())) {
+    estimatedDeliveryDate.setTime(Date.now());
+  }
+  estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + deliveryDays);
+  const deliveryStr = estimatedDeliveryDate.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
     <div className="pt-24 min-h-screen bg-gray-50">
@@ -190,7 +202,7 @@ const OrderTracking = () => {
                 <Truck size={16} className="text-primary flex-shrink-0" />
                 <span>
                   Estimated delivery:{' '}
-                  <span className="font-semibold text-gray-800">{getEstimatedDelivery()}</span>
+                  <span className="font-semibold text-gray-800">{deliveryStr}</span>
                 </span>
               </div>
             )}

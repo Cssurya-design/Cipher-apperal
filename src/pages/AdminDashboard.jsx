@@ -51,6 +51,15 @@ const AdminDashboard = () => {
   const [couponsLoading, setCouponsLoading] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
 
+  // Settings State
+  const [settings, setSettings] = useState({});
+  const [settingsLoading, setSettingsLoading] = useState(false);
+
+  // Database State
+  const [dbTables, setDbTables] = useState([]);
+  const [dbLoading, setDbLoading] = useState(false);
+  const [activeDbTab, setActiveDbTab] = useState('');
+
   // Confirm Dialog State
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -86,6 +95,12 @@ const AdminDashboard = () => {
       fetchProducts();
       fetchCategories();
     }
+    if (activeTab === 'settings') {
+      fetchSettings();
+    }
+    if (activeTab === 'database') {
+      fetchDatabaseTables();
+    }
   }, [activeTab, user]);
 
 
@@ -97,6 +112,41 @@ const AdminDashboard = () => {
       console.error(err);
       setCategories([]);
     }
+  };
+
+  const fetchSettings = async () => {
+    setSettingsLoading(true);
+    try {
+      const res = await api.get('/admin/settings/');
+      setSettings(res.data.settings || {});
+    } catch (err) {
+      toast.error('Failed to load settings');
+    }
+    setSettingsLoading(false);
+  };
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/admin/settings/', settings);
+      toast.success('Settings updated successfully');
+    } catch (err) {
+      toast.error('Failed to update settings');
+    }
+  };
+
+  const fetchDatabaseTables = async () => {
+    setDbLoading(true);
+    try {
+      const res = await api.get('/admin/database/');
+      setDbTables(res.data.tables || []);
+      if (res.data.tables?.length > 0 && !activeDbTab) {
+        setActiveDbTab(res.data.tables[0].name);
+      }
+    } catch (err) {
+      toast.error('Failed to load database tables');
+    }
+    setDbLoading(false);
   };
 
   const fetchProducts = async () => {
@@ -494,6 +544,18 @@ const AdminDashboard = () => {
               className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'products' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             >
               Products
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'settings' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Settings
+            </button>
+            <button
+              onClick={() => setActiveTab('database')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'database' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Database Tables
             </button>
           </div>
         </div>
@@ -1115,6 +1177,117 @@ const AdminDashboard = () => {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Company Settings</h2>
+            {settingsLoading ? (
+              <p>Loading settings...</p>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-2xl">
+                <form onSubmit={handleSaveSettings} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Estimated Delivery Days</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      value={settings.delivery_days || ''} 
+                      onChange={e => setSettings({...settings, delivery_days: e.target.value})} 
+                      className="w-full p-2 border border-gray-200 rounded" 
+                      placeholder="e.g. 5" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Number of days to add to the order date to calculate estimated delivery.</p>
+                  </div>
+                  
+                  {/* You can add more settings inputs here seamlessly by adding more keys to the settings state */}
+                  
+                  <div className="pt-4">
+                    <button type="submit" className="bg-primary text-white px-6 py-2 rounded font-semibold">Save Settings</button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Database Tables Tab */}
+        {activeTab === 'database' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Database Tables Viewer</h2>
+            <p className="text-sm text-gray-500">Showing the latest 50 records for each table.</p>
+            {dbLoading ? (
+              <p>Loading database tables...</p>
+            ) : dbTables.length === 0 ? (
+              <p>No tables found.</p>
+            ) : (
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Table Navigation (Sidebar) */}
+                <div className="w-full md:w-64 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                  <h3 className="font-bold text-gray-800 mb-4 px-2">Tables</h3>
+                  <div className="space-y-1">
+                    {dbTables.map(table => (
+                      <button
+                        key={table.name}
+                        onClick={() => setActiveDbTab(table.name)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          activeDbTab === table.name 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        {table.name}
+                        <span className="float-right text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">
+                          {table.total_count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Table Data View */}
+                <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  {dbTables.map(table => (
+                    table.name === activeDbTab && (
+                      <div key={table.name} className="overflow-x-auto w-full">
+                        <table className="w-full text-left border-collapse min-w-max">
+                          <thead>
+                            <tr className="bg-gray-50 border-b border-gray-100">
+                              {table.fields.map(field => (
+                                <th key={field} className="p-3 font-semibold text-gray-600 text-xs uppercase tracking-wider">
+                                  {field}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {table.rows.length === 0 ? (
+                              <tr>
+                                <td colSpan={table.fields.length} className="p-8 text-center text-gray-500">
+                                  No data available in {table.name}.
+                                </td>
+                              </tr>
+                            ) : (
+                              table.rows.map((row, i) => (
+                                <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                                  {table.fields.map(field => (
+                                    <td key={field} className="p-3 text-sm text-gray-700 max-w-xs truncate" title={row[field]}>
+                                      {row[field] || '-'}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )
+                  ))}
                 </div>
               </div>
             )}

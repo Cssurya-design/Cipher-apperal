@@ -1,20 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle2, Package, ArrowRight, Truck } from 'lucide-react';
 import Footer from '../components/Footer';
+import api from '../api';
 
 const OrderConfirmation = () => {
   const { state } = useLocation();
   const firstOrderId = state?.firstOrderId || null;
   const orderIds = state?.orderIds || [];
+  const [deliveryDays, setDeliveryDays] = useState(5);
 
   useEffect(() => {
     document.title = "Order Confirmed | Cipher Apparel";
+    // Fetch delivery setting
+    api.get('/api/settings/')
+      .then(res => {
+        if (res.data?.settings?.delivery_days) {
+          setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
+        }
+      })
+      .catch(err => console.error("Error fetching settings:", err));
   }, []);
 
   const estimatedDelivery = new Date();
-  estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
+  estimatedDelivery.setDate(estimatedDelivery.getDate() + deliveryDays);
   const deliveryStr = estimatedDelivery.toLocaleDateString('en-IN', {
     weekday: 'long', month: 'long', day: 'numeric'
   });

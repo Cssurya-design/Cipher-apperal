@@ -67,7 +67,7 @@ const Cart = () => {
     try {
       const items = cart.map(item => ({
         name: item.name,
-        price: item.price,
+        price: item.discount_price || item.price,
         quantity: item.quantity,
         size: item.size || '',
         image: item.image || '',
