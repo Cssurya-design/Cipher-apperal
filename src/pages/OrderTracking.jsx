@@ -72,12 +72,17 @@ const OrderTracking = () => {
     setCancelling(false);
   };
 
-  const handleRate = async (stars) => {
+  const handleRate = async (item, stars) => {
     if (!order) return;
     setRatingLoading(true);
     try {
-      await api.post('/rate-product/', { product_name: order.product_name, rating: stars });
-      setOrder(prev => ({ ...prev, user_rating: stars }));
+      await api.post('/rate-product/', { product_name: item.product_name, rating: stars });
+      setOrder(prev => {
+        const updatedItems = prev.items.map(it => 
+          it.id === item.id ? { ...it, user_rating: stars } : it
+        );
+        return { ...prev, items: updatedItems };
+      });
     } catch (err) {
       console.error(err);
     }
@@ -226,64 +231,67 @@ const OrderTracking = () => {
           </motion.div>
         )}
 
-        {/* Product Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100 mb-6"
-        >
-          <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Product Details</h2>
-          <div className="flex gap-4">
-            <img
-              src={getImageUrl(order.product_img)}
-              alt={order.product_name}
-              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0"
-              onError={(e) => { e.target.src = '/hero-new.jpg'; }}
-            />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate">{order.product_name}</h3>
-              {order.product_description && (
-                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{order.product_description}</p>
-              )}
-              <div className="flex flex-wrap gap-2 mt-2">
-                {order.size && (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">
-                    Size: {order.size}
+        {/* Product Cards */}
+        <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Product Details</h2>
+        {order.items?.map((item) => (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100 mb-4"
+          >
+            <div className="flex gap-4 flex-col sm:flex-row items-start sm:items-center">
+              <img
+                src={getImageUrl(item.product_img)}
+                alt={item.product_name}
+                className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0"
+                onError={(e) => { e.target.src = '/hero-new.jpg'; }}
+              />
+              <div className="flex-1 min-w-0 w-full sm:w-auto">
+                <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate">{item.product_name}</h3>
+                {item.product_description && (
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.product_description}</p>
+                )}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {item.size && (
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg font-semibold">
+                      Size: {item.size}
+                    </span>
+                  )}
+                  <span className="text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                    Qty: {item.quantity}
                   </span>
-                )}
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">
-                  Qty: {order.quantity}
-                </span>
-                <span className="text-sm font-bold text-primary">₹{order.price}</span>
+                </div>
               </div>
-            </div>
-          </div>
-
-          {/* Rating (delivered only) */}
-          {order.status === 'delivered' && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-sm font-semibold text-gray-600 mb-2">Rate this product:</p>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map(star => (
-                  <button
-                    key={star}
-                    onClick={() => handleRate(star)}
-                    disabled={ratingLoading}
-                    className={`transition-colors ${
-                      star <= order.user_rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
-                    }`}
-                  >
-                    <Star size={22} fill="currentColor" />
-                  </button>
-                ))}
-                {order.user_rating > 0 && (
-                  <span className="ml-2 text-sm text-gray-500">You rated {order.user_rating}/5</span>
+              <div className="text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Price</p>
+                  <p className="font-bold text-gray-900 text-lg">₹{item.price}</p>
+                </div>
+                {order.status === 'delivered' && (
+                  <div className="mt-2 sm:mt-3">
+                    <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Rate Item</p>
+                    <div className="flex gap-1 justify-end">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          onClick={() => handleRate(item, star)}
+                          disabled={ratingLoading}
+                          className={`transition-colors ${
+                            star <= item.user_rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
+                          }`}
+                        >
+                          <Star size={14} fill="currentColor" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
-          )}
-        </motion.div>
+          </motion.div>
+        ))}
 
         {/* Info Grid: Address + Payment */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -345,36 +353,23 @@ const OrderTracking = () => {
               )}
               <div className="flex justify-between text-sm border-t pt-2 mt-1">
                 <span className="font-semibold text-gray-700">Total</span>
-                <span className="font-bold text-primary">₹{order.price}</span>
+                <span className="font-bold text-gray-900">₹{order.total_price}</span>
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Cancel Order */}
-        {order.status === 'placed' && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-orange-50 border border-orange-100 rounded-2xl p-5 mb-6"
-          >
-            <div className="flex items-start gap-3">
-              <AlertTriangle size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-800">Need to cancel?</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Orders can only be cancelled before processing begins.
-                </p>
-              </div>
-              <button
-                onClick={() => setShowCancelConfirm(true)}
-                className="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50 border border-red-200"
-              >
-                Cancel Order
-              </button>
-            </div>
-          </motion.div>
+        {/* Action Buttons */}
+        {!isCancelled && order.status === 'placed' && (
+          <div className="flex justify-end mt-6 gap-4">
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              disabled={cancelling}
+              className="px-6 py-2.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors disabled:opacity-50"
+            >
+              Cancel Order Group
+            </button>
+          </div>
         )}
 
         <p className="text-center text-xs text-gray-400 pb-4">
