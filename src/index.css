@@ -13,6 +13,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button {
+  cursor: pointer;
+}
+
 /* Base custom styles for animations and layout */
 .glass {
   background: rgba(255, 255, 255, 0.75);
