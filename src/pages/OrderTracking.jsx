@@ -367,7 +367,7 @@ const OrderTracking = () => {
               disabled={cancelling}
               className="px-6 py-2.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors disabled:opacity-50"
             >
-              Cancel Order Group
+              {order.items?.length > 1 ? 'Cancel Order Group' : 'Cancel Order'}
             </button>
           </div>
         )}
