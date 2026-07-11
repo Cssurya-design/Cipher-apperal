@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus, Plus } from 'lucide-react';
+import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus, Plus, Trash2, Eye, X } from 'lucide-react';
 import api, { API_BASE, getImageUrl } from '../api';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
@@ -24,6 +24,8 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  const [showAllOrders, setShowAllOrders] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Staff State
   const [staffList, setStaffList] = useState([]);
@@ -43,6 +45,14 @@ const AdminDashboard = () => {
   const [coupons, setCoupons] = useState([]);
   const [couponsLoading, setCouponsLoading] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
+
+  // Confirm Dialog State
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null,
+  });
 
   useEffect(() => {
     document.title = "Admin Dashboard | Cipher Apparel";
@@ -97,6 +107,25 @@ const AdminDashboard = () => {
     setUpdatingId(null);
   };
 
+  const deleteOrder = (orderId) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Order',
+      message: 'Are you sure you want to delete this order? This action cannot be undone.',
+      onConfirm: async () => {
+        setUpdatingId(orderId);
+        try {
+          await api.delete(`/admin/orders/${orderId}/delete/`);
+          setOrders(prev => prev.filter(o => o.id !== orderId));
+          toast.success('Order deleted successfully');
+        } catch (err) {
+          toast.error('Failed to delete order.');
+        }
+        setUpdatingId(null);
+      }
+    });
+  };
+
   const fetchStaff = async () => {
     setStaffLoading(true);
     try {
@@ -129,18 +158,23 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleRemoveStaff = async (email) => {
-    if (!window.confirm(`Are you sure you want to revoke admin access for ${email}?`)) return;
-    
-    setStaffError('');
-    setStaffSuccess('');
-    try {
-      const res = await api.post('/admin/staff/remove/', { email });
-      setStaffSuccess(res.data.message);
-      fetchStaff();
-    } catch (err) {
-      setStaffError(err.response?.data?.error || "Failed to remove staff");
-    }
+  const handleRemoveStaff = (email) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Revoke Access',
+      message: `Are you sure you want to revoke admin access for ${email}?`,
+      onConfirm: async () => {
+        setStaffError('');
+        setStaffSuccess('');
+        try {
+          const res = await api.post('/admin/staff/remove/', { email });
+          setStaffSuccess(res.data.message);
+          fetchStaff();
+        } catch (err) {
+          setStaffError(err.response?.data?.error || "Failed to remove staff");
+        }
+      }
+    });
   };
 
   const fetchBanners = async () => {
@@ -155,15 +189,21 @@ const AdminDashboard = () => {
     setBannersLoading(false);
   };
 
-  const handleDeleteBanner = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this banner?')) return;
-    try {
-      await api.delete(`/admin/banners/${id}/`);
-      toast.success('Banner deleted');
-      fetchBanners();
-    } catch (err) {
-      toast.error('Failed to delete banner');
-    }
+  const handleDeleteBanner = (id) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Banner',
+      message: 'Are you sure you want to delete this banner?',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/banners/${id}/`);
+          toast.success('Banner deleted');
+          fetchBanners();
+        } catch (err) {
+          toast.error('Failed to delete banner');
+        }
+      }
+    });
   };
 
   const handleSaveBanner = async (e) => {
@@ -213,15 +253,21 @@ const AdminDashboard = () => {
     setCouponsLoading(false);
   };
 
-  const handleDeleteCoupon = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this coupon?')) return;
-    try {
-      await api.delete(`/admin/coupons/${id}/`);
-      toast.success('Coupon deleted');
-      fetchCoupons();
-    } catch (err) {
-      toast.error('Failed to delete coupon');
-    }
+  const handleDeleteCoupon = (id) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Coupon',
+      message: 'Are you sure you want to delete this coupon?',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/coupons/${id}/`);
+          toast.success('Coupon deleted');
+          fetchCoupons();
+        } catch (err) {
+          toast.error('Failed to delete coupon');
+        }
+      }
+    });
   };
 
   const handleSaveCoupon = async (e) => {
@@ -353,10 +399,11 @@ const AdminDashboard = () => {
                       <th className="px-6 py-4">Total</th>
                       <th className="px-6 py-4">Payment Verification</th>
                       <th className="px-6 py-4">Shipping Status</th>
+                      <th className="px-6 py-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {orders.map((order) => (
+                    {(showAllOrders ? orders : orders.slice(0, 5)).map((order) => (
                       <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="font-bold text-gray-900">#{order.id}</div>
@@ -413,6 +460,26 @@ const AdminDashboard = () => {
                             <option value="cancelled">Cancelled ❌</option>
                           </select>
                         </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setSelectedOrder(order)}
+                              className="text-gray-500 hover:text-primary transition-colors"
+                              title="View Order Details"
+                            >
+                              <Eye size={18} />
+                            </button>
+                            {user.is_superuser && (
+                              <button
+                                onClick={() => deleteOrder(order.id)}
+                                className="text-gray-500 hover:text-red-600 transition-colors"
+                                title="Delete Order"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     ))}
                     {orders.length === 0 && !ordersLoading && (
@@ -426,6 +493,17 @@ const AdminDashboard = () => {
                   </tbody>
                 </table>
               </div>
+              
+              {!showAllOrders && orders.length > 5 && (
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() => setShowAllOrders(true)}
+                    className="bg-primary text-white font-bold py-3 px-8 rounded-full hover:bg-purple-900 transition-colors shadow-md"
+                  >
+                    View All Orders ({orders.length - 5} more)
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -737,6 +815,93 @@ const AdminDashboard = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Order Details Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
+          >
+            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900">Order Details #{selectedOrder.id}</h3>
+              <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Customer Info</h4>
+                  <p className="text-sm text-gray-700"><span className="font-medium">Name:</span> {selectedOrder.user_name || 'N/A'}</p>
+                  <p className="text-sm text-gray-700"><span className="font-medium">Email:</span> {selectedOrder.user_email}</p>
+                  <p className="text-sm text-gray-700"><span className="font-medium">Phone:</span> {selectedOrder.user_phone || 'N/A'}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Shipping Address</h4>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedOrder.address || 'No address provided'}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Item Details</h4>
+                  <p className="text-sm text-gray-700"><span className="font-medium">Product:</span> {selectedOrder.product_name}</p>
+                  <p className="text-sm text-gray-700"><span className="font-medium">Quantity:</span> {selectedOrder.quantity}</p>
+                  {selectedOrder.size && <p className="text-sm text-gray-700"><span className="font-medium">Size:</span> {selectedOrder.size}</p>}
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Payment Info</h4>
+                  <p className="text-sm text-gray-700"><span className="font-medium">Total:</span> ₹{selectedOrder.price}</p>
+                  <p className="text-sm text-gray-700"><span className="font-medium">Method:</span> {selectedOrder.payment_method}</p>
+                  {selectedOrder.coupon_code && (
+                    <p className="text-sm text-green-600"><span className="font-medium text-gray-700">Coupon:</span> {selectedOrder.coupon_code} (-₹{selectedOrder.discount_amount})</p>
+                  )}
+                  {selectedOrder.transaction_id && (
+                    <p className="text-sm text-gray-700"><span className="font-medium">Transaction ID:</span> {selectedOrder.transaction_id}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Confirm Dialog Modal */}
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col"
+          >
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{confirmDialog.title}</h3>
+              <p className="text-gray-600 mb-6">{confirmDialog.message}</p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+                  className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    confirmDialog.onConfirm();
+                    setConfirmDialog({ ...confirmDialog, isOpen: false });
+                  }}
+                  className="flex-1 bg-red-600 text-white py-2.5 rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

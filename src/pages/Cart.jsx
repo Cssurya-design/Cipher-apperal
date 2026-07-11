@@ -280,7 +280,7 @@ const Cart = () => {
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   placeholder="Enter code" 
-                  className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-primary font-mono uppercase"
+                  className="flex-1 min-w-0 px-3 py-2 border rounded-lg focus:outline-none focus:border-primary font-mono uppercase text-sm"
                   disabled={appliedCoupon !== null}
                 />
                 {!appliedCoupon ? (
@@ -298,7 +298,7 @@ const Cart = () => {
                       setCouponLoading(false);
                     }}
                     disabled={couponLoading || !couponCode}
-                    className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50"
+                    className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 whitespace-nowrap text-sm"
                   >
                     Apply
                   </button>
@@ -308,7 +308,7 @@ const Cart = () => {
                       setAppliedCoupon(null);
                       setCouponCode('');
                     }}
-                    className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-100 transition-colors"
+                    className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-100 transition-colors whitespace-nowrap text-sm"
                   >
                     Remove
                   </button>
