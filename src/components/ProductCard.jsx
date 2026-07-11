@@ -50,7 +50,7 @@ const ProductCard = ({ product }) => {
           <img 
             src={imageUrl} 
             alt={product.name} 
-            className="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full aspect-[4/5] sm:h-64 object-cover object-top group-hover:scale-105 transition-transform duration-300"
             onError={(e) => { e.target.src = '/hero-new.jpg'; }}
           />
           {/* Quick view overlay */}
