@@ -64,18 +64,6 @@ const Home = () => {
 
   return (
     <div className="w-full">
-      {/* Promo Bar */}
-      {promoCoupons.length > 0 && promoCoupons.map((coupon, idx) => (
-        <div key={`coupon-${idx}`} className="bg-primary text-white text-center py-2 px-4 text-xs sm:text-sm font-semibold flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-4 relative z-20 shadow-md">
-          <div>{coupon.popup_text || `Use code ${coupon.code} for ${coupon.discount_percentage}% OFF!`}</div>
-          <button 
-            onClick={() => setSelectedOffer({ type: 'coupon', data: coupon })} 
-            className="ml-0 sm:ml-2 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-[10px] sm:text-xs transition-colors mt-1 sm:mt-0 uppercase tracking-wider"
-          >
-            Learn More
-          </button>
-        </div>
-      ))}
 
       <Hero />
       

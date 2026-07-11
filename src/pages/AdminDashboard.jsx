@@ -40,6 +40,11 @@ const AdminDashboard = () => {
   const [bannersLoading, setBannersLoading] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+
 
   // Coupons State
   const [coupons, setCoupons] = useState([]);
@@ -74,6 +79,17 @@ const AdminDashboard = () => {
     }
   }, [activeTab, user]);
 
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/admin/categories/');
+      setCategories(res.data.categories || []);
+    } catch (err) {
+      console.error(err);
+      setCategories([]);
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       const res = await api.get('/products/');
@@ -81,6 +97,103 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error(err);
       setProducts([]);
+    }
+  };
+
+  
+
+  const handleDeleteCategory = (id) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete this category?',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/categories/${id}/`);
+          toast.success('Category deleted');
+          fetchCategories();
+        } catch (err) {
+          toast.error('Failed to delete category');
+        }
+      }
+    });
+  };
+
+  const handleSaveCategory = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      if (editingCategory.name) formData.append('name', editingCategory.name);
+      if (editingCategory.slug) formData.append('slug', editingCategory.slug);
+      
+      if (editingCategory.imageFile) {
+        formData.append('image', editingCategory.imageFile);
+      } else if (editingCategory.image) {
+        formData.append('image', editingCategory.image);
+      }
+
+      if (editingCategory.id) {
+        await api.post(`/admin/categories/${editingCategory.id}/`, formData);
+        toast.success('Category updated');
+      } else {
+        await api.post('/admin/categories/', formData);
+        toast.success('Category created');
+      }
+      setEditingCategory(null);
+      fetchCategories();
+    } catch (err) {
+      toast.error('Failed to save category');
+    }
+  };
+
+  const handleDeleteProduct = (id) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Product',
+      message: 'Are you sure you want to delete this product?',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/admin/products/${id}/`);
+          toast.success('Product deleted');
+          fetchProducts();
+        } catch (err) {
+          toast.error('Failed to delete product');
+        }
+      }
+    });
+  };
+
+  const handleSaveProduct = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      if (editingProduct.name) formData.append('name', editingProduct.name);
+      if (editingProduct.price) formData.append('price', editingProduct.price);
+      if (editingProduct.discount_price) formData.append('discount_price', editingProduct.discount_price);
+      if (editingProduct.product_category_id) formData.append('product_category_id', editingProduct.product_category_id);
+      if (editingProduct.category) formData.append('category', editingProduct.category);
+      if (editingProduct.description) formData.append('description', editingProduct.description);
+      
+      if (editingProduct.imageFile) {
+        formData.append('image', editingProduct.imageFile);
+      } else if (editingProduct.image) {
+        formData.append('image', editingProduct.image);
+      } else {
+        toast.error('An image is required');
+        return;
+      }
+
+      if (editingProduct.id) {
+        await api.post(`/admin/products/${editingProduct.id}/`, formData);
+        toast.success('Product updated');
+      } else {
+        await api.post('/admin/products/', formData);
+        toast.success('Product created');
+      }
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (err) {
+      toast.error('Failed to save product');
     }
   };
 
@@ -336,7 +449,7 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          <div className="flex border-b border-gray-200 gap-6">
+          <div className="flex border-b border-gray-200 gap-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
             <button
               onClick={() => setActiveTab('orders')}
               className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'orders' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
@@ -360,6 +473,18 @@ const AdminDashboard = () => {
               className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'coupons' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             >
               Coupons
+            </button>
+            <button
+              onClick={() => setActiveTab('categories')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'categories' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Categories
+            </button>
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'products' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Products
             </button>
           </div>
         </div>
@@ -803,6 +928,192 @@ const AdminDashboard = () => {
                             <td className="p-4 text-right">
                               <button onClick={() => setEditingCoupon(coupon)} className="text-blue-600 text-sm font-semibold hover:underline mr-4">Edit</button>
                               <button onClick={() => handleDeleteCoupon(coupon.id)} className="text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+                {/* Categories Tab */}
+        {activeTab === 'categories' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Manage Categories</h2>
+              <button 
+                onClick={() => setEditingCategory({ name: '', slug: '', image: '', imageFile: null })}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+              >
+                <Plus size={18} /> Add New Category
+              </button>
+            </div>
+
+            {editingCategory ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">{editingCategory.id ? 'Edit Category' : 'Add New Category'}</h3>
+                <form onSubmit={handleSaveCategory} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Category Name *</label>
+                      <input required type="text" value={editingCategory.name} onChange={e => setEditingCategory({...editingCategory, name: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Slug (URL friendly)</label>
+                      <input type="text" value={editingCategory.slug} onChange={e => setEditingCategory({...editingCategory, slug: e.target.value})} className="w-full p-2 border border-gray-200 rounded" placeholder="Auto-generated if empty" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Category Image (Optional)</label>
+                    <input type="file" accept="image/*" onChange={e => setEditingCategory({...editingCategory, imageFile: e.target.files[0]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
+                    {editingCategory.image && !editingCategory.imageFile && (
+                      <img src={editingCategory.image.startsWith('http') ? editingCategory.image : `${API_BASE}${editingCategory.image}`} alt="Preview" className="mt-2 h-20 rounded shadow" />
+                    )}
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                    <button type="button" onClick={() => setEditingCategory(null)} className="flex-1 bg-gray-100 py-2 rounded font-semibold">Cancel</button>
+                    <button type="submit" className="flex-1 bg-primary text-white py-2 rounded font-semibold">Save Category</button>
+                  </div>
+                </form>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-100">
+                        <th className="p-4 font-semibold text-gray-600 text-sm w-16">Image</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Slug</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {categories.length === 0 ? (
+                        <tr><td colSpan="4" className="p-8 text-center text-gray-500">No categories found.</td></tr>
+                      ) : (
+                        categories.map(cat => (
+                          <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
+                            <td className="p-4">
+                              {cat.image ? (
+                                <img src={cat.image.startsWith('http') ? cat.image : `${API_BASE}${cat.image}`} alt={cat.name} className="w-12 h-12 rounded object-cover border border-gray-200" />
+                              ) : (
+                                <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                              )}
+                            </td>
+                            <td className="p-4 font-medium text-gray-900">{cat.name}</td>
+                            <td className="p-4 text-sm text-gray-500">{cat.slug}</td>
+                            <td className="p-4 text-right">
+                              <button onClick={() => setEditingCategory(cat)} className="text-blue-600 text-sm font-semibold hover:underline mr-4">Edit</button>
+                              <button onClick={() => handleDeleteCategory(cat.id)} className="text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Products Tab */}
+        {activeTab === 'products' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Manage Products</h2>
+              <button 
+                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null })}
+                className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+              >
+                <Plus size={18} /> Add New Product
+              </button>
+            </div>
+
+            {editingProduct ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">{editingProduct.id ? 'Edit Product' : 'Add New Product'}</h3>
+                <form onSubmit={handleSaveProduct} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Product Name *</label>
+                      <input required type="text" value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Category *</label>
+                      <select value={editingProduct.product_category_id || ''} onChange={e => setEditingProduct({...editingProduct, product_category_id: e.target.value})} className="w-full p-2 border border-gray-200 rounded" required>
+                        <option value="">Select a Category</option>
+                        {categories.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Product Tag/Status</label>
+                      <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full p-2 border border-gray-200 rounded">
+                        <option value="regular">Regular</option>
+                        <option value="featured">Featured</option>
+                        <option value="new_arrival">New Arrival</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Price (₹) *</label>
+                      <input required type="number" step="0.01" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Discount Price (₹)</label>
+                      <input type="number" step="0.01" value={editingProduct.discount_price || ''} onChange={e => setEditingProduct({...editingProduct, discount_price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+                    <textarea value={editingProduct.description || ''} onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full p-2 border border-gray-200 rounded h-24" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Product Image {!editingProduct.id && '*'}</label>
+                    <input type="file" accept="image/*" onChange={e => setEditingProduct({...editingProduct, imageFile: e.target.files[0]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
+                    {editingProduct.image && !editingProduct.imageFile && (
+                      <img src={editingProduct.image.startsWith('http') ? editingProduct.image : `${API_BASE}${editingProduct.image}`} alt="Preview" className="mt-2 h-20 rounded shadow" />
+                    )}
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                    <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 bg-gray-100 py-2 rounded font-semibold">Cancel</button>
+                    <button type="submit" className="flex-1 bg-primary text-white py-2 rounded font-semibold">Save Product</button>
+                  </div>
+                </form>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-100">
+                        <th className="p-4 font-semibold text-gray-600 text-sm w-16">Image</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Category</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Price</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {products.length === 0 ? (
+                        <tr><td colSpan="5" className="p-8 text-center text-gray-500">No products found.</td></tr>
+                      ) : (
+                        products.map(product => (
+                          <tr key={product.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
+                            <td className="p-4">
+                              <img src={product.image.startsWith('http') ? product.image : `${API_BASE}${product.image}`} alt={product.name} className="w-12 h-12 rounded object-cover border border-gray-200" />
+                            </td>
+                            <td className="p-4 font-medium text-gray-900">{product.name}</td>
+                            <td className="p-4 text-sm"><span className="bg-gray-100 px-2 py-1 rounded text-gray-700 capitalize">{product.category.replace('_', ' ')}</span></td>
+                            <td className="p-4 font-semibold">₹{product.price} {product.discount_price && <span className="text-xs text-green-600 ml-1 block sm:inline">(Sale: ₹{product.discount_price})</span>}</td>
+                            <td className="p-4 text-right">
+                              <button onClick={() => setEditingProduct(product)} className="text-blue-600 text-sm font-semibold hover:underline mr-4">Edit</button>
+                              <button onClick={() => handleDeleteProduct(product.id)} className="text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button>
                             </td>
                           </tr>
                         ))

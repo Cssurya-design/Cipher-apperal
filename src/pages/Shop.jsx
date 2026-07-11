@@ -6,13 +6,7 @@ import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import api, { API_BASE } from '../api';
 
-const categories = [
-  { key: '', label: 'All' },
-  { key: 'Shirts', label: 'Shirts' },
-  { key: 'T-Shirts', label: 'T-Shirts' },
-  { key: 'Pants', label: 'Pants' },
-  { key: 'Shorts', label: 'Shorts' },
-];
+
 
 const sortOptions = [
   { key: '', label: 'Default' },
@@ -28,6 +22,21 @@ const Shop = () => {
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || '');
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [sort, setSort] = useState('');
+  const [categories, setCategories] = useState([{ key: '', label: 'All' }]);
+  
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories/');
+        const dynamicCats = res.data.categories.map(c => ({ key: c.slug, label: c.name }));
+        setCategories([{ key: '', label: 'All' }, ...dynamicCats]);
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
@@ -147,31 +156,29 @@ const Shop = () => {
             )}
           </AnimatePresence>
 
-          {/* Quick category pills (always visible) */}
-          <div className="flex flex-wrap gap-2">
-            {categories.map(cat => (
-              <button
-                key={cat.key}
-                onClick={() => setActiveCategory(cat.key)}
-                className={`px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold border transition-all ${
-                  activeCategory === cat.key
-                    ? 'bg-primary text-white border-primary shadow-sm'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-            {sort && (
-              <button
-                onClick={() => setSort('')}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-50 text-primary border border-purple-200 flex items-center gap-1"
-              >
-                {sortOptions.find(o => o.key === sort)?.label}
-                <X size={12} />
-              </button>
-            )}
-          </div>
+          {/* Active Filter Chips */}
+          {(activeCategory || sort) && (
+            <div className="flex flex-wrap gap-2">
+              {activeCategory && (
+                <button
+                  onClick={() => setActiveCategory('')}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-50 text-primary border border-purple-200 flex items-center gap-1 hover:bg-purple-100 transition-colors"
+                >
+                  {categories.find(c => c.key === activeCategory)?.label || 'Category'}
+                  <X size={12} />
+                </button>
+              )}
+              {sort && (
+                <button
+                  onClick={() => setSort('')}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-50 text-primary border border-purple-200 flex items-center gap-1 hover:bg-purple-100 transition-colors"
+                >
+                  {sortOptions.find(o => o.key === sort)?.label}
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Product count */}
           <p className="text-sm text-gray-500">
