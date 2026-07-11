@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
 import api, { API_BASE } from '../api';
 import { useCart } from '../context/CartContext';
-import toast from 'react-hot-toast';
+import { useToast } from '../components/Toast';
 
 const features = [
   { img: 'f1.png', label: 'Free Shipping' },
@@ -31,6 +31,7 @@ const Home = () => {
   const [selectedOffer, setSelectedOffer] = useState(null);
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     document.title = "Home | Cipher Apparel";
