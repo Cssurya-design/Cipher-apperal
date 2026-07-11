@@ -1063,7 +1063,7 @@ const AdminDashboard = () => {
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Product Image {!editingProduct.id && '*'}</label>
                     <input type="file" accept="image/*" onChange={e => setEditingProduct({...editingProduct, imageFile: e.target.files[0]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
                     {editingProduct.image && !editingProduct.imageFile && (
-                      <img src={editingProduct.image.startsWith('http') ? editingProduct.image : `${API_BASE}${editingProduct.image}`} alt="Preview" className="mt-2 h-20 rounded shadow" />
+                      <img src={getImageUrl(editingProduct.image, 'products')} alt="Preview" className="mt-2 h-20 rounded shadow" />
                     )}
                   </div>
                   <div className="flex gap-4 pt-4">
@@ -1092,7 +1092,7 @@ const AdminDashboard = () => {
                         products.map(product => (
                           <tr key={product.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
                             <td className="p-4">
-                              <img src={product.image.startsWith('http') ? product.image : `${API_BASE}${product.image}`} alt={product.name} className="w-12 h-12 rounded object-cover border border-gray-200" />
+                              <img src={getImageUrl(product.image, 'products')} alt={product.name} className="w-12 h-12 rounded object-cover border border-gray-200" />
                             </td>
                             <td className="p-4 font-medium text-gray-900">{product.name}</td>
                             <td className="p-4 text-sm"><span className="bg-gray-100 px-2 py-1 rounded text-gray-700 capitalize">{product.category.replace('_', ' ')}</span></td>

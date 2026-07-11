@@ -109,7 +109,7 @@ const ProductDetail = () => {
           {/* Product Image */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <img
-              src={getImageUrl(product.image)}
+              src={getImageUrl(product.image, 'products')}
               alt={product.name}
               className="w-full rounded-2xl object-cover max-h-[500px]"
               onError={(e) => { e.target.src = '/hero-new.jpg'; }}

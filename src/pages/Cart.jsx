@@ -184,7 +184,7 @@ const Cart = () => {
                   <div className="flex gap-3 sm:gap-5">
                     {/* Image */}
                     <img
-                      src={getImageUrl(item.image)}
+                      src={getImageUrl(item.image, 'products')}
                       alt={item.name}
                       className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover flex-shrink-0"
                       onError={(e) => { e.target.src = '/hero-new.jpg'; }}

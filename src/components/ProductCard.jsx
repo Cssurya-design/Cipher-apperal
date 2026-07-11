@@ -3,14 +3,12 @@ import { motion } from 'framer-motion';
 import { ShoppingCart, Star, Heart, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { API_BASE } from '../api';
+import { API_BASE, getImageUrl } from '../api';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
-  const imageUrl = product.image?.startsWith('http')
-    ? product.image
-    : `${API_BASE}/static/store/images/products/${product.image}`;
+  const imageUrl = getImageUrl(product.image, 'products');
 
   const avgRating = product.avg_rating || 0;
   const totalReviews = product.total_reviews || 0;

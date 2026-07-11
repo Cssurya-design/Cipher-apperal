@@ -2,11 +2,12 @@ import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://cipherapparel.pythonanywhere.com';
 
-export const getImageUrl = (image) => {
+export const getImageUrl = (image, type = 'banner') => {
   if (!image) return '';
   if (image.startsWith('http')) return image;
   if (image.startsWith('/media/')) return `${API_BASE}${image}`;
-  return `${API_BASE}/static/store/images/banner/${image}`;
+  if (image.startsWith('/static/')) return `${API_BASE}${image}`;
+  return `${API_BASE}/static/store/images/${type}/${image}`;
 };
 
 const api = axios.create({

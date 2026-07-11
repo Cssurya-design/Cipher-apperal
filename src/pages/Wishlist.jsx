@@ -91,7 +91,7 @@ const Wishlist = () => {
                   className="bg-white rounded-2xl p-3 sm:p-4 border border-gray-100 shadow-sm relative group"
                 >
                   <Link to={`/product/${item.id}`}>
-                    <img src={getImageUrl(item.image)} alt={item.name} className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-xl mb-3" onError={(e) => { e.target.src = '/hero-new.jpg'; }} />
+                    <img src={getImageUrl(item.image, 'products')} alt={item.name} className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-xl mb-3" onError={(e) => { e.target.src = '/hero-new.jpg'; }} />
                   </Link>
                   <h5 className="font-semibold text-gray-800 text-sm sm:text-base line-clamp-1">{item.name}</h5>
                   <p className="text-primary font-bold mt-1">₹{item.price}</p>
