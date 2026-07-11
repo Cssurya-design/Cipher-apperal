@@ -12,9 +12,9 @@ import { useToast } from '../components/Toast';
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
-// UPI VPA — update this to your actual UPI address
-const UPI_VPA = 'cssurya2006@okicici';
-const UPI_PAYEE_NAME = 'Cipher Apparel';
+// UPI VPA — update this to your actual UPI address in Vercel Environment Variables
+const UPI_VPA = import.meta.env.VITE_UPI_VPA || '';
+const UPI_PAYEE_NAME = import.meta.env.VITE_UPI_PAYEE_NAME || 'Cipher Apparel';
 
 const Cart = () => {
   const navigate = useNavigate();
