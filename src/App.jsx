@@ -6,6 +6,7 @@ import { LocationProvider } from './context/LocationContext'
 import Navbar from './components/Navbar'
 import LocationModal from './components/LocationModal'
 import ScrollToTop from './components/ScrollToTop'
+import ToastProvider from './components/Toast'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import Cart from './pages/Cart'
@@ -35,6 +36,7 @@ function App() {
         <AuthProvider>
           <CartProvider>
             <LocationProvider>
+              <ToastProvider>
               <div className="font-inter">
                 <Navbar />
                 <LocationModal />
@@ -59,6 +61,7 @@ function App() {
                 </Routes>
               </main>
               </div>
+              </ToastProvider>
             </LocationProvider>
           </CartProvider>
         </AuthProvider>

@@ -8,6 +8,7 @@ import { useLocation as useLocationCtx } from '../context/LocationContext';
 import { API_BASE } from '../api';
 import api from '../api';
 import Footer from '../components/Footer';
+import { useToast } from '../components/Toast';
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
@@ -25,6 +26,7 @@ const Cart = () => {
   const { cart, removeFromCart, updateQuantity, updateSize, clearCart, cartTotal } = useCart();
   const { user } = useAuth();
   const { displayLocation, location, setShowLocationModal } = useLocationCtx();
+  const toast = useToast();
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -50,7 +52,7 @@ const Cart = () => {
     }
 
     if (paymentMethod === 'UPI' && (!transactionId || transactionId.trim().length < 6)) {
-      alert('Please enter a valid 12-digit UTR or Transaction ID to verify your payment.');
+      toast.warning('Please enter a valid 12-digit UTR or Transaction ID to verify your payment.');
       return;
     }
 
@@ -79,7 +81,7 @@ const Cart = () => {
       }, 2000);
     } catch (err) {
       console.error(err);
-      alert('Failed to place order. Please try again.');
+      toast.error('Failed to place order. Please try again.');
     }
   };
 

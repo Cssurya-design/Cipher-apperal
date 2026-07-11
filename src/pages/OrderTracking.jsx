@@ -8,6 +8,7 @@ import {
 import api, { API_BASE } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Footer';
+import { useToast } from '../components/Toast';
 
 // Status ordering for the timeline
 const STATUSES = [
@@ -29,6 +30,7 @@ const OrderTracking = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const toast = useToast();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -60,7 +62,7 @@ const OrderTracking = () => {
       setOrder(prev => ({ ...prev, status: 'cancelled', status_display: 'Cancelled' }));
       setShowCancelConfirm(false);
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to cancel order.');
+      toast.error(err.response?.data?.error || 'Failed to cancel order.');
     }
     setCancelling(false);
   };

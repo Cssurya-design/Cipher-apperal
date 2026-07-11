@@ -8,6 +8,7 @@ import { useLocation } from '../context/LocationContext';
 import api, { API_BASE } from '../api';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
+import { useToast } from '../components/Toast';
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 
@@ -26,6 +27,7 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { displayLocation, setShowLocationModal } = useLocation();
+  const toast = useToast();
 
   useEffect(() => {
     document.title = product ? `${product.name} | Cipher Apparel` : "Product | Cipher Apparel";
@@ -42,7 +44,7 @@ const ProductDetail = () => {
 
   const handleRate = async (stars) => {
     if (!user) {
-      alert("Please login to rate this product");
+      toast.warning('Please login to rate this product');
       return;
     }
     setRatingLoading(true);
@@ -84,7 +86,7 @@ const ProductDetail = () => {
       } catch {}
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+      toast.success('Link copied to clipboard!');
     }
   };
 

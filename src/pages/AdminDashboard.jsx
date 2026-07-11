@@ -5,10 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus } from 'lucide-react';
 import api from '../api';
 import Footer from '../components/Footer';
+import { useToast } from '../components/Toast';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'staff'
   
   // Orders State
@@ -51,7 +53,7 @@ const AdminDashboard = () => {
       await api.post(`/admin/orders/${orderId}/update/`, { [field]: value });
       setOrders(orders.map(o => o.id === orderId ? { ...o, [field]: value } : o));
     } catch (err) {
-      alert("Failed to update order");
+      toast.error('Failed to update order. Please try again.');
     }
     setUpdatingId(null);
   };
