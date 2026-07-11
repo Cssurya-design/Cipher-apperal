@@ -11,7 +11,7 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'staff'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'staff' | 'banners'
   
   // Orders State
   const [orders, setOrders] = useState([]);
@@ -26,6 +26,11 @@ const AdminDashboard = () => {
   const [staffError, setStaffError] = useState('');
   const [staffSuccess, setStaffSuccess] = useState('');
 
+  // Banners State
+  const [banners, setBanners] = useState([]);
+  const [bannersLoading, setBannersLoading] = useState(true);
+  const [editingBanner, setEditingBanner] = useState(null);
+
   useEffect(() => {
     document.title = "Admin Dashboard | Cipher Apparel";
     if (user && !user.is_staff) {
@@ -34,6 +39,7 @@ const AdminDashboard = () => {
     }
     fetchOrders();
     fetchStaff();
+    fetchBanners();
   }, [user, navigate]);
 
   const fetchOrders = async () => {
@@ -103,6 +109,45 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchBanners = async () => {
+    setBannersLoading(true);
+    try {
+      const res = await api.get('/admin/banners/');
+      setBanners(res.data.banners);
+    } catch (err) {
+      console.error(err);
+    }
+    setBannersLoading(false);
+  };
+
+  const handleDeleteBanner = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this banner?')) return;
+    try {
+      await api.delete(`/admin/banners/${id}/`);
+      toast.success('Banner deleted');
+      fetchBanners();
+    } catch (err) {
+      toast.error('Failed to delete banner');
+    }
+  };
+
+  const handleSaveBanner = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingBanner.id) {
+        await api.put(`/admin/banners/${editingBanner.id}/`, editingBanner);
+        toast.success('Banner updated');
+      } else {
+        await api.post('/admin/banners/', editingBanner);
+        toast.success('Banner created');
+      }
+      setEditingBanner(null);
+      fetchBanners();
+    } catch (err) {
+      toast.error('Failed to save banner');
+    }
+  };
+
   if (!user || !user.is_staff) return null;
 
   return (
@@ -132,6 +177,11 @@ const AdminDashboard = () => {
                 Refresh Staff
               </button>
             )}
+            {activeTab === 'banners' && (
+              <button onClick={() => setEditingBanner({ position: 'main', is_active: true })} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-dark self-start sm:self-auto">
+                + Add Banner
+              </button>
+            )}
           </div>
 
           <div className="flex border-b border-gray-200 gap-6">
@@ -146,6 +196,12 @@ const AdminDashboard = () => {
               className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'staff' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             >
               Manage Staff
+            </button>
+            <button
+              onClick={() => setActiveTab('banners')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'banners' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Promotions & Banners
             </button>
           </div>
         </div>
@@ -358,6 +414,74 @@ const AdminDashboard = () => {
               </div>
             </div>
 
+          </motion.div>
+        )}
+
+        {/* --- BANNERS TAB --- */}
+        {activeTab === 'banners' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            {editingBanner ? (
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
+                <h2 className="text-xl font-bold mb-4">{editingBanner.id ? 'Edit Banner' : 'Create Banner'}</h2>
+                <form onSubmit={handleSaveBanner} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Position</label>
+                    <select value={editingBanner.position || 'main'} onChange={e => setEditingBanner({...editingBanner, position: e.target.value})} className="w-full p-2 border rounded">
+                      <option value="main">Main (Center)</option>
+                      <option value="small">Small (Half Width)</option>
+                      <option value="bottom">Bottom (Third Width)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Title (HTML supported)</label>
+                    <input type="text" value={editingBanner.title || ''} onChange={e => setEditingBanner({...editingBanner, title: e.target.value})} className="w-full p-2 border rounded" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Subtitle</label>
+                    <input type="text" value={editingBanner.subtitle || ''} onChange={e => setEditingBanner({...editingBanner, subtitle: e.target.value})} className="w-full p-2 border rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Full Description (Shown in Offer Popup Modal)</label>
+                    <textarea value={editingBanner.description || ''} onChange={e => setEditingBanner({...editingBanner, description: e.target.value})} className="w-full p-2 border rounded min-h-[100px]" placeholder="Enter the full offer details, terms, or descriptions here..." />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Image Name (e.g. b2.jpg)</label>
+                    <input type="text" value={editingBanner.image || ''} onChange={e => setEditingBanner({...editingBanner, image: e.target.value})} className="w-full p-2 border rounded" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Target Link</label>
+                    <input type="text" value={editingBanner.link || ''} onChange={e => setEditingBanner({...editingBanner, link: e.target.value})} className="w-full p-2 border rounded" placeholder="/shop" />
+                  </div>
+                  <div className="flex items-center gap-2 mt-4">
+                    <input type="checkbox" checked={editingBanner.is_active ?? true} onChange={e => setEditingBanner({...editingBanner, is_active: e.target.checked})} id="is_active" />
+                    <label htmlFor="is_active" className="text-sm font-semibold">Active</label>
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                    <button type="submit" className="bg-primary text-white px-6 py-2 rounded font-bold">Save Banner</button>
+                    <button type="button" onClick={() => setEditingBanner(null)} className="bg-gray-200 text-gray-800 px-6 py-2 rounded font-bold">Cancel</button>
+                  </div>
+                </form>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {banners.map(banner => (
+                  <div key={banner.id} className={`bg-white rounded-xl shadow-sm border ${banner.is_active ? 'border-gray-200' : 'border-red-200'} overflow-hidden`}>
+                    <div className="h-32 bg-gray-100 relative bg-cover bg-center" style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}>
+                      <span className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-bold uppercase">{banner.position}</span>
+                      {!banner.is_active && <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">INACTIVE</span>}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg mb-1 line-clamp-1">{banner.title.replace(/<[^>]*>?/gm, '')}</h3>
+                      <p className="text-xs text-gray-500 mb-4">{banner.link}</p>
+                      <div className="flex justify-between items-center">
+                        <button onClick={() => setEditingBanner(banner)} className="text-sm font-semibold text-blue-600 hover:underline">Edit</button>
+                        <button onClick={() => handleDeleteBanner(banner.id)} className="text-sm font-semibold text-red-600 hover:underline">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
@@ -17,12 +18,25 @@ const features = [
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
+  const [banners, setBanners] = useState({ main: [], small: [], bottom: [] });
+  const [selectedOffer, setSelectedOffer] = useState(null);
 
   useEffect(() => {
     document.title = "Home | Cipher Apparel";
     api.get('/featured/')
       .then(res => setFeatured(res.data.featured))
       .catch(err => console.error("Error fetching featured products", err));
+
+    api.get('/banners/')
+      .then(res => {
+        const fetched = res.data.banners || [];
+        setBanners({
+          main: fetched.filter(b => b.position === 'main'),
+          small: fetched.filter(b => b.position === 'small'),
+          bottom: fetched.filter(b => b.position === 'bottom'),
+        });
+      })
+      .catch(err => console.error("Error fetching banners", err));
   }, []);
 
   return (
@@ -91,16 +105,20 @@ const Home = () => {
       </section>
 
       {/* Main Banner */}
-      <section 
-        className="py-12 sm:py-20 md:py-24 text-center bg-cover bg-center text-white my-6 sm:my-12 flex flex-col justify-center items-center w-full min-h-[30vh] sm:min-h-[40vh] px-4"
-        style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b2.jpg')` }}
-      >
-        <h4 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">Repair Services</h4>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">Up to <span className="text-red-500">70% off</span> All t-shirts and accessories</h2>
-        <Link to="/shop" className="bg-white text-gray-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-bold hover:bg-primary hover:text-white transition-colors text-sm sm:text-base">
-          Explore more
-        </Link>
-      </section>
+      {banners.main.length > 0 && banners.main.map(banner => (
+        <section 
+          key={banner.id}
+          className="py-12 sm:py-20 md:py-24 text-center bg-cover bg-center text-white my-6 sm:my-12 flex flex-col justify-center items-center w-full min-h-[30vh] sm:min-h-[40vh] px-4"
+          style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}
+        >
+          {banner.subtitle && <h4 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4">{banner.subtitle}</h4>}
+          {banner.title && <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6" dangerouslySetInnerHTML={{ __html: banner.title }}></h2>}
+          {banner.description && <p className="mb-4">{banner.description}</p>}
+          <button onClick={() => setSelectedOffer(banner)} className="bg-white text-gray-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-bold hover:bg-primary hover:text-white transition-colors text-sm sm:text-base">
+            Explore more
+          </button>
+        </section>
+      ))}
 
       {/* New Arrivals */}
       <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-20 max-w-7xl mx-auto text-center">
@@ -138,51 +156,93 @@ const Home = () => {
       </section>
 
       {/* Small Banners */}
-      <section className="px-4 sm:px-6 md:px-10 lg:px-20 py-8 sm:py-12 w-full flex flex-col md:flex-row gap-4 sm:gap-6 justify-between">
-        <div 
-          className="w-full md:w-[48%] bg-cover bg-center p-6 sm:p-8 md:p-12 text-white flex flex-col justify-center items-start min-h-[30vh] sm:min-h-[40vh] md:min-h-[50vh] rounded-xl"
-          style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b17.jpg')` }}
-        >
-          <h4 className="text-lg sm:text-xl font-light mb-2">crazy deals</h4>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">buy 1 get 1 free</h2>
-          <span className="text-xs sm:text-sm font-medium mb-4 sm:mb-6">The best classic dress is on sale at cipher apparel</span>
-          <button className="border border-white px-4 sm:px-6 py-2 hover:bg-primary hover:border-primary transition-colors text-xs sm:text-sm font-semibold rounded">Learn More</button>
-        </div>
-        <div 
-          className="w-full md:w-[48%] bg-cover bg-center p-6 sm:p-8 md:p-12 text-white flex flex-col justify-center items-start min-h-[30vh] sm:min-h-[40vh] md:min-h-[50vh] rounded-xl"
-          style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b10.jpg')` }}
-        >
-          <h4 className="text-lg sm:text-xl font-light mb-2">spring/summer</h4>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">upcoming season</h2>
-          <span className="text-xs sm:text-sm font-medium mb-4 sm:mb-6">The best classic dress is on sale at cipher apparel</span>
-          <button className="border border-white px-4 sm:px-6 py-2 hover:bg-primary hover:border-primary transition-colors text-xs sm:text-sm font-semibold rounded">Learn More</button>
-        </div>
-      </section>
+      {banners.small.length > 0 && (
+        <section className="px-4 sm:px-6 md:px-10 lg:px-20 py-8 sm:py-12 w-full flex flex-col md:flex-row gap-4 sm:gap-6 justify-between">
+          {banners.small.map(banner => (
+            <div 
+              key={banner.id}
+              className="w-full md:flex-1 bg-cover bg-center p-6 sm:p-8 md:p-12 text-white flex flex-col justify-center items-start min-h-[30vh] sm:min-h-[40vh] md:min-h-[50vh] rounded-xl"
+              style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}
+            >
+              {banner.subtitle && <h4 className="text-lg sm:text-xl font-light mb-2">{banner.subtitle}</h4>}
+              {banner.title && <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4" dangerouslySetInnerHTML={{ __html: banner.title }}></h2>}
+              {banner.description && <span className="text-xs sm:text-sm font-medium mb-4 sm:mb-6">{banner.description}</span>}
+              <button onClick={() => setSelectedOffer(banner)} className="border border-white px-4 sm:px-6 py-2 hover:bg-primary hover:border-primary transition-colors text-xs sm:text-sm font-semibold rounded block">Learn More</button>
+            </div>
+          ))}
+        </section>
+      )}
 
-      {/* Bottom 3 Banners */}
-      <section className="px-4 sm:px-6 md:px-10 lg:px-20 pb-12 sm:pb-16 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <div 
-          className="bg-cover bg-center p-6 sm:p-8 text-white flex flex-col justify-center items-start min-h-[25vh] sm:min-h-[30vh] rounded-xl"
-          style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b7.jpg')` }}
-        >
-          <h2 className="text-xl sm:text-2xl font-bold mb-2 uppercase">SEASONAL SALE</h2>
-          <h3 className="text-red-500 font-bold text-base sm:text-lg">Winter Collection -50% OFF</h3>
-        </div>
-        <div 
-          className="bg-cover bg-center p-6 sm:p-8 text-white flex flex-col justify-center items-start min-h-[25vh] sm:min-h-[30vh] rounded-xl"
-          style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b4.jpg')` }}
-        >
-          <h2 className="text-xl sm:text-2xl font-bold mb-2 uppercase">NEW FOOTWEAR COLLECTION</h2>
-          <h3 className="text-red-500 font-bold text-base sm:text-lg">Spring/Summer 2026</h3>
-        </div>
-        <div 
-          className="bg-cover bg-center p-6 sm:p-8 text-white flex flex-col justify-center items-start min-h-[25vh] sm:min-h-[30vh] rounded-xl sm:col-span-2 lg:col-span-1"
-          style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b18.jpg')` }}
-        >
-          <h2 className="text-xl sm:text-2xl font-bold mb-2 uppercase">T-SHIRTS</h2>
-          <h3 className="text-red-500 font-bold text-base sm:text-lg">New Trendy Prints</h3>
-        </div>
-      </section>
+      {/* Bottom Banners */}
+      {banners.bottom.length > 0 && (
+        <section className="px-4 sm:px-6 md:px-10 lg:px-20 pb-12 sm:pb-16 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {banners.bottom.map((banner, index) => (
+            <div 
+              key={banner.id}
+              className={`bg-cover bg-center p-6 sm:p-8 text-white flex flex-col justify-center items-start min-h-[25vh] sm:min-h-[30vh] rounded-xl ${index === 2 && banners.bottom.length === 3 ? 'sm:col-span-2 lg:col-span-1' : ''}`}
+              style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}
+            >
+              {banner.title && <h2 className="text-xl sm:text-2xl font-bold mb-2 uppercase" dangerouslySetInnerHTML={{ __html: banner.title }}></h2>}
+              {banner.subtitle && <h3 className="text-red-500 font-bold text-base sm:text-lg">{banner.subtitle}</h3>}
+              <button onClick={() => setSelectedOffer(banner)} className="mt-4 border border-white px-4 py-1.5 hover:bg-primary hover:border-primary transition-colors text-xs font-semibold rounded">Shop Now</button>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Offer Modal */}
+      <AnimatePresence>
+        {selectedOffer && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedOffer(null)} 
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col z-10"
+            >
+              <div 
+                className="h-48 sm:h-64 bg-cover bg-center" 
+                style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${selectedOffer.image}')` }}
+              />
+              <button 
+                onClick={() => setSelectedOffer(null)}
+                className="absolute top-4 right-4 bg-black/50 hover:bg-black/80 text-white rounded-full p-2 transition-colors"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="p-6 sm:p-8">
+                {selectedOffer.subtitle && <h4 className="text-sm font-bold text-primary mb-2 uppercase tracking-wide">{selectedOffer.subtitle}</h4>}
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: selectedOffer.title.replace(/<[^>]*>?/gm, '') }}></h3>
+                <p className="text-gray-600 mb-8 whitespace-pre-wrap leading-relaxed">{selectedOffer.description || "Grab this exclusive offer now!"}</p>
+                
+                <div className="flex gap-4">
+                  <Link 
+                    to={selectedOffer.link || '/shop'} 
+                    onClick={() => setSelectedOffer(null)}
+                    className="flex-1 bg-primary text-white text-center py-3 rounded-xl font-bold hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30"
+                  >
+                    Go to Offer
+                  </Link>
+                  <button 
+                    onClick={() => setSelectedOffer(null)}
+                    className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>
