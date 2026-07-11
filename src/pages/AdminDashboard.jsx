@@ -14,6 +14,14 @@ const formatDateTimeLocal = (isoString) => {
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+const formatAdminDate = (dateStr) => {
+  if (!dateStr) return '';
+  const cleanStr = dateStr.replace(' - ', ' ');
+  const d = new Date(`${cleanStr} UTC`);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+};
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -575,7 +583,7 @@ const AdminDashboard = () => {
                       <tr key={order.group_id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4 align-top">
                           <div className="font-bold text-gray-900">#{order.group_id}</div>
-                          <div className="text-xs text-gray-500 mt-1">{order.date}</div>
+                          <div className="text-xs text-gray-500 mt-1">{formatAdminDate(order.date)}</div>
                         </td>
                         <td className="px-6 py-4 align-top">
                           <span className="font-medium text-gray-800">{order.user_email}</span>

@@ -131,6 +131,25 @@ const OrderTracking = () => {
   estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + deliveryDays);
   const deliveryStr = estimatedDeliveryDate.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
+  // Helper to parse old string formats as UTC and return local time
+  const formatLocalDate = (dateStr, timeStr) => {
+    const d = new Date(`${dateStr} ${timeStr} UTC`);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  
+  const formatLocalTime = (dateStr, timeStr) => {
+    const d = new Date(`${dateStr} ${timeStr} UTC`);
+    if (isNaN(d.getTime())) return timeStr;
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  };
+
+  const formatLocalSingle = (fullStr) => {
+    const d = new Date(`${fullStr} UTC`);
+    if (isNaN(d.getTime())) return fullStr;
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+  };
+
   return (
     <div className="pt-24 min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -151,7 +170,7 @@ const OrderTracking = () => {
         >
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Order #{order.id}</h1>
-            <p className="text-sm text-gray-400 mt-1">Placed on {order.date} at {order.time}</p>
+            <p className="text-sm text-gray-400 mt-1">Placed on {formatLocalDate(order.date, order.time)} at {formatLocalTime(order.date, order.time)}</p>
           </div>
           <span
             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold w-fit ${
@@ -373,7 +392,7 @@ const OrderTracking = () => {
         )}
 
         <p className="text-center text-xs text-gray-400 pb-4">
-          Last updated: {order.updated_at}
+          Last updated: {formatLocalSingle(order.updated_at)}
         </p>
       </div>
 
