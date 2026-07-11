@@ -113,12 +113,10 @@ const Blog = () => {
     <div className="pt-20 min-h-screen bg-[#f8f9fa]">
       {/* Hero Section with abstract elements */}
       <div className="relative w-full min-h-[45vh] bg-gray-900 flex flex-col justify-center items-center text-center overflow-hidden">
-        {/* Background Decorative Elements */}
+        {/* Background Image with neutral dark overlay */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-          <div className="absolute -top-20 -left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-          <div className="absolute top-20 -right-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-20 left-1/2 w-72 h-72 bg-primary rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
-          <div className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-overlay" style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b19.jpg')` }}></div>
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/b19.jpg')` }}></div>
+          <div className="absolute inset-0 bg-black/60"></div>
         </div>
 
         <motion.div 
@@ -127,9 +125,9 @@ const Blog = () => {
           transition={{ duration: 0.8 }}
           className="relative z-10 px-4 max-w-3xl"
         >
-          <span className="text-pink-300 font-bold tracking-widest text-sm uppercase mb-3 block">Our Journal</span>
+          <span className="text-gray-300 font-semibold tracking-widest text-sm uppercase mb-3 block">Our Journal</span>
           <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight drop-shadow-lg">
-            #Read<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">More</span>
+            #ReadMore
           </h1>
           <p className="text-gray-200 text-lg md:text-xl font-medium max-w-xl mx-auto drop-shadow-md">
             Dive into our latest styling tips, trend reports, and behind-the-scenes stories.
