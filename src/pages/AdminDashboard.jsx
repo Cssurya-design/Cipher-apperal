@@ -163,7 +163,7 @@ const AdminDashboard = () => {
       if (editingBanner.title) formData.append('title', editingBanner.title);
       if (editingBanner.subtitle) formData.append('subtitle', editingBanner.subtitle);
       if (editingBanner.description) formData.append('description', editingBanner.description);
-      if (editingBanner.link) formData.append('link', editingBanner.link);
+      formData.append('link', editingBanner.link || '');
       if (editingBanner.product_id) formData.append('product_id', editingBanner.product_id);
       formData.append('is_active', editingBanner.is_active ?? true);
       
@@ -592,7 +592,7 @@ const AdminDashboard = () => {
                       {!banner.is_active && <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">INACTIVE</span>}
                     </div>
                     <div className="p-4">
-                      <h3 className="font-bold text-lg mb-1 line-clamp-1">{banner.title.replace(/<[^>]*>?/gm, '')}</h3>
+                      <h3 className="font-bold text-lg mb-1 line-clamp-1">{(banner.title || '').replace(/<[^>]*>?/gm, '')}</h3>
                       <p className="text-xs text-gray-500 mb-4">{banner.link}</p>
                       <div className="flex justify-between items-center">
                         <button onClick={() => setEditingBanner(banner)} className="text-sm font-semibold text-blue-600 hover:underline">Edit</button>

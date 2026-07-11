@@ -247,7 +247,7 @@ const Home = () => {
               
               <div className="p-6 sm:p-8">
                 {selectedOffer.subtitle && <h4 className="text-sm font-bold text-primary mb-2 uppercase tracking-wide">{selectedOffer.subtitle}</h4>}
-                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: selectedOffer.title.replace(/<[^>]*>?/gm, '') }}></h3>
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: (selectedOffer.title || '').replace(/<[^>]*>?/gm, '') }}></h3>
                 <p className="text-gray-600 mb-8 whitespace-pre-wrap leading-relaxed">{selectedOffer.description || "Grab this exclusive offer now!"}</p>
                 
                 <div className="flex gap-4">
