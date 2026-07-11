@@ -5,7 +5,7 @@ import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
-import api, { API_BASE } from '../api';
+import api, { API_BASE, getImageUrl } from '../api';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../components/Toast';
 
@@ -18,12 +18,6 @@ const features = [
   { img: 'f6.png', label: '24/7 Support' },
 ];
 
-const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http')) return image;
-  if (image.startsWith('/media/')) return `${API_BASE}${image}`;
-  return `${API_BASE}/static/store/images/banner/${image}`;
-};
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);

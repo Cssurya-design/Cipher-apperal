@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus, Plus } from 'lucide-react';
-import api, { API_BASE } from '../api';
+import api, { API_BASE, getImageUrl } from '../api';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
 
@@ -517,16 +517,8 @@ const AdminDashboard = () => {
         {/* --- BANNERS TAB --- */}
         {activeTab === 'banners' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex justify-between items-center mb-6">
+            <div className="mb-6">
               <h2 className="text-2xl font-bold">Promotional Banners</h2>
-              {!editingBanner && (
-                <button 
-                  onClick={() => setEditingBanner({ position: 'main', is_active: true })} 
-                  className="bg-primary text-white px-4 py-2 rounded-full font-bold flex items-center gap-2"
-                >
-                  <Plus size={20} /> Create Banner
-                </button>
-              )}
             </div>
             {editingBanner ? (
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
@@ -614,7 +606,7 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {banners.map(banner => (
                   <div key={banner.id} className={`bg-white rounded-xl shadow-sm border ${banner.is_active ? 'border-gray-200' : 'border-red-200'} overflow-hidden`}>
-                    <div className="h-32 bg-gray-100 relative bg-cover bg-center" style={{ backgroundImage: `url('${API_BASE}/static/store/images/banner/${banner.image}')` }}>
+                    <div className="h-32 bg-gray-100 relative bg-cover bg-center" style={{ backgroundImage: `url('${getImageUrl(banner.image)}')` }}>
                       <span className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-bold uppercase">{banner.position}</span>
                       {!banner.is_active && <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">INACTIVE</span>}
                     </div>
