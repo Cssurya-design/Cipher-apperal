@@ -60,9 +60,10 @@ const AdminDashboard = () => {
   const fetchProducts = async () => {
     try {
       const res = await api.get('/products/');
-      setProducts(res.data.products || res.data);
+      setProducts(res.data.products || []);
     } catch (err) {
       console.error(err);
+      setProducts([]);
     }
   };
 
@@ -70,9 +71,10 @@ const AdminDashboard = () => {
     setOrdersLoading(true);
     try {
       const res = await api.get('/admin/orders/');
-      setOrders(res.data.orders);
+      setOrders(res.data.orders || []);
     } catch (err) {
       console.error(err);
+      setOrders([]);
     }
     setOrdersLoading(false);
   };
@@ -92,9 +94,10 @@ const AdminDashboard = () => {
     setStaffLoading(true);
     try {
       const res = await api.get('/admin/staff/');
-      setStaffList(res.data.staff);
+      setStaffList(res.data.staff || []);
     } catch (err) {
       console.error(err);
+      setStaffList([]);
     }
     setStaffLoading(false);
   };
@@ -137,9 +140,10 @@ const AdminDashboard = () => {
     setBannersLoading(true);
     try {
       const res = await api.get('/admin/banners/');
-      setBanners(res.data.banners);
+      setBanners(res.data.banners || []);
     } catch (err) {
       console.error(err);
+      setBanners([]);
     }
     setBannersLoading(false);
   };
@@ -194,9 +198,10 @@ const AdminDashboard = () => {
     setCouponsLoading(true);
     try {
       const res = await api.get('/admin/coupons/');
-      setCoupons(res.data.coupons);
+      setCoupons(res.data.coupons || []);
     } catch (err) {
       console.error(err);
+      setCoupons([]);
     }
     setCouponsLoading(false);
   };
@@ -603,7 +608,7 @@ const AdminDashboard = () => {
                       {!banner.is_active && <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded font-bold">INACTIVE</span>}
                     </div>
                     <div className="p-4">
-                      <h3 className="font-bold text-lg mb-1 line-clamp-1">{(banner.title || '').replace(/<[^>]*>?/gm, '')}</h3>
+                      <h3 className="font-bold text-lg mb-1 line-clamp-1">{String(banner.title || '').replace(/<[^>]*>?/gm, '')}</h3>
                       <div className="flex justify-between items-center mt-4">
                         <button onClick={() => setEditingBanner(banner)} className="text-sm font-semibold text-blue-600 hover:underline">Edit</button>
                         <button onClick={() => handleDeleteBanner(banner.id)} className="text-sm font-semibold text-red-600 hover:underline">Delete</button>
