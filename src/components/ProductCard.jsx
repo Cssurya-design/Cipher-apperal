@@ -5,12 +5,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api, { API_BASE, getImageUrl } from '../api';
-import toast from 'react-hot-toast';
+import { useToast } from '../components/Toast';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const imageUrl = getImageUrl(product.image, 'products');
@@ -96,7 +97,7 @@ const ProductCard = ({ product }) => {
       </button>
 
       <button 
-        onClick={(e) => { e.preventDefault(); addToCart(product); }}
+        onClick={(e) => { e.preventDefault(); addToCart(product, 1, 'XL'); }}
         className="absolute bottom-14 sm:bottom-16 right-5 w-9 h-9 bg-green-50 text-secondary rounded-full flex items-center justify-center hover:bg-secondary hover:text-white transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100"
       >
         <ShoppingCart size={18} />
