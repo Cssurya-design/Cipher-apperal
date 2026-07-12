@@ -24,9 +24,9 @@ const STATUS_PROGRESS = {
   cancelled: 0,
 };
 
-const getEstimatedDelivery = (dateStr) => {
+const getEstimatedDelivery = (deliveryDays = 5) => {
   const est = new Date();
-  est.setDate(est.getDate() + 5);
+  est.setDate(est.getDate() + deliveryDays);
   return est.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
 };
 
@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [summary, setSummary] = useState({ total_orders: 0, total_spent: '0' });
   const [loading, setLoading] = useState(true);
   const [ratingLoading, setRatingLoading] = useState(null);
+  const [deliveryDays, setDeliveryDays] = useState(5);
 
   useEffect(() => {
     document.title = "My Dashboard | Cipher Apparel";
@@ -51,6 +52,14 @@ const Dashboard = () => {
           console.error(err);
           setLoading(false);
         });
+      // Fetch delivery days setting
+      api.get('/api/settings/')
+        .then(res => {
+          if (res.data?.settings?.delivery_days) {
+            setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
+          }
+        })
+        .catch(() => {});
     }
   }, [user]);
 
@@ -59,13 +68,14 @@ const Dashboard = () => {
     return image.startsWith('http') ? image : `${API_BASE}/static/store/images/products/${image}`;
   };
 
-  const handleRateOrder = async (order, stars) => {
-    setRatingLoading(order.id);
+  const handleRateOrder = async (item, stars) => {
+    setRatingLoading(item.id);
     try {
-      await api.post('/rate-product/', { product_name: order.product_name, rating: stars });
-      setOrders(prev => prev.map(o =>
-        o.id === order.id ? { ...o, user_rating: stars } : o
-      ));
+      await api.post('/rate-product/', { product_name: item.product_name, rating: stars });
+      setOrders(prev => prev.map(group => ({
+        ...group,
+        items: group.items?.map(i => i.id === item.id ? { ...i, user_rating: stars } : i)
+      })));
     } catch (err) {
       console.error(err);
     }
@@ -201,8 +211,15 @@ const Dashboard = () => {
                         <span className={`text-xs px-2 py-1 rounded-full font-semibold ${STATUS_STYLES[group.status] || 'bg-gray-100'}`}>
                           {group.status_display || group.status}
                         </span>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded ${group.payment_status === 'Verified' ? 'bg-green-100 text-green-700' : group.payment_status === 'Failed' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                          {group.payment_status}
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                          group.payment_status === 'Verified' ? 'bg-green-100 text-green-700' 
+                          : group.payment_status === 'Failed' ? 'bg-red-100 text-red-700' 
+                          : 'bg-orange-100 text-orange-700'
+                        }`}>
+                          {group.payment_status === 'Pending' ? 'Pending Verification'
+                            : group.payment_status === 'Verified' ? 'Verified ✓'
+                            : group.payment_status === 'Failed' ? 'Failed'
+                            : group.payment_status}
                         </span>
                       </div>
                     </div>
@@ -264,7 +281,7 @@ const Dashboard = () => {
                       <div className="flex items-center gap-1">
                         <Truck size={14} className="text-primary flex-shrink-0" />
                         <span className="text-xs text-gray-500">
-                          Est. delivery: <span className="font-medium text-gray-700">{getEstimatedDelivery(group.date)}</span>
+                        Est. delivery: <span className="font-medium text-gray-700">{getEstimatedDelivery(deliveryDays)}</span>
                         </span>
                       </div>
                     ) : (

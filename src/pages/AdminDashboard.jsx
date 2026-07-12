@@ -1214,13 +1214,14 @@ const AdminDashboard = () => {
             className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
           >
             <div className="flex justify-between items-center p-6 border-b border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900">Order Details #{selectedOrder.id}</h3>
+              <h3 className="text-xl font-bold text-gray-900">Order Details #{selectedOrder.group_id}</h3>
               <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600">
                 <X size={24} />
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto">
+            <div className="p-6 overflow-y-auto space-y-6">
+              {/* Customer + Shipping */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Customer Info</h4>
@@ -1233,23 +1234,62 @@ const AdminDashboard = () => {
                   <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Shipping Address</h4>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedOrder.address || 'No address provided'}</p>
                 </div>
+              </div>
 
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Item Details</h4>
-                  <p className="text-sm text-gray-700"><span className="font-medium">Product:</span> {selectedOrder.product_name}</p>
-                  <p className="text-sm text-gray-700"><span className="font-medium">Quantity:</span> {selectedOrder.quantity}</p>
-                  {selectedOrder.size && <p className="text-sm text-gray-700"><span className="font-medium">Size:</span> {selectedOrder.size}</p>}
+              {/* Items */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3 border-b pb-1">Item Details</h4>
+                <div className="space-y-3">
+                  {selectedOrder.items?.map((item, idx) => (
+                    <div key={item.id || idx} className="flex gap-3 items-center bg-gray-50 rounded-xl p-3">
+                      {item.product_img && (
+                        <img
+                          src={item.product_img.startsWith('http') ? item.product_img : `${API_BASE}/static/store/images/products/${item.product_img}`}
+                          alt={item.product_name}
+                          className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                          onError={(e) => { e.target.src = '/hero-new.jpg'; }}
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-gray-800 truncate">{item.product_name}</p>
+                        <div className="flex gap-2 mt-0.5">
+                          {item.size && <span className="text-xs bg-gray-200 px-1.5 rounded">Size: {item.size}</span>}
+                          <span className="text-xs text-gray-500">Qty: {item.quantity}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm font-bold text-primary">₹{(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Payment Info</h4>
-                  <p className="text-sm text-gray-700"><span className="font-medium">Total:</span> ₹{selectedOrder.price}</p>
-                  <p className="text-sm text-gray-700"><span className="font-medium">Method:</span> {selectedOrder.payment_method}</p>
+              {/* Payment Info */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Payment Info</h4>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                  <p className="text-gray-500">Total</p>
+                  <p className="font-bold text-gray-900">₹{selectedOrder.total_price}</p>
+                  <p className="text-gray-500">Method</p>
+                  <p className="font-medium">{selectedOrder.payment_method === 'COD' ? 'Cash on Delivery' : 'UPI'}</p>
+                  <p className="text-gray-500">Payment Status</p>
+                  <span className={`font-semibold text-xs px-2 py-0.5 rounded-full w-fit ${
+                    selectedOrder.payment_status === 'Verified' ? 'bg-green-100 text-green-700' :
+                    selectedOrder.payment_status === 'Failed' ? 'bg-red-100 text-red-700' :
+                    'bg-orange-100 text-orange-700'
+                  }`}>
+                    {selectedOrder.payment_status === 'Pending' ? 'Pending Verification' : selectedOrder.payment_status}
+                  </span>
                   {selectedOrder.coupon_code && (
-                    <p className="text-sm text-green-600"><span className="font-medium text-gray-700">Coupon:</span> {selectedOrder.coupon_code} (-₹{selectedOrder.discount_amount})</p>
+                    <>
+                      <p className="text-gray-500">Coupon</p>
+                      <p className="text-green-600 font-semibold">{selectedOrder.coupon_code}</p>
+                    </>
                   )}
                   {selectedOrder.transaction_id && (
-                    <p className="text-sm text-gray-700"><span className="font-medium">Transaction ID:</span> {selectedOrder.transaction_id}</p>
+                    <>
+                      <p className="text-gray-500">Transaction ID</p>
+                      <p className="font-mono text-xs break-all">{selectedOrder.transaction_id}</p>
+                    </>
                   )}
                 </div>
               </div>
