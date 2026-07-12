@@ -68,6 +68,17 @@ const Home = () => {
 
   return (
     <div className="w-full">
+      {promoCoupons && promoCoupons.length > 0 && (
+        <div className="bg-purple-50 border-b border-primary/20 text-gray-800 overflow-hidden whitespace-nowrap py-2.5 text-sm sm:text-base font-bold tracking-wide">
+          <div className="animate-marquee inline-block">
+            {promoCoupons.map((c, i) => (
+              <span key={i} className="mx-8">
+                🎉 Limited Time Offer: Use code <span className="bg-primary text-white px-3 py-1 rounded-md font-extrabold mx-1 shadow-sm">{c.code}</span> for {c.discount_percentage}% OFF your order!
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Hero />
       
@@ -130,6 +141,12 @@ const Home = () => {
             </motion.div>
           ))}
         </div>
+        
+        <div className="mt-10 sm:mt-12 flex justify-center">
+          <Link to="/shop" className="bg-white text-primary border-2 border-primary px-8 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-colors">
+            View All Featured
+          </Link>
+        </div>
       </section>
 
       {/* Main Banner */}
@@ -180,6 +197,12 @@ const Home = () => {
               <ProductCard product={product} />
             </motion.div>
           ))}
+        </div>
+        
+        <div className="mt-10 sm:mt-12 flex justify-center">
+          <Link to="/shop" className="bg-white text-primary border-2 border-primary px-8 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-colors">
+            View All New Arrivals
+          </Link>
         </div>
       </section>
 

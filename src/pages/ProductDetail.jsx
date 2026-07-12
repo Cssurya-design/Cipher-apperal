@@ -355,7 +355,7 @@ const ProductDetail = () => {
         {product.related_products && product.related_products.length > 0 && (
           <div className="mt-8 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
-            <div className="grid grid-cols-1 min-[450px]:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {product.related_products.map(p => (
                 <ProductCard key={p.id} product={p} />
               ))}
