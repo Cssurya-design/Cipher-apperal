@@ -117,7 +117,7 @@ const Home = () => {
           Summer Collection New Modern Design
         </motion.p>
         
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-8">
           {featured.map((product, index) => (
             <motion.div
               key={product.id}
@@ -168,7 +168,7 @@ const Home = () => {
           Summer Collection New Modern Design
         </motion.p>
         
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-8">
           {newArrivals.map((product, index) => (
             <motion.div
               key={product.id + 'new'}
