@@ -24,7 +24,7 @@ const STATUS_ORDER = { placed: 0, processing: 1, shipped: 2, delivered: 3, cance
 const OrderTracking = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const toast = useToast();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,7 @@ const OrderTracking = () => {
 
   useEffect(() => {
     document.title = `Order #${id} | Cipher Apparel`;
+    if (authLoading) return;
     if (!user) { navigate('/auth'); return; }
     fetchOrder();
     
@@ -47,7 +48,7 @@ const OrderTracking = () => {
         }
       })
       .catch(err => console.error("Error fetching settings:", err));
-  }, [id, user]);
+  }, [id, user, authLoading, navigate]);
 
   const fetchOrder = async () => {
     setLoading(true);
@@ -94,9 +95,7 @@ const OrderTracking = () => {
     return img.startsWith('http') ? img : `${API_BASE}/static/store/images/products/${img}`;
   };
 
-  if (!user) return null;
-
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="pt-24 min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
