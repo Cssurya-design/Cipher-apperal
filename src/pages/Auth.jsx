@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 import Footer from '../components/Footer';
+import { useToast } from '../components/Toast';
 
 const Auth = () => {
   useEffect(() => {
@@ -14,7 +15,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [profilePic, setProfilePic] = useState(null);
-  const [error, setError] = useState('');
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const { login, signup, googleLogin, logout } = useAuth();
   const navigate = useNavigate();
@@ -23,19 +24,17 @@ const Auth = () => {
   useEffect(() => {
     if (isAdminLogin) {
       setIsLogin(true);
-      setError('');
     }
   }, [isAdminLogin]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
   };
 
   const verifyAdminAccess = (userData) => {
     if (isAdminLogin && !userData.is_staff) {
       logout();
-      setError("Unauthorized. Your account does not have Admin privileges.");
+      toast.error("Unauthorized. Your account does not have Admin privileges.");
       return false;
     }
     return true;
@@ -44,7 +43,6 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
       if (isLogin) {
         const res = await login(formData.email, formData.password);
@@ -61,13 +59,12 @@ const Auth = () => {
       }
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.detail || 'Something went wrong';
-      setError(msg);
+      toast.error(msg);
     }
     setLoading(false);
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    setError('');
     try {
       const res = await googleLogin(credentialResponse.credential);
       if (verifyAdminAccess(res.user)) {
@@ -75,7 +72,7 @@ const Auth = () => {
       }
     } catch (err) {
       const msg = err.response?.data?.error || err.message;
-      setError('Google Login Failed: ' + msg);
+      toast.error('Google Login Failed: ' + msg);
     }
   };
 
@@ -115,13 +112,13 @@ const Auth = () => {
           {!isAdminLogin && (
             <div className="flex mb-8 bg-gray-100 rounded-xl p-1">
               <button
-                onClick={() => { setIsLogin(true); setError(''); }}
+                onClick={() => setIsLogin(true)}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${isLogin ? 'bg-primary text-white shadow-sm' : 'text-gray-500'}`}
               >
                 Login
               </button>
               <button
-                onClick={() => { setIsLogin(false); setError(''); }}
+                onClick={() => setIsLogin(false)}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${!isLogin ? 'bg-primary text-white shadow-sm' : 'text-gray-500'}`}
               >
                 Sign Up
@@ -177,12 +174,6 @@ const Auth = () => {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
             
-            {error && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-50 text-red-500 text-sm p-3 rounded-lg border border-red-100 text-center font-medium">
-                {error}
-              </motion.div>
-            )}
-
             <button
               type="submit"
               disabled={loading}
@@ -204,7 +195,7 @@ const Auth = () => {
             <div className="mt-6 flex justify-center hover:scale-105 transition-transform">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
-                onError={() => setError('Google Login Failed')}
+                onError={() => toast.error('Google Login Failed')}
                 theme="outline"
                 size="large"
               />

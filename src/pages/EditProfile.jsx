@@ -7,6 +7,7 @@ import { MapPin, Navigation, Loader2, CheckCircle2, AlertCircle, ArrowLeft } fro
 import { Link } from 'react-router-dom';
 import api from '../api';
 import Footer from '../components/Footer';
+import { useToast } from '../components/Toast';
 
 const EditProfile = () => {
   const { user, updateUser } = useAuth();
@@ -21,6 +22,7 @@ const EditProfile = () => {
   const [status, setStatus] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const [locationMsg, setLocationMsg] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     document.title = "Edit Profile | Cipher Apparel";
@@ -55,11 +57,11 @@ const EditProfile = () => {
     const result = await autoDetectLocation();
     if (result.success) {
       setLocationData(result.location);
-      setLocationStatus('success');
-      setLocationMsg('Location detected! Click "Save Profile" to apply.');
+      setLocationStatus('');
+      toast.success('Location detected! Click "Save Profile" to apply.');
     } else {
-      setLocationStatus('error');
-      setLocationMsg(result.error);
+      setLocationStatus('');
+      toast.error(result.error);
     }
   };
 
@@ -82,15 +84,13 @@ const EditProfile = () => {
           state: addr.state || prev.state,
           country: addr.country || prev.country || 'India',
         }));
-        setLocationStatus('success');
-        setLocationMsg(`Found: ${addr.city || addr.town || addr.village || ''}, ${addr.state || ''}`);
+        setLocationStatus('');
+        toast.success(`Found: ${addr.city || addr.town || addr.village || ''}, ${addr.state || ''}`);
       } else {
         setLocationStatus('');
-        setLocationMsg('');
       }
     } catch {
       setLocationStatus('');
-      setLocationMsg('');
     }
   };
 
@@ -119,18 +119,17 @@ const EditProfile = () => {
       const result = await saveLocation(locationData);
       
       if (result.success && profileRes.data.status === 'success') {
-        setStatus('success');
+        setStatus('');
+        toast.success('Profile saved successfully! Redirecting...');
         setTimeout(() => navigate('/dashboard'), 1200);
       } else {
-        setStatus('error');
-        if (profileRes.data.error) {
-          setLocationMsg(profileRes.data.error);
-        }
+        setStatus('');
+        toast.error(profileRes.data.error || "Failed to save profile");
       }
     } catch (err) {
       console.error("Profile save error:", err.response?.data || err.message);
-      setStatus('error');
-      setLocationMsg(err.response?.data?.error || err.message || "Failed to save");
+      setStatus('');
+      toast.error(err.response?.data?.error || err.message || "Failed to save");
     }
   };
 
@@ -211,21 +210,13 @@ const EditProfile = () => {
               </div>
 
               {/* Location status */}
-              {locationStatus && (
+              {locationStatus === 'detecting' && (
                 <motion.div
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`mb-4 p-3 rounded-xl text-sm flex items-center gap-2 ${
-                    locationStatus === 'success'
-                      ? 'bg-green-50 text-green-700 border border-green-200'
-                      : locationStatus === 'error'
-                      ? 'bg-red-50 text-red-700 border border-red-200'
-                      : 'bg-blue-50 text-blue-700 border border-blue-200'
-                  }`}
+                  className="mb-4 p-3 rounded-xl text-sm flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200"
                 >
-                  {locationStatus === 'success' && <CheckCircle2 size={16} />}
-                  {locationStatus === 'error' && <AlertCircle size={16} />}
-                  {locationStatus === 'detecting' && <Loader2 size={16} className="animate-spin" />}
+                  <Loader2 size={16} className="animate-spin" />
                   {locationMsg}
                 </motion.div>
               )}
@@ -269,17 +260,6 @@ const EditProfile = () => {
             >
               {status === 'saving' ? 'Saving...' : 'Save Profile'}
             </button>
-
-            {status === 'success' && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-500 text-center font-medium mt-2 flex items-center justify-center gap-2">
-                <CheckCircle2 size={18} /> Saved successfully! Redirecting...
-              </motion.p>
-            )}
-            {status === 'error' && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-center font-medium mt-2 flex items-center justify-center gap-2">
-                <AlertCircle size={18} /> Failed to save. Please try again.
-              </motion.p>
-            )}
           </form>
         </motion.div>
       </div>

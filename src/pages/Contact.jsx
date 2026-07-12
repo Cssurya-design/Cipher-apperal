@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api, { API_BASE } from '../api';
 import Footer from '../components/Footer';
+import { useToast } from '../components/Toast';
 
 const Contact = () => {
   useEffect(() => {
@@ -14,7 +15,8 @@ const Contact = () => {
     subject: '',
     message: ''
   });
-  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,16 +24,16 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus('sending');
+    setLoading(true);
     try {
       await api.post('/contact/', formData);
-      setStatus('success');
+      toast.success('Message sent successfully!');
       setFormData({ full_name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setStatus(''), 5000);
     } catch (error) {
       console.error(error);
-      setStatus('error');
-      setTimeout(() => setStatus(''), 5000);
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,18 +50,6 @@ const Contact = () => {
       </motion.div>
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
-        
-        {status === 'success' && (
-          <div className="bg-[#d4edda] text-[#155724] p-4 mb-8 rounded text-center font-semibold">
-            Message sent successfully!
-          </div>
-        )}
-        
-        {status === 'error' && (
-          <div className="bg-[#f8d7da] text-[#721c24] p-4 mb-8 rounded text-center font-semibold">
-            Failed to send message. Please try again.
-          </div>
-        )}
 
         <div className="flex flex-col lg:flex-row justify-between gap-12 mb-16">
           <div className="w-full lg:w-1/2">
@@ -105,7 +95,9 @@ const Contact = () => {
               <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Your E-mail" required className="p-3 border border-gray-300 rounded focus:outline-none focus:border-primary" />
               <input type="text" name="subject" value={formData.subject} onChange={handleChange} placeholder="Subject" required className="p-3 border border-gray-300 rounded focus:outline-none focus:border-primary" />
               <textarea name="message" value={formData.message} onChange={handleChange} cols="30" rows="6" placeholder="Your Message" required className="p-3 border border-gray-300 rounded focus:outline-none focus:border-primary"></textarea>
-              <button type="submit" className="w-max bg-primary text-white font-semibold py-3 px-6 rounded hover:bg-opacity-90 transition-all">Submit</button>
+              <button type="submit" disabled={loading} className="w-max bg-primary text-white font-semibold py-3 px-6 rounded hover:bg-opacity-90 transition-all disabled:opacity-70">
+                {loading ? 'Sending...' : 'Submit'}
+              </button>
             </form>
           </div>
           <div className="w-full lg:w-1/3 flex flex-col gap-8">

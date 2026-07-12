@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Navigation, Loader2, CheckCircle2, AlertCircle, Search } from 'lucide-react';
 import { useLocation } from '../context/LocationContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from './Toast';
 
 const LocationModal = () => {
   const { user } = useAuth();
@@ -25,9 +26,10 @@ const LocationModal = () => {
     country: 'India',
   });
   const [pincode, setPincode] = useState('');
-  const [status, setStatus] = useState(''); // '', 'detecting', 'success', 'error'
+  const [status, setStatus] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
   const [view, setView] = useState('quick'); // 'quick' or 'full'
+  const toast = useToast();
 
   // Pre-fill form if location exists
   useEffect(() => {
@@ -56,23 +58,21 @@ const LocationModal = () => {
     if (result.success) {
       setFormData(result.location);
       setPincode(result.location.postal_code || '');
-      setStatus('success');
-      setStatusMsg('Location detected successfully!');
+      setStatus('');
+      toast.success('Location detected successfully!');
       // Auto-save after detecting
       setTimeout(async () => {
         await saveLocation(result.location);
-        setStatus('');
       }, 1000);
     } else {
-      setStatus('error');
-      setStatusMsg(result.error);
+      setStatus('');
+      toast.error(result.error);
     }
   };
 
   const handlePincodeSearch = async () => {
     if (!pincode || pincode.length < 4) {
-      setStatus('error');
-      setStatusMsg('Please enter a valid postal code');
+      toast.error('Please enter a valid postal code');
       return;
     }
     setStatus('detecting');
@@ -94,39 +94,37 @@ const LocationModal = () => {
           country: addr.country || 'India',
         };
         setFormData(detected);
-        setStatus('success');
-        setStatusMsg(`Found: ${detected.city}, ${detected.state}`);
+        setStatus('');
+        toast.success(`Found: ${detected.city}, ${detected.state}`);
       } else {
-        setStatus('error');
-        setStatusMsg('Could not find location for this postal code. Please enter details manually.');
+        setStatus('');
+        toast.error('Could not find location for this postal code. Please enter details manually.');
         setView('full');
       }
     } catch (err) {
-      setStatus('error');
-      setStatusMsg('Lookup failed. Please enter manually.');
+      setStatus('');
+      toast.error('Lookup failed. Please enter manually.');
       setView('full');
     }
   };
 
   const handleSave = async () => {
     if (!formData.city && !formData.postal_code) {
-      setStatus('error');
-      setStatusMsg('Please enter at least a city or postal code');
+      toast.error('Please enter at least a city or postal code');
       return;
     }
     setStatus('detecting');
     setStatusMsg('Saving...');
     const result = await saveLocation(formData);
     if (result.success) {
-      setStatus('success');
-      setStatusMsg('Location saved!');
+      setStatus('');
+      toast.success('Location saved!');
       setTimeout(() => {
         setShowLocationModal(false);
-        setStatus('');
       }, 800);
     } else {
-      setStatus('error');
-      setStatusMsg('Failed to save location');
+      setStatus('');
+      toast.error('Failed to save location');
     }
   };
 
@@ -290,21 +288,13 @@ const LocationModal = () => {
             )}
 
             {/* Status message */}
-            {status && (
+            {status === 'detecting' && (
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`mt-3 p-3 rounded-xl text-sm flex items-center gap-2 ${
-                  status === 'success'
-                    ? 'bg-green-50 text-green-700 border border-green-200'
-                    : status === 'error'
-                    ? 'bg-red-50 text-red-700 border border-red-200'
-                    : 'bg-blue-50 text-blue-700 border border-blue-200'
-                }`}
+                className="mt-3 p-3 rounded-xl text-sm flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200"
               >
-                {status === 'success' && <CheckCircle2 size={16} />}
-                {status === 'error' && <AlertCircle size={16} />}
-                {status === 'detecting' && <Loader2 size={16} className="animate-spin" />}
+                <Loader2 size={16} className="animate-spin" />
                 {statusMsg}
               </motion.div>
             )}

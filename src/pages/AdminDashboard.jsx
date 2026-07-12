@@ -40,8 +40,6 @@ const AdminDashboard = () => {
   const [staffLoading, setStaffLoading] = useState(true);
   const [newStaffEmail, setNewStaffEmail] = useState('');
   const [newStaffRole, setNewStaffRole] = useState('staff');
-  const [staffError, setStaffError] = useState('');
-  const [staffSuccess, setStaffSuccess] = useState('');
 
   // Banners State
   const [banners, setBanners] = useState([]);
@@ -299,8 +297,6 @@ const AdminDashboard = () => {
 
   const handleAddStaff = async (e) => {
     e.preventDefault();
-    setStaffError('');
-    setStaffSuccess('');
     if (!newStaffEmail) return;
 
     try {
@@ -308,12 +304,12 @@ const AdminDashboard = () => {
         email: newStaffEmail,
         role: newStaffRole 
       });
-      setStaffSuccess(res.data.message);
+      toast.success(res.data.message);
       setNewStaffEmail('');
       setNewStaffRole('staff');
       fetchStaff();
     } catch (err) {
-      setStaffError(err.response?.data?.error || "Failed to add staff");
+      toast.error(err.response?.data?.error || "Failed to add staff");
     }
   };
 
@@ -323,14 +319,12 @@ const AdminDashboard = () => {
       title: 'Revoke Access',
       message: `Are you sure you want to revoke admin access for ${email}?`,
       onConfirm: async () => {
-        setStaffError('');
-        setStaffSuccess('');
         try {
           const res = await api.post('/admin/staff/remove/', { email });
-          setStaffSuccess(res.data.message);
+          toast.success(res.data.message);
           fetchStaff();
         } catch (err) {
-          setStaffError(err.response?.data?.error || "Failed to remove staff");
+          toast.error(err.response?.data?.error || "Failed to remove staff");
         }
       }
     });
@@ -733,9 +727,6 @@ const AdminDashboard = () => {
                     Grant Access
                   </button>
                 </form>
-                
-                {staffError && <p className="text-red-500 text-sm font-medium mt-3 bg-red-50 p-2 rounded-lg">{staffError}</p>}
-                {staffSuccess && <p className="text-green-600 text-sm font-medium mt-3 bg-green-50 p-2 rounded-lg">{staffSuccess}</p>}
               </div>
             )}
 
