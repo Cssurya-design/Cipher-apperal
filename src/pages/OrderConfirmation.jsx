@@ -7,7 +7,7 @@ import api from '../api';
 
 const OrderConfirmation = () => {
   const { state } = useLocation();
-  const firstOrderId = state?.firstOrderId || null;
+  const groupId = state?.group_id || null;
   const orderIds = state?.orderIds || [];
   const [deliveryDays, setDeliveryDays] = useState(5);
 
@@ -52,7 +52,7 @@ const OrderConfirmation = () => {
         </motion.h1>
 
         {/* Order number */}
-        {firstOrderId && (
+        {groupId && (
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -87,7 +87,7 @@ const OrderConfirmation = () => {
           <p className="text-sm text-gray-500 mt-2">You can track your order status in real-time</p>
 
           {/* Live tracker hint */}
-          {firstOrderId && (
+          {groupId && (
             <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center gap-2 text-sm text-gray-500">
               <Truck size={16} className="text-primary" />
               <span>Tracking updates will appear as your order progresses</span>
@@ -102,9 +102,9 @@ const OrderConfirmation = () => {
           transition={{ delay: 0.7 }}
           className="flex flex-col sm:flex-row gap-3 justify-center"
         >
-          {firstOrderId && (
+          {groupId && (
             <Link
-              to={`/orders/${firstOrderId}`}
+              to={`/orders/${groupId}`}
               className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
             >
               Track Your Order <ArrowRight size={18} />
@@ -113,12 +113,12 @@ const OrderConfirmation = () => {
           <Link
             to="/dashboard"
             className={`px-6 py-3 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 ${
-              firstOrderId
+              groupId
                 ? 'bg-white text-gray-700 hover:bg-gray-50'
                 : 'bg-primary text-white hover:bg-primary-dark'
             }`}
           >
-            View My Orders {!firstOrderId && <ArrowRight size={18} />}
+            View My Orders {!groupId && <ArrowRight size={18} />}
           </Link>
           <Link
             to="/shop"

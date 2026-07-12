@@ -80,13 +80,13 @@ const Cart = () => {
         coupon_code: appliedCoupon ? appliedCoupon.code : ''
       });
       const createdOrderIds = res.data.orders?.map(o => o.id) || [];
-      const firstOrderId = createdOrderIds[0] || null;
+      const groupId = res.data.group_id;
       setOrderPlaced(true);
       clearCart();
       setTimeout(() => {
         setShowCheckout(false);
         setOrderPlaced(false);
-        navigate('/order-confirmation', { state: { orderIds: createdOrderIds, firstOrderId } });
+        navigate('/order-confirmation', { state: { orderIds: createdOrderIds, group_id: groupId } });
       }, 2000);
     } catch (err) {
       console.error(err);
