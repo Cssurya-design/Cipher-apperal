@@ -19,6 +19,16 @@ const ProductCard = ({ product }) => {
   const avgRating = product.avg_rating || 0;
   const totalReviews = product.total_reviews || 0;
 
+  // Use product_category_name if available, fall back to category
+  const categoryLabel = product.product_category_name || product.category || '';
+
+  // Calculate discount percentage if both prices present
+  const originalPrice = parseFloat(product.price) || 0;
+  const discountedPrice = product.discount_price ? parseFloat(product.discount_price) : null;
+  const discountPercent = discountedPrice
+    ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
+    : 0;
+
   const handleWishlist = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -41,66 +51,98 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <motion.div 
-      whileHover={{ y: -6, boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.12)" }}
-      className="bg-white rounded-2xl p-3 sm:p-4 border border-gray-100 shadow-sm transition-all relative group"
+    <motion.div
+      whileHover={{ y: -4, boxShadow: '0 16px 32px -8px rgba(0, 0, 0, 0.12)' }}
+      className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm transition-all relative group overflow-hidden"
     >
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative overflow-hidden rounded-xl mb-3">
-          <img 
-            src={imageUrl} 
-            alt={product.name} 
-            className="w-full aspect-[4/5] sm:h-64 object-cover object-top group-hover:scale-105 transition-transform duration-300"
+        {/* Product Image */}
+        <div className="relative overflow-hidden">
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="w-full aspect-square sm:aspect-[3/4] object-cover object-top group-hover:scale-105 transition-transform duration-500"
             onError={(e) => { e.target.src = '/hero-new.jpg'; }}
           />
+          {/* Discount Badge */}
+          {discountPercent > 0 && (
+            <span className="absolute top-2 left-2 bg-green-500 text-white text-[9px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-full shadow">
+              -{discountPercent}%
+            </span>
+          )}
           {/* Quick view overlay */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors hidden sm:flex items-center justify-center">
             <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-800 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
               <Eye size={14} /> Quick View
             </span>
           </div>
         </div>
-        <span className="text-gray-400 text-[10px] sm:text-xs tracking-wider uppercase">{product.category}</span>
-        <h5 className="text-gray-800 font-semibold text-sm sm:text-base mt-1 mb-2 group-hover:text-primary transition-colors line-clamp-1">{product.name}</h5>
-      </Link>
-      
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col mr-2">
-          <h4 className="text-primary font-bold text-base sm:text-lg truncate">
-            ₹{product.discount_price || product.price}
-          </h4>
-          {product.discount_price && (
-            <span className="text-xs text-gray-400 line-through">₹{product.price}</span>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="flex text-yellow-400">
-            {[1, 2, 3, 4, 5].map(star => (
-              <Star key={star} size={12} fill={star <= Math.round(avgRating) ? "currentColor" : "none"} strokeWidth={1.5} />
-            ))}
-          </div>
-          {totalReviews > 0 && (
-            <span className="text-[10px] text-gray-400">({totalReviews})</span>
-          )}
-        </div>
-      </div>
 
-      <button 
+        {/* Product Info */}
+        <div className="p-2.5 sm:p-4">
+          {/* Category */}
+          {categoryLabel && (
+            <span className="text-gray-400 text-[9px] sm:text-xs tracking-widest uppercase font-medium">
+              {categoryLabel}
+            </span>
+          )}
+
+          {/* Name */}
+          <h5 className="text-gray-900 font-bold text-xs sm:text-base mt-0.5 mb-1 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+            {product.name}
+          </h5>
+
+          {/* Description snippet — hide on mobile for space */}
+          {product.description && (
+            <p className="hidden sm:block text-gray-500 text-xs sm:text-sm leading-relaxed line-clamp-2 mb-3">
+              {product.description}
+            </p>
+          )}
+
+          {/* Rating */}
+          <div className="flex items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
+            <div className="flex text-yellow-400">
+              {[1, 2, 3, 4, 5].map(star => (
+                <Star key={star} size={10} fill={star <= Math.round(avgRating) ? 'currentColor' : 'none'} strokeWidth={1.5} className="sm:w-3.5 sm:h-3.5" />
+              ))}
+            </div>
+            {totalReviews > 0 && (
+              <span className="text-[9px] sm:text-[11px] text-gray-400 ml-0.5">({totalReviews})</span>
+            )}
+          </div>
+
+          {/* Price row */}
+          <div className="flex items-center justify-between gap-1">
+            <div className="min-w-0">
+              <span className="text-primary font-bold text-sm sm:text-lg block leading-tight">
+                ₹{discountedPrice !== null ? discountedPrice.toFixed(2) : originalPrice.toFixed(2)}
+              </span>
+              {discountedPrice !== null && (
+                <span className="text-[9px] sm:text-xs text-gray-400 line-through">₹{originalPrice.toFixed(2)}</span>
+              )}
+            </div>
+            {/* Add to Cart button */}
+            <button
+              onClick={(e) => { e.preventDefault(); addToCart(product, 1, 'XL'); }}
+              className="w-7 h-7 sm:w-9 sm:h-9 bg-primary/10 text-primary rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors flex-shrink-0"
+              title="Add to cart"
+            >
+              <ShoppingCart size={13} className="sm:w-[17px] sm:h-[17px]" />
+            </button>
+          </div>
+        </div>
+      </Link>
+
+      {/* Wishlist button */}
+      <button
         onClick={handleWishlist}
-        className={`absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+        className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all shadow-sm ${
           isWishlisted
-            ? 'bg-pink-500 text-white opacity-100'
-            : 'bg-pink-50 text-pink-500 opacity-100 sm:opacity-0 group-hover:opacity-100 hover:bg-pink-500 hover:text-white'
+            ? 'bg-pink-500 text-white'
+            : 'bg-white/90 text-pink-500 hover:bg-pink-500 hover:text-white'
         }`}
       >
-        <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
-      </button>
-
-      <button 
-        onClick={(e) => { e.preventDefault(); addToCart(product, 1, 'XL'); }}
-        className="absolute bottom-14 sm:bottom-16 right-5 w-9 h-9 bg-green-50 text-secondary rounded-full flex items-center justify-center hover:bg-secondary hover:text-white transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100"
-      >
-        <ShoppingCart size={18} />
+        <Heart size={14} className="sm:w-[17px] sm:h-[17px]" fill={isWishlisted ? 'currentColor' : 'none'} />
       </button>
     </motion.div>
   );

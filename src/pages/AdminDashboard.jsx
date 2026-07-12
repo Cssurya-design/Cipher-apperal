@@ -246,7 +246,8 @@ const AdminDashboard = () => {
     setOrdersLoading(true);
     try {
       const res = await api.get('/admin/orders/');
-      setOrders(res.data.orders || []);
+      // API returns grouped_orders (grouped by group_id)
+      setOrders(res.data.grouped_orders || res.data.orders || []);
     } catch (err) {
       console.error(err);
       setOrders([]);

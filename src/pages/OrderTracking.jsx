@@ -124,9 +124,18 @@ const OrderTracking = () => {
   const isCancelled = order.status === 'cancelled';
   const currentIdx = STATUS_ORDER[order.status] ?? 0;
   
-  const estimatedDeliveryDate = new Date(order.created_at || order.date || new Date());
-  if (isNaN(estimatedDeliveryDate.getTime())) {
-    estimatedDeliveryDate.setTime(Date.now());
+  // Use ISO timestamp if available, otherwise parse from date+time strings
+  let estimatedDeliveryDate;
+  if (order.created_at_iso) {
+    estimatedDeliveryDate = new Date(order.created_at_iso);
+  } else if (order.date && order.time) {
+    // Normalise "Jul 12, 2026" + "12:48 PM" → parse month names safely
+    try {
+      estimatedDeliveryDate = new Date(`${order.date} ${order.time}`);
+    } catch (_) {}
+  }
+  if (!estimatedDeliveryDate || isNaN(estimatedDeliveryDate.getTime())) {
+    estimatedDeliveryDate = new Date(); // fallback: now
   }
   estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + deliveryDays);
   const deliveryStr = estimatedDeliveryDate.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -359,7 +368,10 @@ const OrderTracking = () => {
                     ? 'bg-red-100 text-red-700'
                     : 'bg-orange-100 text-orange-700'
                 }`}>
-                  {order.payment_status}
+                  {order.payment_status === 'Pending' ? 'Pending Verification'
+                    : order.payment_status === 'Verified' ? 'Verified ✓'
+                    : order.payment_status === 'Failed' ? 'Failed ✗'
+                    : order.payment_status}
                 </span>
               </div>
               {order.transaction_id && (
@@ -370,10 +382,36 @@ const OrderTracking = () => {
                   </span>
                 </div>
               )}
-              <div className="flex justify-between text-sm border-t pt-2 mt-1">
-                <span className="font-semibold text-gray-700">Total</span>
-                <span className="font-bold text-gray-900">₹{order.total_price}</span>
-              </div>
+              {/* Price breakdown: original vs discounted */}
+              {(() => {
+                const originalTotal = order.items?.reduce((sum, item) => {
+                  const itemPrice = parseFloat(item.price) || 0;
+                  const discAmt = parseFloat(item.discount_amount) || 0;
+                  return sum + (itemPrice * item.quantity) + discAmt;
+                }, 0);
+                const finalTotal = parseFloat(order.total_price) || 0;
+                const discountTotal = originalTotal - finalTotal;
+                return (
+                  <div className="border-t pt-2 mt-1 space-y-1">
+                    {discountTotal > 0.01 && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Original Price</span>
+                          <span className="text-gray-500 line-through">₹{originalTotal?.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-green-600 font-semibold">Discount</span>
+                          <span className="text-green-600 font-semibold">- ₹{discountTotal?.toFixed(2)}</span>
+                        </div>
+                      </>
+                    )}
+                    <div className="flex justify-between text-sm border-t pt-1 mt-1">
+                      <span className="font-bold text-gray-700">Grand Total</span>
+                      <span className="font-bold text-gray-900">₹{order.total_price}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </motion.div>
         </div>
