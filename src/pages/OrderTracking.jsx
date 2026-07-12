@@ -396,7 +396,7 @@ const OrderTracking = () => {
                       <>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500">Original Price</span>
-                          <span className="text-gray-500 line-through">₹{originalTotal?.toFixed(2)}</span>
+                          <span className="text-gray-500">₹{originalTotal?.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-green-600 font-semibold">Discount</span>
