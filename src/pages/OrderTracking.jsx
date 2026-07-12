@@ -391,7 +391,7 @@ const OrderTracking = () => {
                 const finalTotal = parseFloat(order.total_price) || 0;
                 const discountTotal = originalTotal - finalTotal;
                 return (
-                  <div className="border-t pt-2 mt-1 space-y-1">
+                  <div className={discountTotal > 0.01 ? "border-t pt-2 mt-1 space-y-1" : "pt-2 mt-1"}>
                     {discountTotal > 0.01 && (
                       <>
                         <div className="flex justify-between text-sm">
@@ -404,7 +404,7 @@ const OrderTracking = () => {
                         </div>
                       </>
                     )}
-                    <div className="flex justify-between text-sm border-t pt-1 mt-1">
+                    <div className={`flex justify-between text-sm ${discountTotal > 0.01 ? 'border-t pt-1 mt-1' : ''}`}>
                       <span className="font-bold text-gray-700">Grand Total</span>
                       <span className="font-bold text-gray-900">₹{order.total_price}</span>
                     </div>
