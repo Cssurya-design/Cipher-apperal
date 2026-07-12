@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://cipherapparel.pythonanywhere.com';
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : 'https://cipherapparel.pythonanywhere.com');
 
 export const getImageUrl = (image, type = 'banner') => {
   if (!image) return '';
