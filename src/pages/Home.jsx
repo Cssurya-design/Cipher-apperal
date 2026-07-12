@@ -54,14 +54,6 @@ const Home = () => {
       .then(res => {
         const coupons = res.data.coupons || [];
         setPromoCoupons(coupons);
-        
-        // Show promo as startup popup if it exists
-        if (coupons.length > 0 && !sessionStorage.getItem('startupPopupShown')) {
-          setTimeout(() => {
-            setSelectedOffer({ type: 'coupon', data: coupons[0] });
-            sessionStorage.setItem('startupPopupShown', 'true');
-          }, 1000);
-        }
       })
       .catch(err => console.error("Error fetching coupons", err));
   }, []);
@@ -69,18 +61,20 @@ const Home = () => {
   return (
     <div className="w-full">
       {promoCoupons && promoCoupons.length > 0 && (
-        <div className="bg-purple-50 border-b border-primary/20 text-gray-800 overflow-hidden whitespace-nowrap py-2.5 text-sm sm:text-base font-bold tracking-wide">
-          <div className="animate-marquee inline-block">
-            {promoCoupons.map((c, i) => (
-              <span key={i} className="mx-8">
-                🎉 Limited Time Offer: Use code <span className="bg-primary text-white px-3 py-1 rounded-md font-extrabold mx-1 shadow-sm">{c.code}</span> for {c.discount_percentage}% OFF your order!
-              </span>
-            ))}
+        <div className="pt-[52px] sm:pt-[56px] md:pt-[64px] bg-white w-full">
+          <div className="bg-purple-50 border-y border-primary/20 text-gray-800 overflow-hidden whitespace-nowrap py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-bold tracking-wide">
+            <div className="animate-marquee inline-block">
+              {promoCoupons.map((c, i) => (
+                <span key={i} className="mx-4 sm:mx-8">
+                  🎉 Limited Time Offer: Use code <span className="bg-primary text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded sm:rounded-md font-extrabold mx-1 shadow-sm">{c.code}</span> for {c.discount_percentage}% OFF!
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      <Hero />
+      <Hero hasCoupon={promoCoupons && promoCoupons.length > 0} />
       
       {/* Features Section */}
       <section className="py-10 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
@@ -258,32 +252,7 @@ const Home = () => {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col z-10"
             >
-              {selectedOffer.type === 'coupon' ? (
-                <div className="p-6 sm:p-8 text-center bg-gradient-to-br from-purple-600 to-indigo-700 text-white relative">
-                  <h3 className="text-2xl sm:text-3xl font-bold mb-2">Special Offer!</h3>
-                  <p className="text-purple-100 mb-6 text-sm sm:text-lg px-2">
-                    {selectedOffer.data.popup_text || `Use code below for ${selectedOffer.data.discount_percentage}% OFF your entire order!`}
-                  </p>
-                  <div className="bg-white/20 backdrop-blur border border-white/30 rounded-xl p-3 sm:p-4 inline-block mb-6 sm:mb-8 mx-auto max-w-[90%] overflow-x-auto">
-                    <span className="font-mono text-2xl sm:text-4xl font-bold tracking-widest break-all">{selectedOffer.data.code}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-2 sm:mt-4">
-                    <Link 
-                      to="/shop"
-                      onClick={() => setSelectedOffer(null)}
-                      className="flex-1 bg-white text-purple-700 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors shadow-lg text-sm sm:text-base"
-                    >
-                      Shop Now
-                    </Link>
-                    <button 
-                      onClick={() => setSelectedOffer(null)}
-                      className="flex-1 bg-white/20 text-white py-3 rounded-full font-bold hover:bg-white/30 transition-colors border border-white/30 text-sm sm:text-base"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              ) : (
+              {selectedOffer && (
                 <>
                   <div 
                     className="h-48 sm:h-64 bg-cover bg-center" 

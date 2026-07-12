@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const Hero = () => {
+const Hero = ({ hasCoupon = false }) => {
   const heroRef = useRef(null);
   const imgRef = useRef(null);
   const textRef = useRef(null);
@@ -59,7 +59,7 @@ const Hero = () => {
   return (
     <section 
       ref={heroRef} 
-      className="relative w-full min-h-[70vh] sm:min-h-[85vh] md:min-h-[90vh] flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-24 pt-28 pb-12 bg-white overflow-hidden"
+      className={`relative w-full min-h-[60vh] sm:min-h-[65vh] md:min-h-[70vh] flex flex-col md:flex-row items-center justify-between px-6 sm:px-12 md:px-24 ${hasCoupon ? 'pt-8 sm:pt-12' : 'pt-28'} pb-12 bg-white overflow-hidden`}
     >
       <motion.div 
         ref={textRef}
