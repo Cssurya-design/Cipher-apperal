@@ -525,7 +525,7 @@ const ProductDetail = () => {
                           ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                           : addedToCart
                             ? 'bg-green-500 text-white'
-                            : 'bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 border border-[#FCD200] shadow-sm'
+                            : 'bg-primary hover:bg-primary-dark text-white shadow-sm'
                       }`}
                     >
                       {outOfStock ? 'Out of Stock' : addedToCart ? '✓ Added to Cart' : 'Add to Cart'}
@@ -536,7 +536,7 @@ const ProductDetail = () => {
                       className={`w-full py-2.5 font-bold rounded-full flex items-center justify-center transition-all text-sm border shadow-sm ${
                         outOfStock
                           ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                          : 'bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 border-[#FF8F00]'
+                          : 'bg-primary-dark hover:bg-[#3b00b3] text-white border-primary-dark'
                       }`}
                     >
                       Buy Now

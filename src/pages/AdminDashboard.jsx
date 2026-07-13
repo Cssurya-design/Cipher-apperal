@@ -103,6 +103,9 @@ const AdminDashboard = () => {
     if (activeTab === 'users') {
       fetchUsers();
     }
+    if (activeTab === 'stock') {
+      fetchProducts();
+    }
   }, [activeTab, user]);
 
   const fetchUsers = async () => {
@@ -1498,11 +1501,12 @@ const AdminDashboard = () => {
                       <th className="p-4 font-semibold text-gray-600 text-sm">Product Name</th>
                       <th className="p-4 font-semibold text-gray-600 text-sm">Global Stock</th>
                       <th className="p-4 font-semibold text-gray-600 text-sm">Size Breakdown</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {products.length === 0 ? (
-                      <tr><td colSpan="3" className="p-8 text-center text-gray-500">No products found.</td></tr>
+                      <tr><td colSpan="4" className="p-8 text-center text-gray-500">No products found.</td></tr>
                     ) : (
                       products.map(product => (
                         <tr key={product.id} className="hover:bg-gray-50/50">
@@ -1527,6 +1531,17 @@ const AdminDashboard = () => {
                             ) : (
                               <span className="text-gray-400 text-xs italic">No variants</span>
                             )}
+                          </td>
+                          <td className="p-4 text-right">
+                            <button
+                              onClick={() => {
+                                setEditingProduct(product);
+                                setActiveTab('products');
+                              }}
+                              className="text-primary hover:text-primary-dark font-medium text-sm border border-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              Edit Stock
+                            </button>
                           </td>
                         </tr>
                       ))
