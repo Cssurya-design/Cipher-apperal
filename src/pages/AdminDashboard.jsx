@@ -1174,32 +1174,6 @@ const AdminDashboard = () => {
                     <textarea value={editingProduct.description || ''} onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full p-2 border border-gray-200 rounded h-24" />
                   </div>
                   
-                  <div className="border-t border-gray-200 pt-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Primary Product Image</label>
-                    <input type="file" accept="image/*" onChange={e => setEditingProduct({...editingProduct, imageFile: e.target.files[0]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
-                    {editingProduct.image && !editingProduct.imageFile && (
-                      <img src={getImageUrl(editingProduct.image, 'products')} alt="Preview" className="mt-2 h-20 rounded shadow" />
-                    )}
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Additional Gallery Images</label>
-                    <input type="file" accept="image/*" multiple onChange={e => setEditingProduct({...editingProduct, imageFiles: [...(editingProduct.imageFiles || []), ...Array.from(e.target.files)]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {editingProduct.images?.filter(img => !(editingProduct.delete_image_ids || []).includes(img.id)).map(img => (
-                        <div key={img.id} className="relative group">
-                          <img src={getImageUrl(img.url, 'products')} alt="Gallery" className="h-16 w-16 object-cover rounded shadow" />
-                          <button type="button" onClick={() => setEditingProduct({...editingProduct, delete_image_ids: [...(editingProduct.delete_image_ids || []), img.id]})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12}/></button>
-                        </div>
-                      ))}
-                      {editingProduct.imageFiles?.map((file, idx) => (
-                        <div key={idx} className="relative group">
-                          <img src={URL.createObjectURL(file)} alt="New Gallery" className="h-16 w-16 object-cover rounded shadow border-2 border-green-500" />
-                          <button type="button" onClick={() => setEditingProduct({...editingProduct, imageFiles: editingProduct.imageFiles.filter((_, i) => i !== idx)})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12}/></button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
 
                   <div className="border-t border-gray-200 pt-4">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Sizes & Stock</label>
