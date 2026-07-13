@@ -286,6 +286,11 @@ const OrderTracking = () => {
                       Size: {item.size}
                     </span>
                   )}
+                  {item.color && (
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg font-semibold">
+                      Color: {item.color}
+                    </span>
+                  )}
                   <span className="text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
                     Qty: {item.quantity}
                   </span>

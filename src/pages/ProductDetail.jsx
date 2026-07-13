@@ -24,6 +24,8 @@ const ProductDetail = () => {
   const [deliveryDays, setDeliveryDays] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedColor, setSelectedColor] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -38,8 +40,19 @@ const ProductDetail = () => {
     api.get(`/products/${id}/`)
       .then(res => {
         setProduct(res.data);
+        setSelectedImage(res.data.image);
         setIsWishlisted(res.data.is_wishlisted || false);
         setLoading(false);
+        
+        if (res.data.sizes && res.data.sizes.length > 0) {
+          const availableSize = res.data.sizes.find(s => s.stock > 0);
+          if (availableSize) setSelectedSize(availableSize.size);
+          else setSelectedSize(res.data.sizes[0].size);
+        }
+        
+        if (res.data.colors && res.data.colors.length > 0) {
+          setSelectedColor(res.data.colors[0].color);
+        }
         
         // Add to recently viewed
         try {
@@ -118,13 +131,13 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedSize);
+    addToCart(product, quantity, selectedSize, selectedColor);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity, selectedSize);
+    addToCart(product, quantity, selectedSize, selectedColor);
     navigate('/cart');
   };
 
@@ -173,34 +186,43 @@ const ProductDetail = () => {
           &larr; Back to Shop
         </Link>
         
-        <div className="bg-white rounded-3xl p-4 sm:p-8 md:p-12 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-start">
-          {/* Product Image */}
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+        <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-start">
+          {/* Product Image Gallery (Left Column) */}
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="md:col-span-5 lg:col-span-5 flex flex-col gap-4">
             <img
-              src={getImageUrl(product.image, 'products')}
+              src={getImageUrl(selectedImage || product.image, 'products')}
               alt={product.name}
               className="w-full rounded-2xl object-cover max-h-[500px]"
               onError={(e) => { e.target.src = '/hero-new.jpg'; }}
             />
+            {product.images && product.images.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                <button
+                  onClick={() => setSelectedImage(product.image)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 ${selectedImage === product.image ? 'border-primary' : 'border-transparent'}`}
+                >
+                  <img src={getImageUrl(product.image, 'products')} className="w-full h-full object-cover" alt="Primary" />
+                </button>
+                {product.images.map(img => (
+                  <button
+                    key={img.id}
+                    onClick={() => setSelectedImage(img.url)}
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 ${selectedImage === img.url ? 'border-primary' : 'border-transparent'}`}
+                  >
+                    <img src={getImageUrl(img.url, 'products')} className="w-full h-full object-cover" alt="Gallery" />
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
           
-          {/* Product Info */}
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col">
+          {/* Product Info (Center Column) */}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="md:col-span-4 lg:col-span-4 flex flex-col">
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">{product.category}</span>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-3">{product.name}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2 mb-3">{product.name}</h1>
               </div>
-              <button 
-                onClick={handleWishlist}
-                className={`p-3 rounded-full flex items-center justify-center transition-all border shadow-sm ${
-                  isWishlisted
-                    ? 'bg-pink-50 border-pink-100 text-pink-500'
-                    : 'bg-white border-gray-100 text-gray-400 hover:text-pink-500 hover:bg-pink-50'
-                }`}
-              >
-                <Heart size={24} fill={isWishlisted ? "currentColor" : "none"} />
-              </button>
             </div>
             
             {/* Rating */}
@@ -215,42 +237,31 @@ const ProductDetail = () => {
               </span>
             </div>
 
+            <hr className="my-4 border-gray-100" />
+
             {/* Price */}
             <div className="flex items-center gap-3 mb-4">
-              <p className="text-3xl font-bold text-primary">₹{product.discount_price || product.price}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                <span className="text-sm text-gray-500 align-top mr-1">₹</span>
+                {product.discount_price || product.price}
+              </p>
               {product.discount_price && (
-                <p className="text-xl text-gray-400 line-through">₹{product.price}</p>
+                <p className="text-lg text-gray-400 line-through">₹{product.price}</p>
               )}
             </div>
 
-            {/* Scarcity Indicator */}
-            <div className="mb-4 flex items-center gap-2 text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium w-fit">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
-              </span>
-              Fast selling! Only a few left in stock.
-            </div>
-
-            {/* Delivery location */}
-            <div className="mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <button
-                onClick={() => setShowLocationModal(true)}
-                className="flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition-colors mb-2"
-              >
-                <MapPin size={14} />
-                {displayLocation ? `Deliver to ${displayLocation}` : 'Select delivery location'}
-              </button>
-              <div className="flex items-center gap-2 text-sm text-gray-800">
-                <span className="font-semibold text-gray-600">Estimated Delivery:</span>
-                <span className="font-bold text-gray-900">{(() => {
-                  const est = new Date();
-                  est.setDate(est.getDate() + deliveryDays);
-                  return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
-                })()}</span>
+            {/* Bullet Features (Amazon Style) */}
+            {product.features && product.features.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-bold text-gray-900 mb-2">About this item</h3>
+                <ul className="list-disc pl-5 text-gray-700 space-y-1 text-sm">
+                  {product.features.map((feature, idx) => (
+                    <li key={idx}>{feature}</li>
+                  ))}
+                </ul>
               </div>
-            </div>
-            
+            )}
+
             {/* Accordions */}
             <div className="mb-6 space-y-2 border-t border-b py-4 border-gray-100">
               <div className="border-b border-gray-100 pb-2">
@@ -328,80 +339,185 @@ const ProductDetail = () => {
                 </AnimatePresence>
               </div>
             </div>
+          </motion.div>
 
-            {/* Size Selector */}
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Size</h3>
-              <div className="flex flex-wrap gap-2">
-                {SIZES.map(size => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-xl font-semibold text-sm border-2 transition-all ${
-                      selectedSize === size
-                        ? 'border-primary bg-primary text-white shadow-md'
-                        : 'border-gray-200 bg-white text-gray-700 hover:border-primary/50'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+          {/* Buy Box (Right Column) */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-3 lg:col-span-3 border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm sticky top-28 flex flex-col bg-white">
+            <p className="text-2xl font-bold text-gray-900 mb-4">
+              <span className="text-sm text-gray-500 align-top mr-1">₹</span>
+              {product.discount_price || product.price}
+            </p>
+
+            {/* Delivery location */}
+            <div className="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs">
+              <button
+                onClick={() => setShowLocationModal(true)}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors mb-1"
+              >
+                <MapPin size={12} />
+                {displayLocation ? `Deliver to ${displayLocation}` : 'Select delivery location'}
+              </button>
+              <div className="text-gray-800">
+                Delivery: <span className="font-bold text-gray-900">{(() => {
+                  const est = new Date();
+                  est.setDate(est.getDate() + deliveryDays);
+                  return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+                })()}</span>
               </div>
             </div>
 
-            {/* Quantity Selector */}
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-2 text-sm">Quantity</h3>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-gray-600"
-                  >
-                    -
-                  </button>
-                  <span className="w-12 text-center font-semibold">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-gray-600"
-                  >
-                    +
-                  </button>
+            {/* Scarcity Indicator */}
+            <div className="mb-4 flex items-center gap-2 text-orange-600 text-sm font-bold">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+              </span>
+              In Stock
+            </div>
+
+            {/* Size Selector */}
+            {product.sizes && product.sizes.length > 0 ? (
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-1">
+                  <h3 className="font-bold text-gray-900 text-sm">Size: {selectedSize}</h3>
                 </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setSelectedSize(s.size)}
+                      disabled={s.stock <= 0}
+                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
+                        selectedSize === s.size
+                          ? 'border-primary bg-primary text-white'
+                          : s.stock <= 0
+                            ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {s.size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="mb-4">
+                <h3 className="font-bold text-gray-900 mb-1 text-sm">Size: {selectedSize}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {SIZES.map(size => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
+                        selectedSize === size
+                          ? 'border-primary bg-primary text-white'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Color Selector */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-bold text-gray-900 mb-1 text-sm">Color: {selectedColor}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedColor(c.color)}
+                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
+                        selectedColor === c.color
+                          ? 'border-primary bg-primary text-white'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {c.color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity Selector */}
+            <div className="mb-5">
+              <h3 className="font-bold text-gray-900 mb-1 text-sm">Quantity:</h3>
+              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden w-24 bg-gray-50 shadow-sm">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="flex-1 h-8 flex items-center justify-center hover:bg-gray-200 text-gray-600 text-lg"
+                >
+                  -
+                </button>
+                <span className="flex-1 text-center font-bold text-sm bg-white h-8 flex items-center justify-center">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="flex-1 h-8 flex items-center justify-center hover:bg-gray-200 text-gray-600 text-lg"
+                >
+                  +
+                </button>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="flex flex-col gap-2 mb-4">
               <button
                 onClick={handleAddToCart}
-                className={`flex-1 px-6 py-3.5 font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
+                className={`w-full py-2.5 font-bold rounded-full flex items-center justify-center transition-all text-sm ${
                   addedToCart
                     ? 'bg-green-500 text-white'
-                    : 'bg-primary text-white hover:bg-primary-dark'
+                    : 'bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 border border-[#FCD200] shadow-sm'
                 }`}
               >
-                <ShoppingCart size={20} />
-                {addedToCart ? '✓ Added!' : 'Add to Cart'}
+                {addedToCart ? '✓ Added to Cart' : 'Add to Cart'}
               </button>
               <button
                 onClick={handleBuyNow}
-                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 font-bold rounded-full transition-all flex items-center justify-center border border-[#FF8F00] shadow-sm text-sm"
               >
-                <Zap size={20} /> Buy Now
+                Buy Now
               </button>
             </div>
 
-            {/* Share */}
+            <div className="flex flex-col gap-2 text-xs text-gray-500 font-medium pt-2 border-t border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="w-16">Ships from</span>
+                <span className="text-gray-900">Cipher Apparel</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-16">Sold by</span>
+                <span className="text-gray-900">Cipher Apparel</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-16">Returns</span>
+                <span className="text-blue-600 hover:underline cursor-pointer">15-day refund/replacement</span>
+              </div>
+            </div>
+
+            <hr className="my-4 border-gray-100" />
+
+            <button 
+              onClick={handleWishlist}
+              className="flex justify-center w-full items-center gap-2 border border-gray-300 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
+            >
+              <Heart size={16} className={isWishlisted ? "text-pink-500 fill-pink-500" : "text-gray-600"} /> 
+              {isWishlisted ? "In Wishlist" : "Add to Wishlist"}
+            </button>
+            
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 text-gray-500 hover:text-primary transition-colors text-sm"
+              className="flex justify-center w-full mt-2 items-center gap-2 text-blue-600 hover:underline text-sm font-medium"
             >
-              <Share2 size={16} /> Share this product
+              <Share2 size={14} /> Share
             </button>
+          </motion.div>
+        </div>
 
-            <hr className="my-6 border-gray-100" />
-
+        <div className="bg-white rounded-3xl p-4 sm:p-8 md:p-12 shadow-sm border border-gray-100 mt-6 grid grid-cols-1 gap-8">
             {/* Rate this product */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Rate this product</h3>
@@ -441,7 +557,6 @@ const ProductDetail = () => {
               )}
               {!user && <p className="text-xs text-gray-400 mt-2">Login required to rate</p>}
             </div>
-          </motion.div>
         </div>
 
         {/* Customer Reviews Section */}

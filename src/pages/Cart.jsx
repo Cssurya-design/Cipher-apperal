@@ -83,6 +83,7 @@ const Cart = () => {
         price: item.discount_price || item.price,
         quantity: item.quantity,
         size: item.size || '',
+        color: item.color || '',
         image: item.image || '',
         description: item.description || '',
       }));
@@ -196,7 +197,7 @@ const Cart = () => {
             <AnimatePresence>
               {cart.map(item => (
                 <motion.div
-                  key={`${item.id}-${item.size}`}
+                  key={`${item.id}-${item.size}-${item.color}`}
                   layout
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -223,36 +224,44 @@ const Cart = () => {
                             )}
                           </div>
                         </div>
-                        <button onClick={() => removeFromCart(item.id, item.size)} className="text-red-400 hover:text-red-600 transition-colors flex-shrink-0 p-1">
+                        <button onClick={() => removeFromCart(item.id, item.size, item.color)} className="text-red-400 hover:text-red-600 transition-colors flex-shrink-0 p-1">
                           <Trash2 size={18} />
                         </button>
                       </div>
 
-                      {/* Size & Quantity Row */}
+                      {/* Size & Color & Quantity Row */}
                       <div className="flex flex-wrap items-center gap-3 mt-3">
                         {/* Size Selector */}
                         <div className="flex items-center gap-1">
                           <span className="text-xs text-gray-500">Size:</span>
                           <select
                             value={item.size || 'M'}
-                            onChange={(e) => updateSize(item.id, item.size, e.target.value)}
+                            onChange={(e) => updateSize(item.id, item.size, e.target.value, item.color)}
                             className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-primary bg-white"
                           >
-                            {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                            {/* We just show predefined sizes or the existing item's size in Cart for simplicity */}
+                            {Array.from(new Set([...SIZES, item.size])).filter(Boolean).map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                         </div>
+                        
+                        {item.color && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-500">Color:</span>
+                            <span className="text-xs font-semibold px-2 py-1 bg-gray-100 rounded-lg border border-gray-200">{item.color}</span>
+                          </div>
+                        )}
 
                         {/* Quantity */}
-                        <div className="flex items-center gap-1 bg-gray-100 rounded-full px-1.5 py-0.5">
+                        <div className="flex items-center gap-1 bg-gray-100 rounded-full px-1.5 py-0.5 ml-auto sm:ml-0">
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.size)}
+                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.size, item.color)}
                             className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200"
                           >
                             <Minus size={14} />
                           </button>
-                          <span className="w-7 text-center font-semibold text-sm">{item.quantity}</span>
+                          <span className="text-sm font-semibold w-6 text-center">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.size)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.size, item.color)}
                             className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200"
                           >
                             <Plus size={14} />

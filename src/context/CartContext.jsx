@@ -12,12 +12,12 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, quantity = 1, size = 'XL') => {
+  const addToCart = (product, quantity = 1, size = 'XL', color = '') => {
     setCart(prev => {
-      const existing = prev.find(item => item.id === product.id && item.size === size);
+      const existing = prev.find(item => item.id === product.id && item.size === size && item.color === color);
       if (existing) {
         return prev.map(item =>
-          (item.id === product.id && item.size === size)
+          (item.id === product.id && item.size === size && item.color === color)
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -26,48 +26,49 @@ export const CartProvider = ({ children }) => {
         ...product,
         quantity,
         size,
+        color,
         description: product.description || '',
       }];
     });
   };
 
-  const removeFromCart = (productId, size) => {
-    setCart(prev => prev.filter(item => !(item.id === productId && item.size === size)));
+  const removeFromCart = (productId, size, color = '') => {
+    setCart(prev => prev.filter(item => !(item.id === productId && item.size === size && (item.color || '') === color)));
   };
 
-  const updateQuantity = (productId, quantity, size) => {
+  const updateQuantity = (productId, quantity, size, color = '') => {
     if (quantity <= 0) {
-      removeFromCart(productId, size);
+      removeFromCart(productId, size, color);
       return;
     }
     setCart(prev =>
       prev.map(item =>
-        (item.id === productId && item.size === size)
+        (item.id === productId && item.size === size && (item.color || '') === color)
           ? { ...item, quantity }
           : item
       )
     );
   };
 
-  const updateSize = (productId, oldSize, newSize) => {
+  const updateSize = (productId, oldSize, newSize, color = '') => {
     setCart(prev => {
       // Check if an item with new size already exists
-      const existingNew = prev.find(item => item.id === productId && item.size === newSize);
+      const existingNew = prev.find(item => item.id === productId && item.size === newSize && (item.color || '') === color);
       if (existingNew) {
         // Merge quantities
-        const oldItem = prev.find(item => item.id === productId && item.size === oldSize);
+        const oldItem = prev.find(item => item.id === productId && item.size === oldSize && (item.color || '') === color);
         return prev
           .map(item => {
-            if (item.id === productId && item.size === newSize) {
+            if (item.id === productId && item.size === newSize && (item.color || '') === color) {
               return { ...item, quantity: item.quantity + (oldItem?.quantity || 0) };
             }
             return item;
           })
-          .filter(item => !(item.id === productId && item.size === oldSize));
+          .filter(item => !(item.id === productId && item.size === oldSize && (item.color || '') === color));
       }
       // Just update size
       return prev.map(item =>
-        (item.id === productId && item.size === oldSize)
+        (item.id === productId && item.size === oldSize && (item.color || '') === color)
           ? { ...item, size: newSize }
           : item
       );

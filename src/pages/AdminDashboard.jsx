@@ -218,13 +218,34 @@ const AdminDashboard = () => {
       if (editingProduct.description) formData.append('description', editingProduct.description);
       if (editingProduct.stock !== undefined) formData.append('stock', editingProduct.stock);
       
+      if (editingProduct.stock !== undefined) formData.append('stock', editingProduct.stock);
+      
       if (editingProduct.imageFile) {
         formData.append('image', editingProduct.imageFile);
       } else if (editingProduct.image) {
         formData.append('image', editingProduct.image);
-      } else {
-        toast.error('An image is required');
-        return;
+      }
+      
+      if (editingProduct.imageFiles && editingProduct.imageFiles.length > 0) {
+        editingProduct.imageFiles.forEach(file => {
+          formData.append('images', file);
+        });
+      }
+      
+      if (editingProduct.delete_image_ids && editingProduct.delete_image_ids.length > 0) {
+        formData.append('delete_image_ids', JSON.stringify(editingProduct.delete_image_ids));
+      }
+
+      if (editingProduct.sizes) {
+        formData.append('sizes', JSON.stringify(editingProduct.sizes));
+      }
+      
+      if (editingProduct.colors) {
+        formData.append('colors', JSON.stringify(editingProduct.colors));
+      }
+
+      if (editingProduct.features) {
+        formData.append('features', JSON.stringify(editingProduct.features));
       }
 
       if (editingProduct.id) {
@@ -1064,7 +1085,7 @@ const AdminDashboard = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Manage Products</h2>
               <button 
-                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null, stock: 10 })}
+                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null, stock: 0, sizes: [], colors: [], features: [], imageFiles: [], delete_image_ids: [] })}
                 className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
               >
                 <Plus size={18} /> Add New Product
@@ -1077,12 +1098,12 @@ const AdminDashboard = () => {
                 <form onSubmit={handleSaveProduct} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Product Name *</label>
-                      <input required type="text" value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Product Name</label>
+                      <input type="text" value={editingProduct.name || ''} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Category *</label>
-                      <select value={editingProduct.product_category_id || ''} onChange={e => setEditingProduct({...editingProduct, product_category_id: e.target.value})} className="w-full p-2 border border-gray-200 rounded" required>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Category</label>
+                      <select value={editingProduct.product_category_id || ''} onChange={e => setEditingProduct({...editingProduct, product_category_id: e.target.value})} className="w-full p-2 border border-gray-200 rounded">
                         <option value="">Select a Category</option>
                         {categories.map(c => (
                           <option key={c.id} value={c.id}>{c.name}</option>
@@ -1091,35 +1112,117 @@ const AdminDashboard = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Product Tag/Status</label>
-                      <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full p-2 border border-gray-200 rounded">
+                      <select value={editingProduct.category || ''} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full p-2 border border-gray-200 rounded">
                         <option value="regular">Regular</option>
                         <option value="featured">Featured</option>
                         <option value="new_arrival">New Arrival</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Price (₹) *</label>
-                      <input required type="number" step="0.01" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Price (₹)</label>
+                      <input type="number" min="0" step="0.01" value={editingProduct.price || ''} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Discount Price (₹)</label>
-                      <input type="number" step="0.01" value={editingProduct.discount_price || ''} onChange={e => setEditingProduct({...editingProduct, discount_price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                      <input type="number" min="0" step="0.01" value={editingProduct.discount_price || ''} onChange={e => setEditingProduct({...editingProduct, discount_price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
-                      <input required type="number" value={editingProduct.stock || 0} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                      <input type="number" min="0" value={editingProduct.stock || 0} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
                     <textarea value={editingProduct.description || ''} onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full p-2 border border-gray-200 rounded h-24" />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Product Image {!editingProduct.id && '*'}</label>
+                  
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Primary Product Image</label>
                     <input type="file" accept="image/*" onChange={e => setEditingProduct({...editingProduct, imageFile: e.target.files[0]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
                     {editingProduct.image && !editingProduct.imageFile && (
                       <img src={getImageUrl(editingProduct.image, 'products')} alt="Preview" className="mt-2 h-20 rounded shadow" />
                     )}
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Additional Gallery Images</label>
+                    <input type="file" accept="image/*" multiple onChange={e => setEditingProduct({...editingProduct, imageFiles: [...(editingProduct.imageFiles || []), ...Array.from(e.target.files)]})} className="w-full p-2 border border-gray-200 rounded bg-gray-50" />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {editingProduct.images?.filter(img => !(editingProduct.delete_image_ids || []).includes(img.id)).map(img => (
+                        <div key={img.id} className="relative group">
+                          <img src={getImageUrl(img.url, 'products')} alt="Gallery" className="h-16 w-16 object-cover rounded shadow" />
+                          <button type="button" onClick={() => setEditingProduct({...editingProduct, delete_image_ids: [...(editingProduct.delete_image_ids || []), img.id]})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12}/></button>
+                        </div>
+                      ))}
+                      {editingProduct.imageFiles?.map((file, idx) => (
+                        <div key={idx} className="relative group">
+                          <img src={URL.createObjectURL(file)} alt="New Gallery" className="h-16 w-16 object-cover rounded shadow border-2 border-green-500" />
+                          <button type="button" onClick={() => setEditingProduct({...editingProduct, imageFiles: editingProduct.imageFiles.filter((_, i) => i !== idx)})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12}/></button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Sizes & Stock</label>
+                    {editingProduct.sizes?.map((sizeObj, idx) => (
+                      <div key={idx} className="flex items-center gap-2 mb-2">
+                        <input type="text" placeholder="Size (e.g. XL)" value={sizeObj.size} onChange={e => {
+                          const newSizes = [...editingProduct.sizes];
+                          newSizes[idx].size = e.target.value;
+                          setEditingProduct({...editingProduct, sizes: newSizes});
+                        }} className="w-1/3 p-2 border border-gray-200 rounded" />
+                        <input type="number" min="0" placeholder="Stock" value={sizeObj.stock} onChange={e => {
+                          const newSizes = [...editingProduct.sizes];
+                          newSizes[idx].stock = e.target.value;
+                          setEditingProduct({...editingProduct, sizes: newSizes});
+                        }} className="w-1/3 p-2 border border-gray-200 rounded" />
+                        <button type="button" onClick={() => {
+                          const newSizes = [...editingProduct.sizes];
+                          newSizes.splice(idx, 1);
+                          setEditingProduct({...editingProduct, sizes: newSizes});
+                        }} className="text-red-500 hover:text-red-700 p-2"><Trash2 size={18}/></button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => setEditingProduct({...editingProduct, sizes: [...(editingProduct.sizes || []), {size: '', stock: 0}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Size</button>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Available Colors</label>
+                    {editingProduct.colors?.map((colorObj, idx) => (
+                      <div key={idx} className="flex items-center gap-2 mb-2">
+                        <input type="text" placeholder="Color (e.g. Red)" value={colorObj.color} onChange={e => {
+                          const newColors = [...editingProduct.colors];
+                          newColors[idx].color = e.target.value;
+                          setEditingProduct({...editingProduct, colors: newColors});
+                        }} className="w-2/3 p-2 border border-gray-200 rounded" />
+                        <button type="button" onClick={() => {
+                          const newColors = [...editingProduct.colors];
+                          newColors.splice(idx, 1);
+                          setEditingProduct({...editingProduct, colors: newColors});
+                        }} className="text-red-500 hover:text-red-700 p-2"><Trash2 size={18}/></button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: ''}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color</button>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Bullet Features (Amazon Style)</label>
+                    {editingProduct.features?.map((featureText, idx) => (
+                      <div key={idx} className="flex items-center gap-2 mb-2">
+                        <input type="text" placeholder="Feature (e.g. 100% Cotton)" value={featureText} onChange={e => {
+                          const newFeatures = [...editingProduct.features];
+                          newFeatures[idx] = e.target.value;
+                          setEditingProduct({...editingProduct, features: newFeatures});
+                        }} className="flex-1 p-2 border border-gray-200 rounded" />
+                        <button type="button" onClick={() => {
+                          const newFeatures = [...editingProduct.features];
+                          newFeatures.splice(idx, 1);
+                          setEditingProduct({...editingProduct, features: newFeatures});
+                        }} className="text-red-500 hover:text-red-700 p-2"><Trash2 size={18}/></button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => setEditingProduct({...editingProduct, features: [...(editingProduct.features || []), '']})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Feature</button>
                   </div>
                   <div className="flex gap-4 pt-4">
                     <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 bg-gray-100 py-2 rounded font-semibold">Cancel</button>
@@ -1252,6 +1355,7 @@ const AdminDashboard = () => {
                         <p className="font-semibold text-sm text-gray-800 truncate">{item.product_name}</p>
                         <div className="flex gap-2 mt-0.5">
                           {item.size && <span className="text-xs bg-gray-200 px-1.5 rounded">Size: {item.size}</span>}
+                          {item.color && <span className="text-xs bg-gray-200 px-1.5 rounded">Color: {item.color}</span>}
                           <span className="text-xs text-gray-500">Qty: {item.quantity}</span>
                         </div>
                       </div>
