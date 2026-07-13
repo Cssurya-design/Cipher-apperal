@@ -1291,7 +1291,7 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                     ))}
-                    <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: '', image: null, imageFile: null}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color with Image</button>
+                    <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: '', image: null, imageFile: null, sizes: editingProduct.sizes && editingProduct.sizes.length > 0 ? editingProduct.sizes.map(s => ({...s})) : ['S', 'M', 'L', 'XL', 'XXL'].map(s => ({size: s, stock: '', price: '', discount_price: ''}))}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color with Image</button>
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
