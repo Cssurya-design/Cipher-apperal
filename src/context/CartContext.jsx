@@ -29,11 +29,13 @@ export const CartProvider = ({ children }) => {
       
       const activePrice = sizeObj?.price || product.price;
       const activeDiscountPrice = sizeObj?.discount_price || product.discount_price;
+      const activeImage = selectedColorObj?.image || product.image;
 
       return [...prev, {
         ...product,
         price: activePrice,
         discount_price: activeDiscountPrice,
+        image: activeImage,
         quantity,
         size,
         color,

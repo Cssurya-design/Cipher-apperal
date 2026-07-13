@@ -243,16 +243,23 @@ const ProductDetail = () => {
             </div>
             
             {/* Rating */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex text-yellow-400">
-                {[1, 2, 3, 4, 5].map(star => (
-                  <Star key={star} size={18} fill={star <= product.avg_rating ? "currentColor" : "none"} strokeWidth={1.5} />
-                ))}
-              </div>
-              <span className="text-gray-500 text-sm">
-                {product.avg_rating}/5 ({product.total_reviews} {product.total_reviews === 1 ? 'review' : 'reviews'})
-              </span>
-            </div>
+            {(() => {
+              const colorObj = product.colors?.find(c => c.color === selectedColor);
+              const displayRating = colorObj?.avg_rating ?? product.avg_rating;
+              const displayReviews = colorObj?.total_reviews ?? product.total_reviews;
+              return (
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex text-yellow-400">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <Star key={star} size={18} fill={star <= displayRating ? "currentColor" : "none"} strokeWidth={1.5} />
+                    ))}
+                  </div>
+                  <span className="text-gray-500 text-sm">
+                    {displayRating}/5 ({displayReviews} {displayReviews === 1 ? 'review' : 'reviews'})
+                  </span>
+                </div>
+              );
+            })()}
 
             <hr className="my-4 border-gray-100" />
 
@@ -656,8 +663,7 @@ const ProductDetail = () => {
 
         {/* Customer Reviews Section */}
         {(() => {
-          const colorReviews = product.reviews ? product.reviews.filter(r => r.color === selectedColor) : [];
-          if (colorReviews.length === 0) return null;
+          const colorReviews = product.reviews ? product.reviews.filter(r => (r.color || '') === (selectedColor || '')) : [];
           return (
             <div className="mt-8 bg-white rounded-2xl p-4 sm:p-8 shadow-sm border border-gray-100">
               <button
@@ -676,27 +682,31 @@ const ProductDetail = () => {
                   animate={{ opacity: 1, height: 'auto' }}
                   className="mt-6 space-y-4"
                 >
-                  {colorReviews.map((review, i) => (
-                    <div key={i} className="border-b border-gray-100 pb-4 last:border-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm">
-                          {review.user_name.charAt(0).toUpperCase()}
+                  {colorReviews.length > 0 ? (
+                    colorReviews.map((review, i) => (
+                      <div key={i} className="border-b border-gray-100 pb-4 last:border-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm">
+                            {review.user_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800 text-sm">{review.user_name}</p>
+                            <p className="text-xs text-gray-400">{review.date}</p>
+                          </div>
+                          <div className="flex text-yellow-400 ml-auto">
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <Star key={s} size={14} fill={s <= review.rating ? "currentColor" : "none"} />
+                            ))}
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-800 text-sm">{review.user_name}</p>
-                          <p className="text-xs text-gray-400">{review.date}</p>
-                        </div>
-                        <div className="flex text-yellow-400 ml-auto">
-                          {[1, 2, 3, 4, 5].map(s => (
-                            <Star key={s} size={14} fill={s <= review.rating ? "currentColor" : "none"} />
-                          ))}
-                        </div>
+                        {review.review_text && (
+                          <p className="text-gray-600 text-sm ml-11">{review.review_text}</p>
+                        )}
                       </div>
-                      {review.review_text && (
-                        <p className="text-gray-600 text-sm ml-11">{review.review_text}</p>
-                      )}
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">No reviews yet for this color.</p>
+                  )}
                 </motion.div>
               )}
             </div>
