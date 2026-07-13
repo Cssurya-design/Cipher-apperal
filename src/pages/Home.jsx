@@ -270,7 +270,7 @@ const Home = () => {
                     <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4" dangerouslySetInnerHTML={{ __html: (selectedOffer.title || '').replace(/<[^>]*>?/gm, '') }}></h3>
                     <p className="text-gray-600 mb-8 whitespace-pre-wrap leading-relaxed">{selectedOffer.description || "Grab this exclusive offer now!"}</p>
                     
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
                       {selectedOffer.product ? (
                         <button 
                           onClick={() => {

@@ -24,10 +24,16 @@ const STATUS_PROGRESS = {
   cancelled: 0,
 };
 
-const getEstimatedDelivery = (deliveryDays = 5) => {
-  const est = new Date();
+const getEstimatedDelivery = (dateStr, deliveryDays = 5) => {
+  let est = new Date();
+  if (dateStr) {
+    const parsed = new Date(dateStr.split('•')[0].trim());
+    if (!isNaN(parsed.getTime())) {
+      est = parsed;
+    }
+  }
   est.setDate(est.getDate() + deliveryDays);
-  return est.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+  return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 };
 
 const Dashboard = () => {
@@ -281,7 +287,7 @@ const Dashboard = () => {
                       <div className="flex items-center gap-1">
                         <Truck size={14} className="text-primary flex-shrink-0" />
                         <span className="text-xs text-gray-500">
-                        Est. delivery: <span className="font-medium text-gray-700">{getEstimatedDelivery(deliveryDays)}</span>
+                        Est. delivery: <span className="font-medium text-gray-700">{getEstimatedDelivery(group.date, deliveryDays)}</span>
                         </span>
                       </div>
                     ) : (

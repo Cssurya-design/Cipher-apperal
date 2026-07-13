@@ -23,7 +23,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
         <div className="grid grid-cols-1 min-[450px]:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
           {/* Brand */}
-          <div className="col-span-2 sm:col-span-1">
+          <div className="col-span-1 min-[450px]:col-span-2 md:col-span-1">
             <h3 className="text-white text-lg sm:text-xl font-bold mb-3 sm:mb-4">Cipher Apparel</h3>
             <p className="text-xs sm:text-sm leading-relaxed">Premium fashion brand delivering quality and style. Discover the latest trends and shop with confidence.</p>
           </div>
@@ -53,7 +53,7 @@ const Footer = () => {
           </div>
 
           {/* Newsletter */}
-          <div className="col-span-2 sm:col-span-1">
+          <div className="col-span-1 min-[450px]:col-span-2 md:col-span-1">
             <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Newsletter</h4>
             <p className="text-xs sm:text-sm mb-3 sm:mb-4">Subscribe to get updates on new arrivals and special offers.</p>
             <form onSubmit={handleNewsletter} className="flex">

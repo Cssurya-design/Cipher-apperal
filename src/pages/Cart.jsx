@@ -19,17 +19,28 @@ const UPI_PAYEE_NAME = import.meta.env.VITE_UPI_PAYEE_NAME || 'Cipher Apparel';
 const Cart = () => {
   const navigate = useNavigate();
   
-  useEffect(() => {
-    document.title = "Shopping Cart | Cipher Apparel";
-  }, []);
-
   const { cart, removeFromCart, updateQuantity, updateSize, clearCart, cartTotal } = useCart();
   const { user } = useAuth();
+  const [deliveryDays, setDeliveryDays] = useState(5);
+
+  useEffect(() => {
+    document.title = "Shopping Cart | Cipher Apparel";
+    // Fetch delivery setting
+    api.get('/api/settings/')
+      .then(res => {
+        if (res.data?.settings?.delivery_days) {
+          setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
+        }
+      })
+      .catch(err => console.error("Error fetching settings:", err));
+  }, []);
+
   const { displayLocation, location, setShowLocationModal } = useLocationCtx();
   const toast = useToast();
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // New Payment States
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'COD'
@@ -54,6 +65,7 @@ const Cart = () => {
   }, []);
 
   const handleCheckout = async () => {
+    if (checkoutLoading) return;
     if (!user) {
       navigate('/auth');
       return;
@@ -64,6 +76,7 @@ const Cart = () => {
       return;
     }
 
+    setCheckoutLoading(true);
     try {
       const items = cart.map(item => ({
         name: item.name,
@@ -91,6 +104,8 @@ const Cart = () => {
     } catch (err) {
       console.error(err);
       toast.error('Failed to place order. Please try again.');
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -154,10 +169,17 @@ const Cart = () => {
         <div className="mb-6 bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
           <MapPin size={18} className="text-blue-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <span className="text-sm text-blue-800">
+            <span className="text-sm text-blue-800 block">
               {displayLocation
                 ? `Delivering to ${location?.city}${location?.postal_code ? ' - ' + location.postal_code : ''}`
                 : 'Select a delivery location'}
+            </span>
+            <span className="text-xs font-semibold text-blue-900 mt-0.5 block">
+              Estimated Delivery: {(() => {
+                const est = new Date();
+                est.setDate(est.getDate() + deliveryDays);
+                return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+              })()}
             </span>
           </div>
           <button
@@ -367,6 +389,19 @@ const Cart = () => {
                 </div>
               ) : (
                 <>
+                  {/* Progress Indicator */}
+                  <div className="flex items-center justify-center gap-2 sm:gap-4 mb-6">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-700">Cart</span>
+                    </div>
+                    <div className="w-8 sm:w-12 h-0.5 bg-gray-200"></div>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">2</div>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">Payment</span>
+                    </div>
+                  </div>
+                  
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Checkout</h3>
                   <p className="text-3xl font-bold text-primary mb-6">₹{finalTotal.toFixed(2)}</p>
 
@@ -463,9 +498,10 @@ const Cart = () => {
 
                   <button
                     onClick={handleCheckout}
-                    className="w-full bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-primary-dark transition-colors"
+                    disabled={checkoutLoading}
+                    className="w-full bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-primary-dark transition-colors disabled:opacity-70"
                   >
-                    {paymentMethod === 'UPI' ? 'Verify & Place Order' : 'Confirm Order'}
+                    {checkoutLoading ? 'Processing...' : paymentMethod === 'UPI' ? 'Verify & Place Order' : 'Confirm Order'}
                   </button>
                 </>
               )}

@@ -22,6 +22,8 @@ const Shop = () => {
   const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || '');
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [sort, setSort] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   const [categories, setCategories] = useState([{ key: '', label: 'All' }]);
   
   useEffect(() => {
@@ -40,6 +42,14 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
+
+  useEffect(() => {
+    try {
+      const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      setRecentlyViewed(viewed);
+    } catch(e) {}
+  }, []);
 
   useEffect(() => {
     document.title = "Shop | Cipher Apparel";
@@ -59,6 +69,8 @@ const Shop = () => {
     if (activeCategory) params.category = activeCategory;
     if (search) params.search = search;
     if (sort) params.sort = sort;
+    if (minPrice) params.min_price = minPrice;
+    if (maxPrice) params.max_price = maxPrice;
 
     api.get('/products/', { params })
       .then(res => {
@@ -70,7 +82,7 @@ const Shop = () => {
         console.error(err);
         setLoading(false);
       });
-  }, [activeCategory, search, sort]);
+  }, [activeCategory, search, sort, minPrice, maxPrice]);
 
   return (
     <div className="pt-24 min-h-screen bg-gray-50">
@@ -138,8 +150,30 @@ const Shop = () => {
                     </div>
                   </div>
 
-                  {/* Sort */}
-                  <div>
+                  {/* Price Range & Sort */}
+                  <div className="flex flex-wrap gap-6">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Price Range (₹)</p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          placeholder="Min"
+                          value={minPrice}
+                          onChange={(e) => setMinPrice(e.target.value)}
+                          className="px-3 py-1.5 w-24 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary bg-white"
+                        />
+                        <span className="text-gray-400">-</span>
+                        <input
+                          type="number"
+                          placeholder="Max"
+                          value={maxPrice}
+                          onChange={(e) => setMaxPrice(e.target.value)}
+                          className="px-3 py-1.5 w-24 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Sort by</p>
                     <select
                       value={sort}
@@ -152,12 +186,12 @@ const Shop = () => {
                     </select>
                   </div>
                 </div>
-              </motion.div>
-            )}
+              </div>
+            </motion.div>
+          )}
           </AnimatePresence>
-
           {/* Active Filter Chips */}
-          {(activeCategory || sort) && (
+          {(activeCategory || sort || minPrice || maxPrice) && (
             <div className="flex flex-wrap gap-2">
               {activeCategory && (
                 <button
@@ -177,6 +211,15 @@ const Shop = () => {
                   <X size={12} />
                 </button>
               )}
+              {(minPrice || maxPrice) && (
+                <button
+                  onClick={() => { setMinPrice(''); setMaxPrice(''); }}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-50 text-primary border border-purple-200 flex items-center gap-1 hover:bg-purple-100 transition-colors"
+                >
+                  ₹{minPrice || '0'} - ₹{maxPrice || 'Any'}
+                  <X size={12} />
+                </button>
+              )}
             </div>
           )}
 
@@ -188,7 +231,15 @@ const Shop = () => {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="text-center py-20 text-gray-400">Loading products...</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="animate-pulse flex flex-col gap-2">
+                <div className="bg-gray-200 rounded-2xl w-full aspect-[4/5]"></div>
+                <div className="bg-gray-200 h-4 w-3/4 rounded mt-2"></div>
+                <div className="bg-gray-200 h-4 w-1/2 rounded"></div>
+              </div>
+            ))}
+          </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-gray-400 text-lg mb-4">No products found.</p>
@@ -211,6 +262,18 @@ const Shop = () => {
                 </motion.div>
               ))}
             </AnimatePresence>
+          </div>
+        )}
+
+        {/* Recently Viewed */}
+        {!loading && recentlyViewed.length > 0 && (
+          <div className="mt-16 sm:mt-20 border-t border-gray-100 pt-10">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Recently Viewed</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+              {recentlyViewed.map((product) => (
+                <ProductCard key={`recent-${product.id}`} product={product} />
+              ))}
+            </div>
           </div>
         )}
       </div>

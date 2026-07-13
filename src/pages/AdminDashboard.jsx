@@ -216,6 +216,7 @@ const AdminDashboard = () => {
       if (editingProduct.product_category_id) formData.append('product_category_id', editingProduct.product_category_id);
       if (editingProduct.category) formData.append('category', editingProduct.category);
       if (editingProduct.description) formData.append('description', editingProduct.description);
+      if (editingProduct.stock !== undefined) formData.append('stock', editingProduct.stock);
       
       if (editingProduct.imageFile) {
         formData.append('image', editingProduct.imageFile);
@@ -1063,7 +1064,7 @@ const AdminDashboard = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Manage Products</h2>
               <button 
-                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null })}
+                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null, stock: 10 })}
                 className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
               >
                 <Plus size={18} /> Add New Product
@@ -1104,6 +1105,10 @@ const AdminDashboard = () => {
                       <label className="block text-sm font-semibold text-gray-700 mb-1">Discount Price (₹)</label>
                       <input type="number" step="0.01" value={editingProduct.discount_price || ''} onChange={e => setEditingProduct({...editingProduct, discount_price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
                     </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
+                      <input required type="number" value={editingProduct.stock || 0} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
@@ -1132,6 +1137,7 @@ const AdminDashboard = () => {
                         <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Category</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Price</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Stock</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
                       </tr>
                     </thead>
@@ -1147,6 +1153,7 @@ const AdminDashboard = () => {
                             <td className="p-4 font-medium text-gray-900">{product.name}</td>
                             <td className="p-4 text-sm"><span className="bg-gray-100 px-2 py-1 rounded text-gray-700 capitalize">{product.category.replace('_', ' ')}</span></td>
                             <td className="p-4 font-semibold">₹{product.price} {product.discount_price && <span className="text-xs text-green-600 ml-1 block sm:inline">(Sale: ₹{product.discount_price})</span>}</td>
+                            <td className="p-4 text-sm font-semibold">{product.stock}</td>
                             <td className="p-4 text-right">
                               <button onClick={() => setEditingProduct(product)} className="text-blue-600 text-sm font-semibold hover:underline mr-4">Edit</button>
                               <button onClick={() => handleDeleteProduct(product.id)} className="text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button>

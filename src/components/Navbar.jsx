@@ -34,13 +34,13 @@ const Navbar = () => {
         {/* Location indicator — Amazon style */}
         <button
           onClick={() => setShowLocationModal(true)}
-          className="hidden sm:flex items-center gap-1 text-left hover:outline hover:outline-1 hover:outline-gray-300 rounded-lg px-2 py-1 transition-all group"
+          className="flex items-center gap-1 text-left hover:outline hover:outline-1 hover:outline-gray-300 rounded-lg px-1 sm:px-2 py-1 transition-all group"
           title="Change delivery location"
         >
           <MapPin size={16} className="text-gray-500 group-hover:text-primary flex-shrink-0" />
           <div className="flex flex-col leading-tight">
-            <span className="text-[10px] text-gray-400 font-medium">Deliver to</span>
-            <span className="text-xs font-bold text-gray-700 group-hover:text-primary max-w-[100px] truncate">
+            <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium">Deliver to</span>
+            <span className="text-[10px] sm:text-xs font-bold text-gray-700 group-hover:text-primary max-w-[80px] sm:max-w-[120px] md:max-w-[150px] truncate">
               {displayLocation || 'Select location'}
             </span>
           </div>
@@ -103,18 +103,6 @@ const Navbar = () => {
 
       {/* Mobile: Location + Cart + Hamburger */}
       <div className="md:hidden flex items-center space-x-3 text-gray-800">
-        {/* Mobile location button */}
-        <button
-          onClick={() => setShowLocationModal(true)}
-          className="sm:hidden flex items-center gap-0.5 text-gray-600 hover:text-primary transition-colors"
-          title="Set delivery location"
-        >
-          <MapPin size={18} />
-          {displayLocation && (
-            <span className="text-[10px] font-bold max-w-[50px] truncate">{location?.city || ''}</span>
-          )}
-        </button>
-
         <Link to="/cart" className="relative">
           <ShoppingCart size={24} />
           {cartCount > 0 && (

@@ -80,11 +80,11 @@ const Hero = ({ hasCoupon = false }) => {
         <motion.p variants={itemVariants} className="text-gray-500 text-base sm:text-lg mb-8 max-w-lg leading-relaxed">
           Discover the ultimate e-commerce fashion destination. Shop our latest collection of premium clothing designed for the modern man. Save up to 70% today!
         </motion.p>
-        <motion.div variants={itemVariants} className="flex gap-4">
-          <Link to="/shop" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-full font-bold shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transform hover:-translate-y-1 transition-all text-sm sm:text-base">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <Link to="/shop" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-full font-bold shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transform hover:-translate-y-1 transition-all text-sm sm:text-base text-center w-full sm:w-auto">
             Shop Collection
           </Link>
-          <Link to="/about" className="bg-white text-purple-700 border-2 border-purple-200 px-8 py-4 rounded-full font-bold hover:border-purple-600 hover:bg-purple-50 transition-all text-sm sm:text-base">
+          <Link to="/about" className="bg-white text-purple-700 border-2 border-purple-200 px-8 py-4 rounded-full font-bold hover:border-purple-600 hover:bg-purple-50 transition-all text-sm sm:text-base text-center w-full sm:w-auto">
             Our Story
           </Link>
         </motion.div>

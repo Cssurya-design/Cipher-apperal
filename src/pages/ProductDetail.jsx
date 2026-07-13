@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingCart, Zap, Share2, Heart, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -21,10 +21,13 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState('XL');
   const [quantity, setQuantity] = useState(1);
   const [showReviews, setShowReviews] = useState(false);
+  const [deliveryDays, setDeliveryDays] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [hoverRating, setHoverRating] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [activeAccordion, setActiveAccordion] = useState('details');
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { displayLocation, setShowLocationModal } = useLocation();
@@ -37,11 +40,39 @@ const ProductDetail = () => {
         setProduct(res.data);
         setIsWishlisted(res.data.is_wishlisted || false);
         setLoading(false);
+        
+        // Add to recently viewed
+        try {
+          const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+          const newItem = { id: res.data.id, name: res.data.name, image: res.data.image, price: res.data.price, discount_price: res.data.discount_price };
+          const filtered = viewed.filter(item => item.id !== newItem.id);
+          const updated = [newItem, ...filtered].slice(0, 4);
+          localStorage.setItem('recentlyViewed', JSON.stringify(updated));
+        } catch(e) {}
+        
+        // Fetch related products
+        if (res.data.category) {
+          api.get(`/products/?category=${res.data.category.slug || res.data.category}`)
+            .then(relRes => {
+              const rel = relRes.data.products.filter(p => p.id !== res.data.id).slice(0, 4);
+              setRelatedProducts(rel);
+            })
+            .catch(() => {});
+        }
       })
       .catch(err => {
         console.error(err);
         setLoading(false);
       });
+      
+    // Fetch delivery setting
+    api.get('/api/settings/')
+      .then(res => {
+        if (res.data?.settings?.delivery_days) {
+          setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
+        }
+      })
+      .catch(err => console.error("Error fetching settings:", err));
   }, [id]);
 
   const handleRate = async (stars) => {
@@ -117,7 +148,22 @@ const ProductDetail = () => {
     return image.startsWith('http') ? image : `${API_BASE}/static/store/images/products/${image}`;
   };
 
-  if (loading) return <div className="pt-24 text-center py-20 text-gray-500">Loading product...</div>;
+  if (loading) return (
+    <div className="pt-24 min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        <div className="bg-white rounded-3xl p-4 sm:p-8 md:p-12 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-start animate-pulse">
+          <div className="bg-gray-200 rounded-2xl w-full h-[300px] sm:h-[400px] md:h-[500px]"></div>
+          <div className="flex flex-col space-y-4">
+            <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-10 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-24 bg-gray-200 rounded w-full mt-4"></div>
+            <div className="h-12 bg-gray-200 rounded w-1/3 mt-6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   if (!product) return <div className="pt-24 text-center py-20 text-gray-500">Product not found</div>;
 
   return (
@@ -177,19 +223,111 @@ const ProductDetail = () => {
               )}
             </div>
 
+            {/* Scarcity Indicator */}
+            <div className="mb-4 flex items-center gap-2 text-orange-600 bg-orange-50 px-3 py-2 rounded-lg text-sm font-medium w-fit">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+              </span>
+              Fast selling! Only a few left in stock.
+            </div>
+
             {/* Delivery location */}
-            <button
-              onClick={() => setShowLocationModal(true)}
-              className="flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition-colors mb-4"
-            >
-              <MapPin size={14} />
-              {displayLocation ? `Deliver to ${displayLocation}` : 'Select delivery location'}
-            </button>
+            <div className="mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <button
+                onClick={() => setShowLocationModal(true)}
+                className="flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition-colors mb-2"
+              >
+                <MapPin size={14} />
+                {displayLocation ? `Deliver to ${displayLocation}` : 'Select delivery location'}
+              </button>
+              <div className="flex items-center gap-2 text-sm text-gray-800">
+                <span className="font-semibold text-gray-600">Estimated Delivery:</span>
+                <span className="font-bold text-gray-900">{(() => {
+                  const est = new Date();
+                  est.setDate(est.getDate() + deliveryDays);
+                  return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+                })()}</span>
+              </div>
+            </div>
             
-            {/* Description */}
-            <p className="text-gray-600 leading-relaxed mb-6 text-sm sm:text-base">
-              {product.description || "Premium quality clothing designed for ultimate comfort and style. Perfect for every occasion."}
-            </p>
+            {/* Accordions */}
+            <div className="mb-6 space-y-2 border-t border-b py-4 border-gray-100">
+              <div className="border-b border-gray-100 pb-2">
+                <button
+                  onClick={() => setActiveAccordion(activeAccordion === 'details' ? '' : 'details')}
+                  className="flex items-center justify-between w-full text-left font-semibold text-gray-900 hover:text-primary transition-colors py-2"
+                >
+                  <span>Product Details</span>
+                  {activeAccordion === 'details' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                <AnimatePresence>
+                  {activeAccordion === 'details' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-gray-600 text-sm mt-2 mb-4 leading-relaxed">
+                        {product.description || "Premium quality clothing designed for ultimate comfort and style. Perfect for every occasion."}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="border-b border-gray-100 pb-2">
+                <button
+                  onClick={() => setActiveAccordion(activeAccordion === 'shipping' ? '' : 'shipping')}
+                  className="flex items-center justify-between w-full text-left font-semibold text-gray-900 hover:text-primary transition-colors py-2"
+                >
+                  <span>Shipping & Returns</span>
+                  {activeAccordion === 'shipping' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                <AnimatePresence>
+                  {activeAccordion === 'shipping' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-gray-600 text-sm mt-2 mb-4 leading-relaxed">
+                        Free shipping on orders over ₹1000. Hassle-free 15-day return policy. Items must be unworn and unwashed.
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="pb-2">
+                <button
+                  onClick={() => setActiveAccordion(activeAccordion === 'care' ? '' : 'care')}
+                  className="flex items-center justify-between w-full text-left font-semibold text-gray-900 hover:text-primary transition-colors py-2"
+                >
+                  <span>Care Instructions</span>
+                  {activeAccordion === 'care' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                <AnimatePresence>
+                  {activeAccordion === 'care' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <ul className="list-disc pl-5 text-gray-600 text-sm mt-2 mb-4 space-y-1">
+                        <li>Machine wash cold with like colors</li>
+                        <li>Do not bleach</li>
+                        <li>Tumble dry low</li>
+                        <li>Warm iron if needed</li>
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
 
             {/* Size Selector */}
             <div className="mb-6">
@@ -284,18 +422,18 @@ const ProductDetail = () => {
                 ))}
               </div>
               {user && (
-                <div className="flex gap-2 mt-2">
+                <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <input
                     type="text"
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                     placeholder="Write a review (optional)"
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+                    className="flex-1 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                   />
                   <button
                     onClick={() => handleRate(product.user_rating || 5)}
                     disabled={ratingLoading || !reviewText}
-                    className="px-4 py-2 bg-primary text-white text-sm rounded-lg disabled:opacity-50"
+                    className="w-full sm:w-auto px-4 py-2 bg-primary text-white text-sm rounded-lg disabled:opacity-50"
                   >
                     Submit
                   </button>
@@ -352,17 +490,18 @@ const ProductDetail = () => {
         )}
 
         {/* Related Products */}
-        {product.related_products && product.related_products.length > 0 && (
+        {relatedProducts && relatedProducts.length > 0 && (
           <div className="mt-8 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {product.related_products.map(p => (
-                <ProductCard key={p.id} product={p} />
+              {relatedProducts.map(p => (
+                <ProductCard key={`related-${p.id}`} product={p} />
               ))}
             </div>
           </div>
         )}
       </div>
+
       <Footer />
     </div>
   );
