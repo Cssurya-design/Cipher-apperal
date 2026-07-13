@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Package, Truck, CheckCircle, Clock, ChevronRight, Download, RefreshCw, AlertCircle, MapPin, ChevronDown, ChevronUp, Star, Phone, StarHalf } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import {
+  Package, Truck, CheckCircle2, Clock, MapPin, CreditCard,
+  Banknote, ArrowLeft, XCircle, Star, ShoppingBag, AlertTriangle,
+} from 'lucide-react';
 import api, { API_BASE, getImageUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Footer';
