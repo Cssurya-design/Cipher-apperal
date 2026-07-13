@@ -153,12 +153,15 @@ const AdminDashboard = () => {
   };
 
   const fetchProducts = async () => {
+    setProductsLoading(true);
     try {
       const res = await api.get('/products/');
       setProducts(res.data.products || []);
     } catch (err) {
       console.error(err);
       setProducts([]);
+    } finally {
+      setProductsLoading(false);
     }
   };
 
@@ -266,7 +269,8 @@ const AdminDashboard = () => {
           color: c.color,
           id: c.id,
           image: c.image,
-          images: c.images || []
+          images: c.images || [],
+          sizes: c.sizes || []
         }));
         formData.append('colors', JSON.stringify(colorsDataToSave));
         
@@ -1175,39 +1179,7 @@ const AdminDashboard = () => {
                   </div>
                   
 
-                  <div className="border-t border-gray-200 pt-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Sizes & Stock</label>
-                    {editingProduct.sizes?.map((sizeObj, idx) => (
-                      <div key={idx} className="flex flex-wrap md:flex-nowrap items-center gap-2 mb-2 p-2 bg-gray-50 rounded border border-gray-100">
-                        <input type="text" placeholder="Size (e.g. XL)" value={sizeObj.size} onChange={e => {
-                          const newSizes = [...editingProduct.sizes];
-                          newSizes[idx].size = e.target.value;
-                          setEditingProduct({...editingProduct, sizes: newSizes});
-                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
-                        <input type="number" min="0" placeholder="Stock" value={sizeObj.stock} onChange={e => {
-                          const newSizes = [...editingProduct.sizes];
-                          newSizes[idx].stock = e.target.value;
-                          setEditingProduct({...editingProduct, sizes: newSizes});
-                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
-                        <input type="number" min="0" step="0.01" placeholder="Price (₹)" value={sizeObj.price || ''} onChange={e => {
-                          const newSizes = [...editingProduct.sizes];
-                          newSizes[idx].price = e.target.value;
-                          setEditingProduct({...editingProduct, sizes: newSizes});
-                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
-                        <input type="number" min="0" step="0.01" placeholder="Disc. Price (₹)" value={sizeObj.discount_price || ''} onChange={e => {
-                          const newSizes = [...editingProduct.sizes];
-                          newSizes[idx].discount_price = e.target.value;
-                          setEditingProduct({...editingProduct, sizes: newSizes});
-                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
-                        <button type="button" onClick={() => {
-                          const newSizes = [...editingProduct.sizes];
-                          newSizes.splice(idx, 1);
-                          setEditingProduct({...editingProduct, sizes: newSizes});
-                        }} className="text-red-500 hover:text-red-700 p-2"><Trash2 size={18}/></button>
-                      </div>
-                    ))}
-                    <button type="button" onClick={() => setEditingProduct({...editingProduct, sizes: [...(editingProduct.sizes || []), {size: '', stock: 0}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Size</button>
-                  </div>
+
 
                   <div className="border-t border-gray-200 pt-4">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Available Colors (Amazon Style)</label>
@@ -1361,8 +1333,10 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {products.length === 0 ? (
-                        <tr><td colSpan="5" className="p-8 text-center text-gray-500">No products found.</td></tr>
+                      {productsLoading ? (
+                        <tr><td colSpan="6" className="p-8 text-center text-gray-500">Loading products...</td></tr>
+                      ) : products.length === 0 ? (
+                        <tr><td colSpan="6" className="p-8 text-center text-gray-500">No products found.</td></tr>
                       ) : (
                         products.map(product => (
                           <tr key={product.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
@@ -1539,7 +1513,9 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {products.length === 0 ? (
+                    {productsLoading ? (
+                      <tr><td colSpan="4" className="p-8 text-center text-gray-500">Loading stock...</td></tr>
+                    ) : products.length === 0 ? (
                       <tr><td colSpan="4" className="p-8 text-center text-gray-500">No products found.</td></tr>
                     ) : (
                       products.map(product => (
