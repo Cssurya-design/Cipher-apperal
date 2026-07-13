@@ -45,6 +45,7 @@ const Dashboard = () => {
   const [ratingLoading, setRatingLoading] = useState(null);
   const [deliveryDays, setDeliveryDays] = useState(5);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [activeTab, setActiveTab] = useState('orders');
 
   useEffect(() => {
     try {
@@ -190,12 +191,30 @@ const Dashboard = () => {
           </motion.div>
         </div>
 
-        {/* Order History */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 sm:p-6 border-b border-gray-100">
-            <h2 className="text-lg sm:text-xl font-bold">Order History</h2>
+        {/* Tabs for Order History & Recently Viewed */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div className="flex border-b border-gray-100">
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex-1 py-4 text-sm sm:text-base font-bold text-center transition-colors ${
+                activeTab === 'orders' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Order History
+            </button>
+            <button
+              onClick={() => setActiveTab('recent')}
+              className={`flex-1 py-4 text-sm sm:text-base font-bold text-center transition-colors ${
+                activeTab === 'recent' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Recently Viewed
+            </button>
           </div>
           
+          <div className="p-4 sm:p-6">
+            {activeTab === 'orders' && (
+              <>
           {loading ? (
             <div className="p-8 text-center text-gray-500">Loading orders...</div>
           ) : orders.length === 0 ? (
@@ -314,19 +333,26 @@ const Dashboard = () => {
               ))}
             </div>
           )}
-        </div>
+              </>
+            )}
 
-        {/* Recently Viewed */}
-        {!loading && recentlyViewed.length > 0 && (
-          <div className="mt-12 border-t border-gray-100 pt-8">
-            <h2 className="text-lg sm:text-xl font-bold mb-6">Recently Viewed</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {recentlyViewed.map((product) => (
-                <ProductCard key={`recent-${product.id}`} product={product} />
-              ))}
-            </div>
+            {activeTab === 'recent' && (
+              <>
+                {loading ? (
+                  <div className="p-8 text-center text-gray-500">Loading...</div>
+                ) : recentlyViewed.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500">You haven't viewed any products yet.</div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                    {recentlyViewed.map((product) => (
+                      <ProductCard key={`recent-${product.id}`} product={product} />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        )}
+        </div>
       </div>
       <Footer />
     </div>
