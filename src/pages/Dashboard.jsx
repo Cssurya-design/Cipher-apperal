@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLocation as useLocationCtx } from '../context/LocationContext';
 import { Star, Package, CreditCard, MapPin, Edit3, ShoppingBag, Heart, Truck, ExternalLink } from 'lucide-react';
-import api, { API_BASE } from '../api';
+import api, { API_BASE, getImageUrl } from '../api';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 const STATUS_STYLES = {
@@ -78,10 +78,7 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  const getImageUrl = (image) => {
-    if (!image) return '/hero-new.jpg';
-    return image.startsWith('http') ? image : `${API_BASE}/static/store/images/products/${image}`;
-  };
+
 
   const handleRateOrder = async (item, stars) => {
     setRatingLoading(item.id);

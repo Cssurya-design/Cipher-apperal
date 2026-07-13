@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import {
-  Package, Truck, CheckCircle2, Clock, MapPin, CreditCard,
-  Banknote, ArrowLeft, XCircle, Star, ShoppingBag, AlertTriangle,
-} from 'lucide-react';
-import api, { API_BASE } from '../api';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { Package, Truck, CheckCircle, Clock, ChevronRight, Download, RefreshCw, AlertCircle, MapPin, ChevronDown, ChevronUp, Star, Phone, StarHalf } from 'lucide-react';
+import api, { API_BASE, getImageUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
@@ -90,10 +87,7 @@ const OrderTracking = () => {
     setRatingLoading(false);
   };
 
-  const getImageUrl = (img) => {
-    if (!img) return '/hero-new.jpg';
-    return img.startsWith('http') ? img : `${API_BASE}/static/store/images/products/${img}`;
-  };
+
 
   if (authLoading || loading) {
     return (

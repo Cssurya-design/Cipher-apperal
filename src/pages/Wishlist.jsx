@@ -4,8 +4,7 @@ import { Heart, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { API_BASE } from '../api';
-import api from '../api';
+import api, { API_BASE, getImageUrl } from '../api';
 import Footer from '../components/Footer';
 
 const Wishlist = () => {
@@ -37,10 +36,7 @@ const Wishlist = () => {
     }
   };
 
-  const getImageUrl = (image) => {
-    if (!image) return '/hero-new.jpg';
-    return image.startsWith('http') ? image : `${API_BASE}/static/store/images/products/${image}`;
-  };
+
 
   if (!user) {
     return (
