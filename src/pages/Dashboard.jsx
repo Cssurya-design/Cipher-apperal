@@ -6,7 +6,7 @@ import { useLocation as useLocationCtx } from '../context/LocationContext';
 import { Star, Package, CreditCard, MapPin, Edit3, ShoppingBag, Heart, Truck, ExternalLink } from 'lucide-react';
 import api, { API_BASE } from '../api';
 import Footer from '../components/Footer';
-
+import ProductCard from '../components/ProductCard';
 const STATUS_STYLES = {
   placed: 'status-placed',
   processing: 'status-processing',
@@ -44,6 +44,14 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [ratingLoading, setRatingLoading] = useState(null);
   const [deliveryDays, setDeliveryDays] = useState(5);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
+
+  useEffect(() => {
+    try {
+      const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      setRecentlyViewed(viewed);
+    } catch(e) {}
+  }, []);
 
   useEffect(() => {
     document.title = "My Dashboard | Cipher Apparel";
@@ -307,6 +315,18 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+
+        {/* Recently Viewed */}
+        {!loading && recentlyViewed.length > 0 && (
+          <div className="mt-12 border-t border-gray-100 pt-8">
+            <h2 className="text-lg sm:text-xl font-bold mb-6">Recently Viewed</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+              {recentlyViewed.map((product) => (
+                <ProductCard key={`recent-${product.id}`} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <Footer />
     </div>

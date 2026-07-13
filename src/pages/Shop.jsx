@@ -42,14 +42,7 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
-  useEffect(() => {
-    try {
-      const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-      setRecentlyViewed(viewed);
-    } catch(e) {}
-  }, []);
 
   useEffect(() => {
     document.title = "Shop | Cipher Apparel";
@@ -265,17 +258,7 @@ const Shop = () => {
           </div>
         )}
 
-        {/* Recently Viewed */}
-        {!loading && recentlyViewed.length > 0 && (
-          <div className="mt-16 sm:mt-20 border-t border-gray-100 pt-10">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Recently Viewed</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {recentlyViewed.map((product) => (
-                <ProductCard key={`recent-${product.id}`} product={product} />
-              ))}
-            </div>
-          </div>
-        )}
+
       </div>
 
       <Footer />
