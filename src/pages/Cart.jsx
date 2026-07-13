@@ -79,6 +79,7 @@ const Cart = () => {
     setCheckoutLoading(true);
     try {
       const items = cart.map(item => ({
+        product_id: item.id,
         name: item.name,
         price: item.discount_price || item.price,
         quantity: item.quantity,

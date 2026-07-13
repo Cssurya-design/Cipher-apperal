@@ -61,6 +61,10 @@ const AdminDashboard = () => {
   const [settings, setSettings] = useState({});
   const [settingsLoading, setSettingsLoading] = useState(false);
 
+  // Users State
+  const [usersList, setUsersList] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+
   // Confirm Dialog State
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -96,10 +100,22 @@ const AdminDashboard = () => {
       fetchProducts();
       fetchCategories();
     }
-    if (activeTab === 'settings') {
-      fetchSettings();
+    if (activeTab === 'users') {
+      fetchUsers();
     }
   }, [activeTab, user]);
+
+  const fetchUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const res = await api.get('/admin/users/');
+      setUsersList(res.data.users || []);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load users');
+    }
+    setUsersLoading(false);
+  };
 
 
   const fetchCategories = async () => {
@@ -237,15 +253,34 @@ const AdminDashboard = () => {
       }
 
       if (editingProduct.sizes) {
-        formData.append('sizes', JSON.stringify(editingProduct.sizes));
+        const validSizes = editingProduct.sizes.filter(s => s.size && s.size.trim() !== '');
+        formData.append('sizes', JSON.stringify(validSizes));
       }
       
       if (editingProduct.colors) {
-        formData.append('colors', JSON.stringify(editingProduct.colors));
+        const validColors = editingProduct.colors.filter(c => c.color && c.color.trim() !== '');
+        const colorsDataToSave = validColors.map(c => ({
+          color: c.color,
+          id: c.id,
+          image: c.image,
+          images: c.images || []
+        }));
+        formData.append('colors', JSON.stringify(colorsDataToSave));
+        
+        validColors.forEach((c, idx) => {
+          if (c.imageFiles && c.imageFiles.length > 0) {
+            c.imageFiles.forEach(file => {
+              formData.append(`color_images_${idx}`, file);
+            });
+          } else if (c.imageFile) {
+            formData.append(`color_images_${idx}`, c.imageFile);
+          }
+        });
       }
 
       if (editingProduct.features) {
-        formData.append('features', JSON.stringify(editingProduct.features));
+        const validFeatures = editingProduct.features.filter(f => f && f.trim() !== '');
+        formData.append('features', JSON.stringify(validFeatures));
       }
 
       if (editingProduct.id) {
@@ -547,6 +582,18 @@ const AdminDashboard = () => {
               className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'products' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             >
               Products
+            </button>
+            <button
+              onClick={() => setActiveTab('stock')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'stock' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Stock
+            </button>
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              Users
             </button>
             <button
               onClick={() => setActiveTab('settings')}
@@ -1188,22 +1235,54 @@ const AdminDashboard = () => {
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Available Colors</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Available Colors (Amazon Style)</label>
                     {editingProduct.colors?.map((colorObj, idx) => (
-                      <div key={idx} className="flex items-center gap-2 mb-2">
-                        <input type="text" placeholder="Color (e.g. Red)" value={colorObj.color} onChange={e => {
-                          const newColors = [...editingProduct.colors];
-                          newColors[idx].color = e.target.value;
-                          setEditingProduct({...editingProduct, colors: newColors});
-                        }} className="w-2/3 p-2 border border-gray-200 rounded" />
+                      <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 p-3 border border-gray-100 rounded bg-gray-50/50">
+                        <div className="flex-1 w-full">
+                          <input type="text" placeholder="Color (e.g. Red)" value={colorObj.color} onChange={e => {
+                            const newColors = [...editingProduct.colors];
+                            newColors[idx].color = e.target.value;
+                            setEditingProduct({...editingProduct, colors: newColors});
+                          }} className="w-full p-2 border border-gray-200 rounded" />
+                        </div>
+                        <div className="flex-1 w-full flex flex-col gap-2">
+                          <input type="file" multiple accept="image/*" onChange={e => {
+                            const newColors = [...editingProduct.colors];
+                            newColors[idx].imageFiles = Array.from(e.target.files).slice(0, 6);
+                            setEditingProduct({...editingProduct, colors: newColors});
+                          }} className="w-full p-1 border border-gray-200 rounded text-sm bg-white" title="Select up to 6 images" />
+                          
+                          <div className="flex gap-2 overflow-x-auto pb-1">
+                            {colorObj.imageFiles?.length > 0 ? (
+                              colorObj.imageFiles.map((file, i) => (
+                                <img key={i} src={URL.createObjectURL(file)} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
+                              ))
+                            ) : colorObj.images?.length > 0 ? (
+                              colorObj.images.map((imgUrl, i) => (
+                                <div key={i} className="relative group">
+                                  <img src={imgUrl.startsWith('http') ? imgUrl : `http://localhost:8000${imgUrl}`} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
+                                  <button type="button" onClick={(e) => {
+                                    e.preventDefault();
+                                    const newColors = [...editingProduct.colors];
+                                    newColors[idx].images = newColors[idx].images.filter((_, index) => index !== i);
+                                    setEditingProduct({...editingProduct, colors: newColors});
+                                  }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                </div>
+                              ))
+                            ) : colorObj.image ? (
+                              <img src={colorObj.image.startsWith('http') ? colorObj.image : `http://localhost:8000${colorObj.image}`} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
+                            ) : null}
+                          </div>
+                        </div>
+                        
                         <button type="button" onClick={() => {
                           const newColors = [...editingProduct.colors];
                           newColors.splice(idx, 1);
                           setEditingProduct({...editingProduct, colors: newColors});
-                        }} className="text-red-500 hover:text-red-700 p-2"><Trash2 size={18}/></button>
+                        }} className="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded"><Trash2 size={18}/></button>
                       </div>
                     ))}
-                    <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: ''}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color</button>
+                    <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: '', image: null, imageFile: null}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color with Image</button>
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
@@ -1399,6 +1478,115 @@ const AdminDashboard = () => {
           </motion.div>
         </div>
       )}
+
+        {/* --- STOCK TAB --- */}
+        {activeTab === 'stock' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Stock Management</h2>
+              <button onClick={fetchProducts} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                <RefreshCw size={16} className={productsLoading ? 'animate-spin' : ''} />
+                Refresh Stock
+              </button>
+            </div>
+            
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Product Name</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Global Stock</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Size Breakdown</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {products.length === 0 ? (
+                      <tr><td colSpan="3" className="p-8 text-center text-gray-500">No products found.</td></tr>
+                    ) : (
+                      products.map(product => (
+                        <tr key={product.id} className="hover:bg-gray-50/50">
+                          <td className="p-4 flex items-center gap-3">
+                            <img src={getImageUrl(product.image, 'products')} alt={product.name} className="h-10 w-10 object-cover rounded shadow-sm" />
+                            <span className="font-semibold text-gray-900">{product.name}</span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2 py-1 rounded font-semibold text-xs ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {product.stock}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            {product.sizes && product.sizes.length > 0 ? (
+                              <div className="flex flex-wrap gap-2">
+                                {product.sizes.map(s => (
+                                  <span key={s.id} className={`px-2 py-1 rounded border text-xs font-medium ${s.stock > 0 ? 'bg-white border-gray-200 text-gray-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                                    {s.size}: {s.stock}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-xs italic">No variants</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* --- USERS TAB --- */}
+        {activeTab === 'users' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Registered Users</h2>
+              <button onClick={fetchUsers} className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                <RefreshCw size={16} className={usersLoading ? 'animate-spin' : ''} />
+                Refresh Users
+              </button>
+            </div>
+            
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Email</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Joined</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Status</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm">Location</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {usersList.length === 0 ? (
+                      <tr><td colSpan="5" className="p-8 text-center text-gray-500">No users found.</td></tr>
+                    ) : (
+                      usersList.map(u => (
+                        <tr key={u.id} className="hover:bg-gray-50/50">
+                          <td className="p-4 font-semibold text-gray-900">{u.name} {u.is_staff ? <span className="ml-2 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full uppercase tracking-wider">Admin</span> : ''}</td>
+                          <td className="p-4 text-gray-600">{u.email}</td>
+                          <td className="p-4 text-gray-500 text-sm">{u.date_joined}</td>
+                          <td className="p-4">
+                            <span className={`px-2 py-1 rounded font-semibold text-xs ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {u.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-sm text-gray-600">
+                            {u.location ? `${u.location.city || ''}, ${u.location.country || ''}` : <span className="italic text-gray-400">Not provided</span>}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
       {/* Confirm Dialog Modal */}
       {confirmDialog.isOpen && (

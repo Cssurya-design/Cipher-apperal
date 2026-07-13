@@ -51,7 +51,11 @@ const ProductDetail = () => {
         }
         
         if (res.data.colors && res.data.colors.length > 0) {
-          setSelectedColor(res.data.colors[0].color);
+          const firstColor = res.data.colors[0];
+          setSelectedColor(firstColor.color);
+          if (firstColor.image) {
+            setSelectedImage(firstColor.image);
+          }
         }
         
         // Add to recently viewed
@@ -189,31 +193,44 @@ const ProductDetail = () => {
         <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-start">
           {/* Product Image Gallery (Left Column) */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="md:col-span-5 lg:col-span-5 flex flex-col gap-4">
-            <img
-              src={getImageUrl(selectedImage || product.image, 'products')}
-              alt={product.name}
-              className="w-full rounded-2xl object-cover max-h-[500px]"
-              onError={(e) => { e.target.src = '/hero-new.jpg'; }}
-            />
-            {product.images && product.images.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                <button
-                  onClick={() => setSelectedImage(product.image)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 ${selectedImage === product.image ? 'border-primary' : 'border-transparent'}`}
-                >
-                  <img src={getImageUrl(product.image, 'products')} className="w-full h-full object-cover" alt="Primary" />
-                </button>
-                {product.images.map(img => (
-                  <button
-                    key={img.id}
-                    onClick={() => setSelectedImage(img.url)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 ${selectedImage === img.url ? 'border-primary' : 'border-transparent'}`}
-                  >
-                    <img src={getImageUrl(img.url, 'products')} className="w-full h-full object-cover" alt="Gallery" />
-                  </button>
-                ))}
-              </div>
-            )}
+            {(() => {
+              const selectedColorObj = product.colors?.find(c => c.color === selectedColor);
+              const hasColorImages = selectedColorObj && selectedColorObj.images && selectedColorObj.images.length > 0;
+              const galleryImages = hasColorImages 
+                ? selectedColorObj.images.map((img, idx) => ({ id: `cimg-${idx}`, url: img }))
+                : product.images || [];
+              const primaryImage = hasColorImages && selectedColorObj.image ? selectedColorObj.image : product.image;
+              
+              return (
+                <>
+                  <img
+                    src={getImageUrl(selectedImage || primaryImage, 'products')}
+                    alt={product.name}
+                    className="w-full rounded-2xl object-cover max-h-[500px]"
+                    onError={(e) => { e.target.src = '/hero-new.jpg'; }}
+                  />
+                  {(galleryImages.length > 0 || (hasColorImages && selectedColorObj.image)) && (
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                      <button
+                        onClick={() => setSelectedImage(primaryImage)}
+                        className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 ${(!selectedImage || selectedImage === primaryImage) ? 'border-primary' : 'border-transparent'}`}
+                      >
+                        <img src={getImageUrl(primaryImage, 'products')} className="w-full h-full object-cover" alt="Primary" />
+                      </button>
+                      {galleryImages.filter(img => img.url !== primaryImage).map(img => (
+                        <button
+                          key={img.id}
+                          onClick={() => setSelectedImage(img.url)}
+                          className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 ${selectedImage === img.url ? 'border-primary' : 'border-transparent'}`}
+                        >
+                          <img src={getImageUrl(img.url, 'products')} className="w-full h-full object-cover" alt="Gallery" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </motion.div>
           
           {/* Product Info (Center Column) */}
@@ -367,13 +384,28 @@ const ProductDetail = () => {
             </div>
 
             {/* Scarcity Indicator */}
-            <div className="mb-4 flex items-center gap-2 text-orange-600 text-sm font-bold">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-              </span>
-              In Stock
-            </div>
+            {(() => {
+              const currentStock = (product.sizes && product.sizes.length > 0)
+                ? (product.sizes.find(s => s.size === selectedSize)?.stock || 0)
+                : (product.stock || 0);
+
+              return currentStock > 0 ? (
+                <div className="mb-4 flex items-center gap-2 text-orange-600 text-sm font-bold">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                  </span>
+                  In Stock ({currentStock} available)
+                </div>
+              ) : (
+                <div className="mb-4 flex items-center gap-2 text-red-600 text-sm font-bold">
+                  <span className="relative flex h-2 w-2">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                  Out of Stock
+                </div>
+              );
+            })()}
 
             {/* Size Selector */}
             {product.sizes && product.sizes.length > 0 ? (
@@ -421,22 +453,34 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Color Selector */}
+            {/* Color Selector (Amazon Style) */}
             {product.colors && product.colors.length > 0 && (
               <div className="mb-4">
-                <h3 className="font-bold text-gray-900 mb-1 text-sm">Color: {selectedColor}</h3>
+                <h3 className="font-bold text-gray-900 mb-2 text-sm">Color: <span className="font-normal text-gray-700">{selectedColor}</span></h3>
                 <div className="flex flex-wrap gap-2">
                   {product.colors.map(c => (
                     <button
                       key={c.id}
-                      onClick={() => setSelectedColor(c.color)}
-                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
+                      onClick={() => {
+                        setSelectedColor(c.color);
+                        if (c.image) setSelectedImage(c.image);
+                      }}
+                      className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all p-0.5 group ${
                         selectedColor === c.color
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                          ? 'border-primary ring-2 ring-primary/20 shadow-sm'
+                          : 'border-gray-200 hover:border-primary/50'
                       }`}
+                      title={c.color}
                     >
-                      {c.color}
+                      {c.image ? (
+                        <div className="w-full h-full rounded-lg overflow-hidden bg-white">
+                          <img src={getImageUrl(c.image, 'products')} alt={c.color} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300" />
+                        </div>
+                      ) : (
+                        <div className="w-full h-full rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
+                          {c.color.substring(0, 3).toUpperCase()}
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -465,22 +509,41 @@ const ProductDetail = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-2 mb-4">
-              <button
-                onClick={handleAddToCart}
-                className={`w-full py-2.5 font-bold rounded-full flex items-center justify-center transition-all text-sm ${
-                  addedToCart
-                    ? 'bg-green-500 text-white'
-                    : 'bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 border border-[#FCD200] shadow-sm'
-                }`}
-              >
-                {addedToCart ? '✓ Added to Cart' : 'Add to Cart'}
-              </button>
-              <button
-                onClick={handleBuyNow}
-                className="w-full py-2.5 bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 font-bold rounded-full transition-all flex items-center justify-center border border-[#FF8F00] shadow-sm text-sm"
-              >
-                Buy Now
-              </button>
+              {(() => {
+                const currentStock = (product.sizes && product.sizes.length > 0)
+                  ? (product.sizes.find(s => s.size === selectedSize)?.stock || 0)
+                  : (product.stock || 0);
+                const outOfStock = currentStock <= 0;
+
+                return (
+                  <>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={outOfStock}
+                      className={`w-full py-2.5 font-bold rounded-full flex items-center justify-center transition-all text-sm ${
+                        outOfStock 
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          : addedToCart
+                            ? 'bg-green-500 text-white'
+                            : 'bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 border border-[#FCD200] shadow-sm'
+                      }`}
+                    >
+                      {outOfStock ? 'Out of Stock' : addedToCart ? '✓ Added to Cart' : 'Add to Cart'}
+                    </button>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={outOfStock}
+                      className={`w-full py-2.5 font-bold rounded-full flex items-center justify-center transition-all text-sm border shadow-sm ${
+                        outOfStock
+                          ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                          : 'bg-[#FFA41C] hover:bg-[#FA8900] text-gray-900 border-[#FF8F00]'
+                      }`}
+                    >
+                      Buy Now
+                    </button>
+                  </>
+                );
+              })()}
             </div>
 
             <div className="flex flex-col gap-2 text-xs text-gray-500 font-medium pt-2 border-t border-gray-100">
