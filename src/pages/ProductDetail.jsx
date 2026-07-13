@@ -125,7 +125,7 @@ const ProductDetail = () => {
       return;
     }
     try {
-      const res = await api.post('/wishlist/', { product_id: product.id });
+      const res = await api.post('/wishlist/', { product_id: product.id, color: selectedColor });
       if (res.data.status === 'added') {
         setIsWishlisted(true);
         toast.success('Added to wishlist');

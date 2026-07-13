@@ -27,10 +27,10 @@ const Wishlist = () => {
       .catch(() => setLoading(false));
   }, [user]);
 
-  const removeFromWishlist = async (productId) => {
+  const removeFromWishlist = async (productId, color = '') => {
     try {
-      await api.post('/wishlist/', { product_id: productId });
-      setItems(prev => prev.filter(item => item.id !== productId));
+      await api.post('/wishlist/', { product_id: productId, color });
+      setItems(prev => prev.filter(item => !(item.id === productId && item.color === color)));
     } catch (err) {
       console.error(err);
     }
@@ -79,7 +79,7 @@ const Wishlist = () => {
             <AnimatePresence>
               {items.map((item, i) => (
                 <motion.div
-                  key={item.id}
+                  key={`${item.id}-${item.color}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -93,13 +93,13 @@ const Wishlist = () => {
                   <p className="text-primary font-bold mt-1">₹{item.price}</p>
                   <div className="flex gap-2 mt-3">
                     <button
-                      onClick={() => { addToCart(item); }}
+                      onClick={() => { addToCart(item, 1, '', item.color); }}
                       className="flex-1 bg-primary text-white py-2 rounded-lg text-xs sm:text-sm font-semibold hover:bg-primary-dark transition-colors flex items-center justify-center gap-1"
                     >
                       <ShoppingCart size={14} /> Add to Cart
                     </button>
                     <button
-                      onClick={() => removeFromWishlist(item.id)}
+                      onClick={() => removeFromWishlist(item.id, item.color)}
                       className="w-9 h-9 sm:w-10 sm:h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors flex-shrink-0"
                     >
                       <Heart size={16} fill="currentColor" />
