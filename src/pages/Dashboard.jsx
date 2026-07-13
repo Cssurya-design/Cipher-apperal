@@ -259,7 +259,7 @@ const Dashboard = () => {
                     {group.items?.map(item => (
                       <div key={item.id} className="flex gap-3 sm:gap-4 items-center">
                         <img
-                          src={getImageUrl(item.product_img)}
+                          src={getImageUrl(item.product_img, 'products')}
                           alt={item.product_name}
                           className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-xl flex-shrink-0"
                           onError={(e) => { e.target.src = '/hero-new.jpg'; }}

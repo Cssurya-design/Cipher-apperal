@@ -267,7 +267,7 @@ const OrderTracking = () => {
           >
             <div className="flex gap-4 flex-col sm:flex-row items-start sm:items-center">
               <img
-                src={getImageUrl(item.product_img)}
+                src={getImageUrl(item.product_img, 'products')}
                 alt={item.product_name}
                 className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl flex-shrink-0"
                 onError={(e) => { e.target.src = '/hero-new.jpg'; }}
