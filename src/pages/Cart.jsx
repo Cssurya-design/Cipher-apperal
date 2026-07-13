@@ -104,7 +104,8 @@ const Cart = () => {
       }, 2000);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to place order. Please try again.');
+      const apiError = err.response?.data?.error || err.message || 'Failed to place order. Please try again.';
+      toast.error(`Order Failed: ${apiError}`);
     } finally {
       setCheckoutLoading(false);
     }
