@@ -1139,7 +1139,7 @@ const AdminDashboard = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Manage Products</h2>
               <button 
-                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null, stock: 0, sizes: ['S', 'M', 'L', 'XL', 'XXL'].map(s => ({ size: s, stock: '', price: '', discount_price: '' })), colors: [], features: [], imageFiles: [], delete_image_ids: [] })}
+                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null, stock: 0, sizes: [{size: 'S', stock: 10, price: 299.00, discount_price: ''}, {size: 'M', stock: 20, price: 399.00, discount_price: ''}, {size: 'L', stock: 30, price: 499.00, discount_price: ''}, {size: 'XL', stock: 40, price: 599.00, discount_price: ''}, {size: 'XXL', stock: 50, price: 699.00, discount_price: ''}], colors: [], features: [], imageFiles: [], delete_image_ids: [] })}
                 className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
               >
                 <Plus size={18} /> Add New Product
@@ -1291,7 +1291,7 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                     ))}
-                    <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: '', image: null, imageFile: null, sizes: editingProduct.sizes && editingProduct.sizes.length > 0 ? editingProduct.sizes.map(s => ({...s})) : ['S', 'M', 'L', 'XL', 'XXL'].map(s => ({size: s, stock: '', price: '', discount_price: ''}))}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color with Image</button>
+                    <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: '', image: null, imageFile: null, sizes: editingProduct.sizes && editingProduct.sizes.length > 0 ? editingProduct.sizes.map(s => ({...s})) : [{size: 'S', stock: 10, price: 299.00, discount_price: ''}, {size: 'M', stock: 20, price: 399.00, discount_price: ''}, {size: 'L', stock: 30, price: 499.00, discount_price: ''}, {size: 'XL', stock: 40, price: 599.00, discount_price: ''}, {size: 'XXL', stock: 50, price: 699.00, discount_price: ''}]}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color with Image</button>
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
