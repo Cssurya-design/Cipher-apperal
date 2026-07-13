@@ -86,7 +86,7 @@ const Dashboard = () => {
   const handleRateOrder = async (item, stars) => {
     setRatingLoading(item.id);
     try {
-      await api.post('/rate-product/', { product_name: item.product_name, rating: stars });
+      await api.post('/rate-product/', { product_name: item.product_name, color: item.color, rating: stars });
       setOrders(prev => prev.map(group => ({
         ...group,
         items: group.items?.map(i => i.id === item.id ? { ...i, user_rating: stars } : i)
@@ -269,6 +269,9 @@ const Dashboard = () => {
                         />
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-gray-800 text-sm truncate">{item.product_name}</h4>
+                          {item.product_description && (
+                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{item.product_description}</p>
+                          )}
                           <div className="flex flex-wrap items-center gap-2 mt-1">
                             {item.size && (
                               <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">

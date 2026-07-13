@@ -77,7 +77,7 @@ const OrderTracking = () => {
     if (!order) return;
     setRatingLoading(true);
     try {
-      await api.post('/rate-product/', { product_name: item.product_name, rating: stars });
+      await api.post('/rate-product/', { product_name: item.product_name, color: item.color, rating: stars });
       setOrder(prev => {
         const updatedItems = prev.items.map(it => 
           it.id === item.id ? { ...it, user_rating: stars } : it

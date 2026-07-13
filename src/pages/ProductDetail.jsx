@@ -101,10 +101,14 @@ const ProductDetail = () => {
     try {
       await api.post('/rate-product/', {
         product_name: product.name,
+        color: selectedColor,
         rating: stars,
         review_text: reviewText,
       });
-      setProduct(prev => ({ ...prev, user_rating: stars }));
+      setProduct(prev => ({
+        ...prev,
+        user_ratings: { ...(prev.user_ratings || {}), [selectedColor]: stars }
+      }));
       // Refresh product to get updated reviews
       const res = await api.get(`/products/${id}/`);
       setProduct(res.data);
@@ -621,7 +625,7 @@ const ProductDetail = () => {
                     onMouseLeave={() => setHoverRating(0)}
                     disabled={ratingLoading}
                     className={`transition-colors ${
-                      star <= (hoverRating || product.user_rating) ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'
+                      star <= (hoverRating || (product.user_ratings?.[selectedColor] || 0)) ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'
                     }`}
                   >
                     <Star size={28} fill="currentColor" />
@@ -638,7 +642,7 @@ const ProductDetail = () => {
                     className="flex-1 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                   />
                   <button
-                    onClick={() => handleRate(product.user_rating || 5)}
+                    onClick={() => handleRate(product.user_ratings?.[selectedColor] || 5)}
                     disabled={ratingLoading || !reviewText}
                     className="w-full sm:w-auto px-4 py-2 bg-primary text-white text-sm rounded-lg disabled:opacity-50"
                   >
@@ -651,49 +655,53 @@ const ProductDetail = () => {
         </div>
 
         {/* Customer Reviews Section */}
-        {product.reviews && product.reviews.length > 0 && (
-          <div className="mt-8 bg-white rounded-2xl p-4 sm:p-8 shadow-sm border border-gray-100">
-            <button
-              onClick={() => setShowReviews(!showReviews)}
-              className="flex items-center justify-between w-full text-left"
-            >
-              <h2 className="text-xl font-bold text-gray-900">
-                Customer Reviews ({product.total_reviews})
-              </h2>
-              {showReviews ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-            </button>
-
-            {showReviews && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-6 space-y-4"
+        {(() => {
+          const colorReviews = product.reviews ? product.reviews.filter(r => r.color === selectedColor) : [];
+          if (colorReviews.length === 0) return null;
+          return (
+            <div className="mt-8 bg-white rounded-2xl p-4 sm:p-8 shadow-sm border border-gray-100">
+              <button
+                onClick={() => setShowReviews(!showReviews)}
+                className="flex items-center justify-between w-full text-left"
               >
-                {product.reviews.map((review, i) => (
-                  <div key={i} className="border-b border-gray-100 pb-4 last:border-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm">
-                        {review.user_name.charAt(0).toUpperCase()}
+                <h2 className="text-xl font-bold text-gray-900">
+                  Customer Reviews ({colorReviews.length})
+                </h2>
+                {showReviews ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              </button>
+
+              {showReviews && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-6 space-y-4"
+                >
+                  {colorReviews.map((review, i) => (
+                    <div key={i} className="border-b border-gray-100 pb-4 last:border-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm">
+                          {review.user_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-800 text-sm">{review.user_name}</p>
+                          <p className="text-xs text-gray-400">{review.date}</p>
+                        </div>
+                        <div className="flex text-yellow-400 ml-auto">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} size={14} fill={s <= review.rating ? "currentColor" : "none"} />
+                          ))}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-800 text-sm">{review.user_name}</p>
-                        <p className="text-xs text-gray-400">{review.date}</p>
-                      </div>
-                      <div className="flex text-yellow-400 ml-auto">
-                        {[1, 2, 3, 4, 5].map(s => (
-                          <Star key={s} size={14} fill={s <= review.rating ? "currentColor" : "none"} />
-                        ))}
-                      </div>
+                      {review.review_text && (
+                        <p className="text-gray-600 text-sm ml-11">{review.review_text}</p>
+                      )}
                     </div>
-                    {review.review_text && (
-                      <p className="text-gray-600 text-sm ml-11">{review.review_text}</p>
-                    )}
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </div>
-        )}
+                  ))}
+                </motion.div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Related Products */}
         {relatedProducts && relatedProducts.length > 0 && (

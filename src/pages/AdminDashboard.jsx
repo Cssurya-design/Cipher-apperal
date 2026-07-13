@@ -1327,6 +1327,7 @@ const AdminDashboard = () => {
                         <th className="p-4 font-semibold text-gray-600 text-sm w-16">Image</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Category</th>
+                        <th className="p-4 font-semibold text-gray-600 text-sm">Product Tag/Status</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Price</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm">Stock</th>
                         <th className="p-4 font-semibold text-gray-600 text-sm text-right">Actions</th>
@@ -1334,9 +1335,9 @@ const AdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {productsLoading ? (
-                        <tr><td colSpan="6" className="p-8 text-center text-gray-500">Loading products...</td></tr>
+                        <tr><td colSpan="7" className="p-8 text-center text-gray-500">Loading products...</td></tr>
                       ) : products.length === 0 ? (
-                        <tr><td colSpan="6" className="p-8 text-center text-gray-500">No products found.</td></tr>
+                        <tr><td colSpan="7" className="p-8 text-center text-gray-500">No products found.</td></tr>
                       ) : (
                         products.map(product => (
                           <tr key={product.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
@@ -1344,6 +1345,7 @@ const AdminDashboard = () => {
                               <img src={getImageUrl(product.image, 'products')} alt={product.name} className="w-12 h-12 rounded object-cover border border-gray-200" />
                             </td>
                             <td className="p-4 font-medium text-gray-900">{product.name}</td>
+                            <td className="p-4 text-sm"><span className="bg-gray-100 px-2 py-1 rounded text-gray-700 capitalize">{product.product_category_name || 'Uncategorized'}</span></td>
                             <td className="p-4 text-sm"><span className="bg-gray-100 px-2 py-1 rounded text-gray-700 capitalize">{product.category.replace('_', ' ')}</span></td>
                             <td className="p-4 font-semibold">₹{product.price} {product.discount_price && <span className="text-xs text-green-600 ml-1 block sm:inline">(Sale: ₹{product.discount_price})</span>}</td>
                             <td className="p-4 text-sm font-semibold">{product.stock}</td>
