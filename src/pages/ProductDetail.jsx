@@ -5,7 +5,7 @@ import { Star, ShoppingCart, Zap, Share2, Heart, ChevronDown, ChevronUp, MapPin 
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLocation } from '../context/LocationContext';
-import api, { API_BASE } from '../api';
+import api, { API_BASE, getImageUrl } from '../api';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
@@ -160,10 +160,6 @@ const ProductDetail = () => {
     }
   };
 
-  const getImageUrl = (image) => {
-    if (!image) return '/hero-new.jpg';
-    return image.startsWith('http') ? image : `${API_BASE}/static/store/images/products/${image}`;
-  };
 
   if (loading) return (
     <div className="pt-24 min-h-screen bg-gray-50">
@@ -257,7 +253,11 @@ const ProductDetail = () => {
             <hr className="my-4 border-gray-100" />
 
             {(() => {
-              const currentSizeObj = product.sizes?.find(s => s.size === selectedSize);
+              const selectedColorObj = product.colors?.find(c => c.color === selectedColor);
+              const availableSizes = selectedColorObj && selectedColorObj.sizes && selectedColorObj.sizes.length > 0 
+                ? selectedColorObj.sizes 
+                : product.sizes || [];
+              const currentSizeObj = availableSizes.find(s => s.size === selectedSize);
               const activePrice = currentSizeObj?.price || product.price;
               const activeDiscountPrice = currentSizeObj?.discount_price || product.discount_price;
               return (
@@ -367,7 +367,11 @@ const ProductDetail = () => {
           {/* Buy Box (Right Column) */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-3 lg:col-span-3 border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm sticky top-28 flex flex-col bg-white">
             {(() => {
-              const currentSizeObj = product.sizes?.find(s => s.size === selectedSize);
+              const selectedColorObj = product.colors?.find(c => c.color === selectedColor);
+              const availableSizes = selectedColorObj && selectedColorObj.sizes && selectedColorObj.sizes.length > 0 
+                ? selectedColorObj.sizes 
+                : product.sizes || [];
+              const currentSizeObj = availableSizes.find(s => s.size === selectedSize);
               const activePrice = currentSizeObj?.price || product.price;
               const activeDiscountPrice = currentSizeObj?.discount_price || product.discount_price;
               return (
@@ -398,8 +402,12 @@ const ProductDetail = () => {
 
             {/* Scarcity Indicator */}
             {(() => {
-              const currentStock = (product.sizes && product.sizes.length > 0)
-                ? (product.sizes.find(s => s.size === selectedSize)?.stock || 0)
+              const selectedColorObj = product.colors?.find(c => c.color === selectedColor);
+              const availableSizes = selectedColorObj && selectedColorObj.sizes && selectedColorObj.sizes.length > 0 
+                ? selectedColorObj.sizes 
+                : product.sizes || [];
+              const currentStock = availableSizes.length > 0
+                ? (availableSizes.find(s => s.size === selectedSize)?.stock || 0)
                 : (product.stock || 0);
 
               return currentStock > 0 ? (
@@ -421,50 +429,57 @@ const ProductDetail = () => {
             })()}
 
             {/* Size Selector */}
-            {product.sizes && product.sizes.length > 0 ? (
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-1">
-                  <h3 className="font-bold text-gray-900 text-sm">Size: {selectedSize}</h3>
+            {(() => {
+              const selectedColorObj = product.colors?.find(c => c.color === selectedColor);
+              const availableSizes = selectedColorObj && selectedColorObj.sizes && selectedColorObj.sizes.length > 0 
+                ? selectedColorObj.sizes 
+                : product.sizes || [];
+              
+              return availableSizes.length > 0 ? (
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <h3 className="font-bold text-gray-900 text-sm">Size: {selectedSize}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {availableSizes.map(s => (
+                      <button
+                        key={s.id || s.size}
+                        onClick={() => setSelectedSize(s.size)}
+                        disabled={s.stock <= 0}
+                        className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
+                          selectedSize === s.size
+                            ? 'border-primary bg-primary text-white'
+                            : s.stock <= 0
+                              ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60'
+                              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        {s.size}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map(s => (
-                    <button
-                      key={s.id}
-                      onClick={() => setSelectedSize(s.size)}
-                      disabled={s.stock <= 0}
-                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
-                        selectedSize === s.size
-                          ? 'border-primary bg-primary text-white'
-                          : s.stock <= 0
-                            ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60'
+              ) : (
+                <div className="mb-4">
+                  <h3 className="font-bold text-gray-900 mb-1 text-sm">Size: {selectedSize}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {SIZES.map(size => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
+                          selectedSize === size
+                            ? 'border-primary bg-primary text-white'
                             : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      {s.size}
-                    </button>
-                  ))}
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="mb-4">
-                <h3 className="font-bold text-gray-900 mb-1 text-sm">Size: {selectedSize}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {SIZES.map(size => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-3 py-1.5 rounded-lg font-semibold text-xs border-2 transition-all ${
-                        selectedSize === size
-                          ? 'border-primary bg-primary text-white'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Color Selector (Amazon Style) */}
             {product.colors && product.colors.length > 0 && (

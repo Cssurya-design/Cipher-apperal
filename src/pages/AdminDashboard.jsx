@@ -1135,7 +1135,7 @@ const AdminDashboard = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Manage Products</h2>
               <button 
-                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null, stock: 0, sizes: [], colors: [], features: [], imageFiles: [], delete_image_ids: [] })}
+                onClick={() => setEditingProduct({ name: '', price: '', discount_price: '', product_category_id: '', category: 'regular', description: '', image: '', imageFile: null, stock: 0, sizes: ['S', 'M', 'L', 'XL', 'XXL'].map(s => ({ size: s, stock: '', price: '', discount_price: '' })), colors: [], features: [], imageFiles: [], delete_image_ids: [] })}
                 className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
               >
                 <Plus size={18} /> Add New Product
@@ -1212,49 +1212,111 @@ const AdminDashboard = () => {
                   <div className="border-t border-gray-200 pt-4">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Available Colors (Amazon Style)</label>
                     {editingProduct.colors?.map((colorObj, idx) => (
-                      <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4 p-3 border border-gray-100 rounded bg-gray-50/50">
-                        <div className="flex-1 w-full">
-                          <input type="text" placeholder="Color (e.g. Red)" value={colorObj.color} onChange={e => {
+                      <div key={idx} className="flex flex-col gap-4 mb-4 p-4 border border-gray-200 rounded-xl bg-gray-50 relative">
+                        <div className="absolute top-2 right-2">
+                          <button type="button" onClick={() => {
                             const newColors = [...editingProduct.colors];
-                            newColors[idx].color = e.target.value;
+                            newColors.splice(idx, 1);
                             setEditingProduct({...editingProduct, colors: newColors});
-                          }} className="w-full p-2 border border-gray-200 rounded" />
-                        </div>
-                        <div className="flex-1 w-full flex flex-col gap-2">
-                          <input type="file" multiple accept="image/*" onChange={e => {
-                            const newColors = [...editingProduct.colors];
-                            newColors[idx].imageFiles = Array.from(e.target.files).slice(0, 6);
-                            setEditingProduct({...editingProduct, colors: newColors});
-                          }} className="w-full p-1 border border-gray-200 rounded text-sm bg-white" title="Select up to 6 images" />
-                          
-                          <div className="flex gap-2 overflow-x-auto pb-1">
-                            {colorObj.imageFiles?.length > 0 ? (
-                              colorObj.imageFiles.map((file, i) => (
-                                <img key={i} src={URL.createObjectURL(file)} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
-                              ))
-                            ) : colorObj.images?.length > 0 ? (
-                              colorObj.images.map((imgUrl, i) => (
-                                <div key={i} className="relative group">
-                                  <img src={imgUrl.startsWith('http') ? imgUrl : `http://localhost:8000${imgUrl}`} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
-                                  <button type="button" onClick={(e) => {
-                                    e.preventDefault();
-                                    const newColors = [...editingProduct.colors];
-                                    newColors[idx].images = newColors[idx].images.filter((_, index) => index !== i);
-                                    setEditingProduct({...editingProduct, colors: newColors});
-                                  }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
-                                </div>
-                              ))
-                            ) : colorObj.image ? (
-                              <img src={colorObj.image.startsWith('http') ? colorObj.image : `http://localhost:8000${colorObj.image}`} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
-                            ) : null}
-                          </div>
+                          }} className="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded-full"><Trash2 size={16}/></button>
                         </div>
                         
-                        <button type="button" onClick={() => {
-                          const newColors = [...editingProduct.colors];
-                          newColors.splice(idx, 1);
-                          setEditingProduct({...editingProduct, colors: newColors});
-                        }} className="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded"><Trash2 size={18}/></button>
+                        <div className="flex flex-col sm:flex-row items-start gap-4 pr-10 w-full">
+                          <div className="flex-1 w-full">
+                            <input type="text" placeholder="Color (e.g. Red)" value={colorObj.color} onChange={e => {
+                              const newColors = [...editingProduct.colors];
+                              newColors[idx].color = e.target.value;
+                              setEditingProduct({...editingProduct, colors: newColors});
+                            }} className="w-full p-2 border border-gray-300 rounded focus:ring-primary focus:border-primary" />
+                          </div>
+                          <div className="flex-1 w-full flex flex-col gap-2">
+                            <input type="file" multiple accept="image/*" onChange={e => {
+                              const newColors = [...editingProduct.colors];
+                              newColors[idx].imageFiles = Array.from(e.target.files).slice(0, 6);
+                              setEditingProduct({...editingProduct, colors: newColors});
+                            }} className="w-full p-1 border border-gray-300 rounded text-sm bg-white" title="Select up to 6 images" />
+                            
+                            <div className="flex gap-2 overflow-x-auto pb-1">
+                              {colorObj.imageFiles?.length > 0 ? (
+                                colorObj.imageFiles.map((file, i) => (
+                                  <img key={i} src={URL.createObjectURL(file)} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
+                                ))
+                              ) : colorObj.images?.length > 0 ? (
+                                colorObj.images.map((imgUrl, i) => (
+                                  <div key={i} className="relative group">
+                                    <img src={getImageUrl(imgUrl, 'products')} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
+                                    <button type="button" onClick={(e) => {
+                                      e.preventDefault();
+                                      const newColors = [...editingProduct.colors];
+                                      newColors[idx].images = newColors[idx].images.filter((_, index) => index !== i);
+                                      setEditingProduct({...editingProduct, colors: newColors});
+                                    }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                                  </div>
+                                ))
+                              ) : colorObj.image ? (
+                                <img src={getImageUrl(colorObj.image, 'products')} alt="Preview" className="h-12 w-12 object-cover rounded shadow-sm border border-gray-200 flex-shrink-0" />
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-3">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Available Sizes for {colorObj.color || 'this color'}</label>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {['S', 'M', 'L', 'XL', 'XXL'].map(size => {
+                              const isSelected = colorObj.sizes?.some(s => s.size === size);
+                              return (
+                                <label key={size} className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-full cursor-pointer transition-colors ${isSelected ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+                                  <input type="checkbox" checked={isSelected} onChange={(e) => {
+                                    const newColors = [...editingProduct.colors];
+                                    if (!newColors[idx].sizes) newColors[idx].sizes = [];
+                                    if (e.target.checked) {
+                                      newColors[idx].sizes.push({ size, stock: '', price: '', discount_price: '' });
+                                      // Sort by standard sizes
+                                      const order = {'S':1, 'M':2, 'L':3, 'XL':4, 'XXL':5};
+                                      newColors[idx].sizes.sort((a,b) => (order[a.size]||99) - (order[b.size]||99));
+                                    } else {
+                                      newColors[idx].sizes = newColors[idx].sizes.filter(s => s.size !== size);
+                                    }
+                                    setEditingProduct({ ...editingProduct, colors: newColors });
+                                  }} className="rounded text-primary focus:ring-primary h-3.5 w-3.5" />
+                                  <span className="text-sm font-bold">{size}</span>
+                                </label>
+                              )
+                            })}
+                          </div>
+                          
+                          {colorObj.sizes?.length > 0 && (
+                            <div className="space-y-2 mt-3">
+                              <div className="grid grid-cols-4 gap-4 px-2 mb-1">
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Size</span>
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</span>
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Price (₹)</span>
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Discount (₹)</span>
+                              </div>
+                              {colorObj.sizes.map((s, sIdx) => (
+                                <div key={sIdx} className="grid grid-cols-4 gap-4 items-center bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
+                                  <span className="font-bold text-gray-800 px-2 text-center bg-gray-100 rounded py-1">{s.size}</span>
+                                  <input type="number" placeholder="0" value={s.stock} onChange={(e) => {
+                                    const newColors = [...editingProduct.colors];
+                                    newColors[idx].sizes[sIdx].stock = e.target.value;
+                                    setEditingProduct({ ...editingProduct, colors: newColors });
+                                  }} className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm" />
+                                  <input type="number" placeholder="Price" value={s.price} onChange={(e) => {
+                                    const newColors = [...editingProduct.colors];
+                                    newColors[idx].sizes[sIdx].price = e.target.value;
+                                    setEditingProduct({ ...editingProduct, colors: newColors });
+                                  }} className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm" />
+                                  <input type="number" placeholder="Discount" value={s.discount_price} onChange={(e) => {
+                                    const newColors = [...editingProduct.colors];
+                                    newColors[idx].sizes[sIdx].discount_price = e.target.value;
+                                    setEditingProduct({ ...editingProduct, colors: newColors });
+                                  }} className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm" />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                     <button type="button" onClick={() => setEditingProduct({...editingProduct, colors: [...(editingProduct.colors || []), {color: '', image: null, imageFile: null}]})} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded font-semibold">+ Add Color with Image</button>
