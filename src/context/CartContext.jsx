@@ -23,7 +23,10 @@ export const CartProvider = ({ children }) => {
         );
       }
       
-      const sizeObj = product.sizes?.find(s => s.size === size);
+      const selectedColorObj = product.colors?.find(c => c.color === color);
+      const availableSizes = selectedColorObj?.sizes?.length > 0 ? selectedColorObj.sizes : (product.sizes || []);
+      const sizeObj = availableSizes.find(s => s.size === size);
+      
       const activePrice = sizeObj?.price || product.price;
       const activeDiscountPrice = sizeObj?.discount_price || product.discount_price;
 
@@ -59,26 +62,31 @@ export const CartProvider = ({ children }) => {
 
   const updateSize = (productId, oldSize, newSize, color = '') => {
     setCart(prev => {
-      // Check if an item with new size already exists
       const existingNew = prev.find(item => item.id === productId && item.size === newSize && (item.color || '') === color);
-      if (existingNew) {
-        // Merge quantities
-        const oldItem = prev.find(item => item.id === productId && item.size === oldSize && (item.color || '') === color);
-        return prev
-          .map(item => {
-            if (item.id === productId && item.size === newSize && (item.color || '') === color) {
-              return { ...item, quantity: item.quantity + (oldItem?.quantity || 0) };
-            }
-            return item;
-          })
-          .filter(item => !(item.id === productId && item.size === oldSize && (item.color || '') === color));
-      }
-      // Just update size
-      return prev.map(item =>
-        (item.id === productId && item.size === oldSize && (item.color || '') === color)
-          ? { ...item, size: newSize }
-          : item
-      );
+      
+      return prev
+        .map(item => {
+          if (item.id === productId && item.size === newSize && (item.color || '') === color) {
+            // This is the item that already existed with the new size, we just add the quantity of the old one
+            const oldItem = prev.find(i => i.id === productId && i.size === oldSize && (i.color || '') === color);
+            return { ...item, quantity: item.quantity + (oldItem?.quantity || 0) };
+          }
+          if (item.id === productId && item.size === oldSize && (item.color || '') === color) {
+            if (existingNew) return null; // We merged it into the existing one above
+            
+            // Otherwise, we update this item's size and price
+            const selectedColorObj = item.colors?.find(c => c.color === color);
+            const availableSizes = selectedColorObj?.sizes?.length > 0 ? selectedColorObj.sizes : (item.sizes || []);
+            const sizeObj = availableSizes.find(s => s.size === newSize);
+            
+            const activePrice = sizeObj?.price || item.price;
+            const activeDiscountPrice = sizeObj?.discount_price || item.discount_price;
+            
+            return { ...item, size: newSize, price: activePrice, discount_price: activeDiscountPrice };
+          }
+          return item;
+        })
+        .filter(Boolean); // Remove nulls
     });
   };
 
