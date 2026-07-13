@@ -1168,18 +1168,6 @@ const AdminDashboard = () => {
                         <option value="new_arrival">New Arrival</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Price (₹)</label>
-                      <input type="number" min="0" step="0.01" value={editingProduct.price || ''} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Discount Price (₹)</label>
-                      <input type="number" min="0" step="0.01" value={editingProduct.discount_price || ''} onChange={e => setEditingProduct({...editingProduct, discount_price: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
-                      <input type="number" min="0" value={editingProduct.stock || 0} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} className="w-full p-2 border border-gray-200 rounded" />
-                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
@@ -1216,17 +1204,27 @@ const AdminDashboard = () => {
                   <div className="border-t border-gray-200 pt-4">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Sizes & Stock</label>
                     {editingProduct.sizes?.map((sizeObj, idx) => (
-                      <div key={idx} className="flex items-center gap-2 mb-2">
+                      <div key={idx} className="flex flex-wrap md:flex-nowrap items-center gap-2 mb-2 p-2 bg-gray-50 rounded border border-gray-100">
                         <input type="text" placeholder="Size (e.g. XL)" value={sizeObj.size} onChange={e => {
                           const newSizes = [...editingProduct.sizes];
                           newSizes[idx].size = e.target.value;
                           setEditingProduct({...editingProduct, sizes: newSizes});
-                        }} className="w-1/3 p-2 border border-gray-200 rounded" />
+                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
                         <input type="number" min="0" placeholder="Stock" value={sizeObj.stock} onChange={e => {
                           const newSizes = [...editingProduct.sizes];
                           newSizes[idx].stock = e.target.value;
                           setEditingProduct({...editingProduct, sizes: newSizes});
-                        }} className="w-1/3 p-2 border border-gray-200 rounded" />
+                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
+                        <input type="number" min="0" step="0.01" placeholder="Price (₹)" value={sizeObj.price || ''} onChange={e => {
+                          const newSizes = [...editingProduct.sizes];
+                          newSizes[idx].price = e.target.value;
+                          setEditingProduct({...editingProduct, sizes: newSizes});
+                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
+                        <input type="number" min="0" step="0.01" placeholder="Disc. Price (₹)" value={sizeObj.discount_price || ''} onChange={e => {
+                          const newSizes = [...editingProduct.sizes];
+                          newSizes[idx].discount_price = e.target.value;
+                          setEditingProduct({...editingProduct, sizes: newSizes});
+                        }} className="w-full md:w-1/4 p-2 border border-gray-200 rounded" />
                         <button type="button" onClick={() => {
                           const newSizes = [...editingProduct.sizes];
                           newSizes.splice(idx, 1);

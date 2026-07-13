@@ -256,16 +256,22 @@ const ProductDetail = () => {
 
             <hr className="my-4 border-gray-100" />
 
-            {/* Price */}
-            <div className="flex items-center gap-3 mb-4">
-              <p className="text-2xl font-bold text-gray-900">
-                <span className="text-sm text-gray-500 align-top mr-1">₹</span>
-                {product.discount_price || product.price}
-              </p>
-              {product.discount_price && (
-                <p className="text-lg text-gray-400 line-through">₹{product.price}</p>
-              )}
-            </div>
+            {(() => {
+              const currentSizeObj = product.sizes?.find(s => s.size === selectedSize);
+              const activePrice = currentSizeObj?.price || product.price;
+              const activeDiscountPrice = currentSizeObj?.discount_price || product.discount_price;
+              return (
+                <div className="flex items-center gap-3 mb-4">
+                  <p className="text-2xl font-bold text-gray-900">
+                    <span className="text-sm text-gray-500 align-top mr-1">₹</span>
+                    {activeDiscountPrice || activePrice}
+                  </p>
+                  {activeDiscountPrice && (
+                    <p className="text-lg text-gray-400 line-through">₹{activePrice}</p>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Bullet Features (Amazon Style) */}
             {product.features && product.features.length > 0 && (
@@ -360,10 +366,17 @@ const ProductDetail = () => {
 
           {/* Buy Box (Right Column) */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-3 lg:col-span-3 border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm sticky top-28 flex flex-col bg-white">
-            <p className="text-2xl font-bold text-gray-900 mb-4">
-              <span className="text-sm text-gray-500 align-top mr-1">₹</span>
-              {product.discount_price || product.price}
-            </p>
+            {(() => {
+              const currentSizeObj = product.sizes?.find(s => s.size === selectedSize);
+              const activePrice = currentSizeObj?.price || product.price;
+              const activeDiscountPrice = currentSizeObj?.discount_price || product.discount_price;
+              return (
+                <p className="text-2xl font-bold text-gray-900 mb-4">
+                  <span className="text-sm text-gray-500 align-top mr-1">₹</span>
+                  {activeDiscountPrice || activePrice}
+                </p>
+              );
+            })()}
 
             {/* Delivery location */}
             <div className="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs">

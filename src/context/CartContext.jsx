@@ -22,8 +22,15 @@ export const CartProvider = ({ children }) => {
             : item
         );
       }
+      
+      const sizeObj = product.sizes?.find(s => s.size === size);
+      const activePrice = sizeObj?.price || product.price;
+      const activeDiscountPrice = sizeObj?.discount_price || product.discount_price;
+
       return [...prev, {
         ...product,
+        price: activePrice,
+        discount_price: activeDiscountPrice,
         quantity,
         size,
         color,
