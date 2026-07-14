@@ -434,8 +434,8 @@ const AdminDashboard = () => {
       if (editingBanner.title) formData.append('title', editingBanner.title);
       if (editingBanner.subtitle) formData.append('subtitle', editingBanner.subtitle);
       if (editingBanner.description) formData.append('description', editingBanner.description);
-      if (editingBanner.product_id) formData.append('product_id', editingBanner.product_id);
-      if (editingBanner.product_size_id) formData.append('product_size_id', editingBanner.product_size_id);
+      if (editingBanner.product_id !== undefined) formData.append('product_id', editingBanner.product_id);
+      if (editingBanner.product_size_id !== undefined) formData.append('product_size_id', editingBanner.product_size_id);
       if (editingBanner.discount_price !== undefined) formData.append('discount_price', editingBanner.discount_price);
       formData.append('is_active', editingBanner.is_active ?? true);
       
@@ -449,7 +449,7 @@ const AdminDashboard = () => {
       }
 
       if (editingBanner.id) {
-        await api.put(`/admin/banners/${editingBanner.id}/`, formData);
+        await api.post(`/admin/banners/${editingBanner.id}/`, formData);
         toast.success('Banner updated');
       } else {
         await api.post('/admin/banners/', formData);
