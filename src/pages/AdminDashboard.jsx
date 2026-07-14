@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus, Plus, Trash2, Eye, X } from 'lucide-react';
+import { ShieldCheck, PackageSearch, RefreshCw, CheckCircle2, XCircle, Users, UserPlus, UserMinus, Plus, Trash2, Eye, X, Truck } from 'lucide-react';
 import api, { API_BASE, getImageUrl } from '../api';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
@@ -105,6 +105,9 @@ const AdminDashboard = () => {
     }
     if (activeTab === 'stock') {
       fetchProducts();
+    }
+    if (activeTab === 'settings') {
+      fetchSettings();
     }
   }, [activeTab, user]);
 

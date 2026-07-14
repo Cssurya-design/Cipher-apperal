@@ -50,6 +50,19 @@ const ProductCard = ({ product }) => {
     }
   };
 
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    const defaultColor = product.colors?.length > 0 ? product.colors[0].color : '';
+    let defaultSize = 'XL';
+    if (product.colors?.length > 0 && product.colors[0].sizes?.length > 0) {
+        defaultSize = product.colors[0].sizes[0].size;
+    } else if (product.sizes?.length > 0) {
+        defaultSize = product.sizes[0].size;
+    }
+    addToCart(product, 1, defaultSize, defaultColor);
+    toast.success('Added to cart!');
+  };
+
   return (
     <motion.div
       whileHover={{ y: -4, boxShadow: '0 16px 32px -8px rgba(0, 0, 0, 0.12)' }}
@@ -123,7 +136,7 @@ const ProductCard = ({ product }) => {
             </div>
             {/* Add to Cart button */}
             <button
-              onClick={(e) => { e.preventDefault(); addToCart(product, 1, 'XL'); }}
+              onClick={handleAddToCart}
               className="w-7 h-7 sm:w-9 sm:h-9 bg-primary/10 text-primary rounded-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors flex-shrink-0"
               title="Add to cart"
             >
