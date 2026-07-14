@@ -21,6 +21,9 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    if (config.method === 'get' && config.url && config.url.includes('/settings')) {
+      config.params = { ...config.params, t: new Date().getTime() };
+    }
     return config;
   },
   (error) => Promise.reject(error)

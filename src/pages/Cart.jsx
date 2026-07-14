@@ -40,7 +40,7 @@ const Cart = () => {
             delivery_fee: parseFloat(s.delivery_fee) || 40,
             free_delivery_above: parseFloat(s.free_delivery_above) || 499,
             gst_percentage: s.gst_percentage !== undefined && s.gst_percentage !== null && s.gst_percentage !== '' && !isNaN(parseFloat(s.gst_percentage)) ? parseFloat(s.gst_percentage) : 5,
-            gst_enabled: s.gst_enabled !== 'false' && s.gst_enabled !== false
+            gst_enabled: String(s.gst_enabled).toLowerCase() !== 'false'
           });
         }
       })

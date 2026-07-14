@@ -1459,13 +1459,13 @@ const AdminDashboard = () => {
                         <label className="flex items-center gap-2 cursor-pointer mb-2">
                           <input 
                             type="checkbox"
-                            checked={settings.gst_enabled !== false && settings.gst_enabled !== 'false'}
+                            checked={String(settings.gst_enabled).toLowerCase() !== 'false'}
                             onChange={e => setSettings({...settings, gst_enabled: e.target.checked})}
                             className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
                           />
                           <span className="text-sm font-semibold text-gray-700">Enable GST</span>
                         </label>
-                        {settings.gst_enabled !== false && settings.gst_enabled !== 'false' && (
+                        {String(settings.gst_enabled).toLowerCase() !== 'false' && (
                           <>
                             <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">GST Percentage (%)</label>
                             <input 
