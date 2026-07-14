@@ -22,9 +22,7 @@ const Cart = () => {
   const { user } = useAuth();
   const [settings, setSettings] = useState({
     delivery_days: 5,
-    delivery_radius_km: 10,
     delivery_fee: 40,
-    min_order_amount: 99,
     free_delivery_above: 499,
     gst_percentage: 5
   });
@@ -38,11 +36,9 @@ const Cart = () => {
           const s = res.data.settings;
           setSettings({
             delivery_days: parseInt(s.delivery_days, 10) || 5,
-            delivery_radius_km: parseFloat(s.delivery_radius_km) || 10,
             delivery_fee: parseFloat(s.delivery_fee) || 40,
-            min_order_amount: parseFloat(s.min_order_amount) || 99,
             free_delivery_above: parseFloat(s.free_delivery_above) || 499,
-            gst_percentage: parseFloat(s.gst_percentage) || 5
+            gst_percentage: s.gst_percentage !== undefined && s.gst_percentage !== null && s.gst_percentage !== '' ? parseFloat(s.gst_percentage) : 5
           });
         }
       })
@@ -314,10 +310,12 @@ const Cart = () => {
                 <span>Subtotal ({cart.reduce((s, i) => s + i.quantity, 0)} items)</span>
                 <span>₹{cartTotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-600 text-sm">
-                <span>GST ({settings.gst_percentage}%)</span>
-                <span>₹{gstAmount.toFixed(2)}</span>
-              </div>
+              {settings.gst_percentage > 0 && (
+                <div className="flex justify-between text-gray-600 text-sm">
+                  <span>GST ({settings.gst_percentage}%)</span>
+                  <span>₹{gstAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-gray-600 text-sm">
                 <span>Shipping</span>
                 {deliveryCharge > 0 ? (

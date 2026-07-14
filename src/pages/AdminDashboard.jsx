@@ -1427,19 +1427,7 @@ const AdminDashboard = () => {
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Delivery Radius (KM)</label>
-                        <input 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          value={settings.delivery_radius_km || ''} 
-                          onChange={e => setSettings({...settings, delivery_radius_km: e.target.value})} 
-                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
-                          placeholder="10.00" 
-                        />
-                      </div>
-                      
+
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Delivery Fee (₹)</label>
                         <input 
@@ -1453,18 +1441,6 @@ const AdminDashboard = () => {
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Min. Order Amount (₹)</label>
-                        <input 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          value={settings.min_order_amount || ''} 
-                          onChange={e => setSettings({...settings, min_order_amount: e.target.value})} 
-                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
-                          placeholder="99.00" 
-                        />
-                      </div>
 
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Free Delivery Above (₹)</label>
@@ -1485,7 +1461,7 @@ const AdminDashboard = () => {
                           type="number" 
                           step="0.01"
                           min="0"
-                          value={settings.gst_percentage || ''} 
+                          value={settings.gst_percentage !== undefined && settings.gst_percentage !== null ? settings.gst_percentage : ''} 
                           onChange={e => setSettings({...settings, gst_percentage: e.target.value})} 
                           className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
                           placeholder="5.00" 
