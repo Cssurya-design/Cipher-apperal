@@ -38,7 +38,7 @@ const Cart = () => {
             delivery_days: parseInt(s.delivery_days, 10) || 5,
             delivery_fee: parseFloat(s.delivery_fee) || 40,
             free_delivery_above: parseFloat(s.free_delivery_above) || 499,
-            gst_percentage: s.gst_percentage !== undefined && s.gst_percentage !== null && s.gst_percentage !== '' ? parseFloat(s.gst_percentage) : 5
+            gst_percentage: s.gst_percentage !== undefined && s.gst_percentage !== null && s.gst_percentage !== '' && !isNaN(parseFloat(s.gst_percentage)) ? parseFloat(s.gst_percentage) : 5
           });
         }
       })
