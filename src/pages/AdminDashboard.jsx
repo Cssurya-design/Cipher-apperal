@@ -925,8 +925,37 @@ const AdminDashboard = () => {
                     <p className="text-xs text-gray-500 mt-1">If a product is linked, clicking the offer will automatically apply a discount / add it to cart.</p>
                   </div>
                   {editingBanner.product_id && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                      <label className="block text-sm font-semibold mb-1">Discount Price for this Product (₹)</label>
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4">
+                      <label className="block text-sm font-semibold mb-1">Target Size for Discount (Optional)</label>
+                      <select 
+                        value={editingBanner.product_size_id || ''} 
+                        onChange={e => setEditingBanner({...editingBanner, product_size_id: e.target.value})} 
+                        className="w-full p-2 border rounded mb-4"
+                      >
+                        <option value="">-- Apply to All Sizes --</option>
+                        {(() => {
+                           const p = products.find(prod => prod.id == editingBanner.product_id);
+                           if (!p) return null;
+                           let allSizes = [];
+                           if (p.sizes && p.sizes.length > 0) {
+                              allSizes = [...p.sizes];
+                           }
+                           if (p.colors && p.colors.length > 0) {
+                              p.colors.forEach(c => {
+                                  if (c.sizes && c.sizes.length > 0) {
+                                      c.sizes.forEach(s => {
+                                          allSizes.push({...s, size: `${c.color} - ${s.size}`});
+                                      });
+                                  }
+                              });
+                           }
+                           return allSizes.map(s => (
+                             <option key={s.id} value={s.id}>{s.size} (₹{s.price || p.price})</option>
+                           ));
+                        })()}
+                      </select>
+                      
+                      <label className="block text-sm font-semibold mb-1">Discount Price (₹)</label>
                       <input 
                         type="number" 
                         step="0.01" 
@@ -935,7 +964,7 @@ const AdminDashboard = () => {
                         className="w-full p-2 border rounded" 
                         placeholder="e.g. 499.00" 
                       />
-                      <p className="text-xs text-green-600 font-semibold mt-1">This will update the product's price sitewide to show a strikethrough sale price.</p>
+                      <p className="text-xs text-green-600 font-semibold mt-1">This will update the selected target's price sitewide to show a strikethrough sale price.</p>
                     </motion.div>
                   )}
                   <div className="flex items-center gap-2 mt-4">
@@ -1638,12 +1667,31 @@ const AdminDashboard = () => {
                                }
                                
                                if (allSizes.length > 0) {
+                                  const grouped = {};
+                                  allSizes.forEach(s => {
+                                      let color = 'Default';
+                                      let sizeLabel = s.size;
+                                      if (s.size.includes(' - ')) {
+                                          const parts = s.size.split(' - ');
+                                          color = parts[0];
+                                          sizeLabel = parts[1];
+                                      }
+                                      if (!grouped[color]) grouped[color] = [];
+                                      grouped[color].push({...s, size: sizeLabel});
+                                  });
                                   return (
-                                      <div className="flex flex-wrap gap-2">
-                                        {allSizes.map((s, idx) => (
-                                          <span key={s.id || idx} className={`px-2 py-1 rounded border text-xs font-medium ${s.stock > 0 ? 'bg-white border-gray-200 text-gray-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
-                                            {s.size}: {s.stock}
-                                          </span>
+                                      <div className="flex flex-col gap-2">
+                                        {Object.keys(grouped).map(color => (
+                                          <div key={color} className="flex items-center gap-2">
+                                            {color !== 'Default' && <span className="font-semibold text-[10px] text-gray-500 uppercase tracking-wider w-16 truncate" title={color}>{color}</span>}
+                                            <div className="flex flex-wrap gap-1">
+                                              {grouped[color].map((s, idx) => (
+                                                <span key={s.id || idx} className={`px-2 py-0.5 rounded border text-xs font-medium ${s.stock > 0 ? 'bg-white border-gray-200 text-gray-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                                                  {s.size}: {s.stock}
+                                                </span>
+                                              ))}
+                                            </div>
+                                          </div>
                                         ))}
                                       </div>
                                   );
