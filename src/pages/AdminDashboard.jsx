@@ -1622,17 +1622,34 @@ const AdminDashboard = () => {
                             </span>
                           </td>
                           <td className="p-4">
-                            {product.sizes && product.sizes.length > 0 ? (
-                              <div className="flex flex-wrap gap-2">
-                                {product.sizes.map(s => (
-                                  <span key={s.id} className={`px-2 py-1 rounded border text-xs font-medium ${s.stock > 0 ? 'bg-white border-gray-200 text-gray-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
-                                    {s.size}: {s.stock}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="text-gray-400 text-xs italic">No variants</span>
-                            )}
+                            {(() => {
+                               let allSizes = [];
+                               if (product.sizes && product.sizes.length > 0) {
+                                  allSizes = [...product.sizes];
+                               }
+                               if (product.colors && product.colors.length > 0) {
+                                  product.colors.forEach(c => {
+                                      if (c.sizes && c.sizes.length > 0) {
+                                          c.sizes.forEach(s => {
+                                              allSizes.push({...s, size: `${c.color} - ${s.size}`});
+                                          });
+                                      }
+                                  });
+                               }
+                               
+                               if (allSizes.length > 0) {
+                                  return (
+                                      <div className="flex flex-wrap gap-2">
+                                        {allSizes.map((s, idx) => (
+                                          <span key={s.id || idx} className={`px-2 py-1 rounded border text-xs font-medium ${s.stock > 0 ? 'bg-white border-gray-200 text-gray-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                                            {s.size}: {s.stock}
+                                          </span>
+                                        ))}
+                                      </div>
+                                  );
+                               }
+                               return <span className="text-gray-400 text-xs italic">No variants</span>;
+                            })()}
                           </td>
                           <td className="p-4 text-right">
                             <button
