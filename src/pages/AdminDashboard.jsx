@@ -1386,7 +1386,80 @@ const AdminDashboard = () => {
                     <p className="text-xs text-gray-500 mt-1">Number of days to add to the order date to calculate estimated delivery.</p>
                   </div>
                   
-                  {/* You can add more settings inputs here seamlessly by adding more keys to the settings state */}
+                  {/* Delivery Settings UI based on mockup */}
+                  <div className="mt-8 bg-gray-900 rounded-xl p-6 text-white border border-gray-800">
+                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                      <Truck className="text-orange-500 w-5 h-5" />
+                      Delivery Settings
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Delivery Radius (KM)</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          value={settings.delivery_radius_km || ''} 
+                          onChange={e => setSettings({...settings, delivery_radius_km: e.target.value})} 
+                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          placeholder="10.00" 
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Delivery Fee (₹)</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          value={settings.delivery_fee || ''} 
+                          onChange={e => setSettings({...settings, delivery_fee: e.target.value})} 
+                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          placeholder="40.00" 
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Min. Order Amount (₹)</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          value={settings.min_order_amount || ''} 
+                          onChange={e => setSettings({...settings, min_order_amount: e.target.value})} 
+                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          placeholder="99.00" 
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Free Delivery Above (₹)</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          value={settings.free_delivery_above || ''} 
+                          onChange={e => setSettings({...settings, free_delivery_above: e.target.value})} 
+                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          placeholder="499.00" 
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">GST Percentage (%)</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          value={settings.gst_percentage || ''} 
+                          onChange={e => setSettings({...settings, gst_percentage: e.target.value})} 
+                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          placeholder="5.00" 
+                        />
+                      </div>
+                    </div>
+                  </div>
                   
                   <div className="pt-4">
                     <button type="submit" className="bg-primary text-white px-6 py-2 rounded font-semibold">Save Settings</button>
@@ -1461,8 +1534,22 @@ const AdminDashboard = () => {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Payment Info</h4>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                  <p className="text-gray-500">Total</p>
+                  <p className="text-gray-500">Total Price</p>
                   <p className="font-bold text-gray-900">₹{selectedOrder.total_price}</p>
+                  {parseFloat(selectedOrder.gst_amount) > 0 && (
+                    <>
+                      <p className="text-gray-500">GST</p>
+                      <p className="font-semibold text-gray-700">₹{parseFloat(selectedOrder.gst_amount).toFixed(2)}</p>
+                    </>
+                  )}
+                  {parseFloat(selectedOrder.delivery_fee) >= 0 && (
+                    <>
+                      <p className="text-gray-500">Delivery Fee</p>
+                      <p className="font-semibold text-gray-700">
+                        {parseFloat(selectedOrder.delivery_fee) > 0 ? `₹${parseFloat(selectedOrder.delivery_fee).toFixed(2)}` : <span className="text-green-600">Free</span>}
+                      </p>
+                    </>
+                  )}
                   <p className="text-gray-500">Method</p>
                   <p className="font-medium">{selectedOrder.payment_method === 'COD' ? 'Cash on Delivery' : 'UPI'}</p>
                   <p className="text-gray-500">Payment Status</p>

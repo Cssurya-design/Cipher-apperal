@@ -391,7 +391,10 @@ const OrderTracking = () => {
                   return sum + (itemPrice * item.quantity) + discAmt;
                 }, 0);
                 const finalTotal = parseFloat(order.total_price) || 0;
-                const discountTotal = originalTotal - finalTotal;
+                const gstAmount = parseFloat(order.gst_amount) || 0;
+                const deliveryFee = parseFloat(order.delivery_fee) || 0;
+                const subTotalAfterDiscount = finalTotal - gstAmount - deliveryFee;
+                const discountTotal = originalTotal - subTotalAfterDiscount;
                 return (
                   <div className={discountTotal > 0.01 ? "border-t pt-2 mt-1 space-y-1" : "pt-2 mt-1"}>
                     {discountTotal > 0.01 && (
@@ -406,7 +409,21 @@ const OrderTracking = () => {
                         </div>
                       </>
                     )}
-                    <div className={`flex justify-between text-sm ${discountTotal > 0.01 ? 'border-t pt-1 mt-1' : ''}`}>
+                    {gstAmount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">GST</span>
+                        <span className="text-gray-500">₹{gstAmount?.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Shipping</span>
+                      {deliveryFee > 0 ? (
+                        <span className="text-gray-500">₹{deliveryFee?.toFixed(2)}</span>
+                      ) : (
+                        <span className="text-green-500 font-semibold">Free</span>
+                      )}
+                    </div>
+                    <div className={`flex justify-between text-sm border-t pt-1 mt-1`}>
                       <span className="font-bold text-gray-700">Grand Total</span>
                       <span className="font-bold text-gray-900">₹{order.total_price}</span>
                     </div>

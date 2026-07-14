@@ -20,15 +20,30 @@ const Cart = () => {
   
   const { cart, removeFromCart, updateQuantity, updateSize, clearCart, cartTotal } = useCart();
   const { user } = useAuth();
-  const [deliveryDays, setDeliveryDays] = useState(5);
+  const [settings, setSettings] = useState({
+    delivery_days: 5,
+    delivery_radius_km: 10,
+    delivery_fee: 40,
+    min_order_amount: 99,
+    free_delivery_above: 499,
+    gst_percentage: 5
+  });
 
   useEffect(() => {
     document.title = "Shopping Cart | Cipher Apparel";
     // Fetch delivery setting
     api.get('/api/settings/')
       .then(res => {
-        if (res.data?.settings?.delivery_days) {
-          setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
+        if (res.data?.settings) {
+          const s = res.data.settings;
+          setSettings({
+            delivery_days: parseInt(s.delivery_days, 10) || 5,
+            delivery_radius_km: parseFloat(s.delivery_radius_km) || 10,
+            delivery_fee: parseFloat(s.delivery_fee) || 40,
+            min_order_amount: parseFloat(s.min_order_amount) || 99,
+            free_delivery_above: parseFloat(s.free_delivery_above) || 499,
+            gst_percentage: parseFloat(s.gst_percentage) || 5
+          });
         }
       })
       .catch(err => console.error("Error fetching settings:", err));
@@ -51,7 +66,13 @@ const Cart = () => {
   const [couponLoading, setCouponLoading] = useState(false);
 
   // Derived Total
-  const finalTotal = appliedCoupon ? cartTotal * (1 - appliedCoupon.discount_percentage / 100) : cartTotal;
+  const subTotalAfterDiscount = appliedCoupon ? cartTotal * (1 - appliedCoupon.discount_percentage / 100) : cartTotal;
+  const gstAmount = subTotalAfterDiscount * (settings.gst_percentage / 100);
+  let deliveryCharge = 0;
+  if (cartTotal > 0 && subTotalAfterDiscount < settings.free_delivery_above) {
+    deliveryCharge = settings.delivery_fee;
+  }
+  const finalTotal = subTotalAfterDiscount + gstAmount + deliveryCharge;
 
   useEffect(() => {
     const checkMobile = () => {
@@ -91,7 +112,10 @@ const Cart = () => {
         items,
         payment_method: paymentMethod,
         transaction_id: paymentMethod === 'UPI' ? transactionId : '',
-        coupon_code: appliedCoupon ? appliedCoupon.code : ''
+        coupon_code: appliedCoupon ? appliedCoupon.code : '',
+        delivery_fee: deliveryCharge,
+        gst_amount: gstAmount,
+        gst_percentage: settings.gst_percentage
       });
       const createdOrderIds = res.data.orders?.map(o => o.id) || [];
       const groupId = res.data.group_id;
@@ -176,7 +200,7 @@ const Cart = () => {
             <span className="text-xs font-semibold text-blue-900 mt-0.5 block">
               Estimated Delivery: {(() => {
                 const est = new Date();
-                est.setDate(est.getDate() + deliveryDays);
+                est.setDate(est.getDate() + settings.delivery_days);
                 return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
               })()}
             </span>
@@ -291,9 +315,22 @@ const Cart = () => {
                 <span>₹{cartTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600 text-sm">
-                <span>Shipping</span>
-                <span className="text-green-500 font-semibold">Free</span>
+                <span>GST ({settings.gst_percentage}%)</span>
+                <span>₹{gstAmount.toFixed(2)}</span>
               </div>
+              <div className="flex justify-between text-gray-600 text-sm">
+                <span>Shipping</span>
+                {deliveryCharge > 0 ? (
+                  <span>₹{deliveryCharge.toFixed(2)}</span>
+                ) : (
+                  <span className="text-green-500 font-semibold">Free</span>
+                )}
+              </div>
+              {cartTotal > 0 && deliveryCharge > 0 && (
+                <div className="text-xs text-blue-600 mb-2">
+                  Add items worth ₹{(settings.free_delivery_above - subTotalAfterDiscount).toFixed(2)} more for free delivery!
+                </div>
+              )}
               <div className="border-t pt-3 flex justify-between font-bold text-lg text-gray-900">
                 <span>Total</span>
                 <span className="text-primary">₹{finalTotal.toFixed(2)}</span>
