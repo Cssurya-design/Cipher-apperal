@@ -436,7 +436,7 @@ const AdminDashboard = () => {
       if (editingBanner.description) formData.append('description', editingBanner.description);
       if (editingBanner.product_id) formData.append('product_id', editingBanner.product_id);
       if (editingBanner.product_size_id) formData.append('product_size_id', editingBanner.product_size_id);
-      if (editingBanner.discount_price !== undefined && editingBanner.discount_price !== '') formData.append('discount_price', editingBanner.discount_price);
+      if (editingBanner.discount_price !== undefined) formData.append('discount_price', editingBanner.discount_price);
       formData.append('is_active', editingBanner.is_active ?? true);
       
       if (editingBanner.imageFile) {
