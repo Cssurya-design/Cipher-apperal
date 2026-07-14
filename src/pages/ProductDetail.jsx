@@ -269,8 +269,8 @@ const ProductDetail = () => {
                 ? selectedColorObj.sizes 
                 : product.sizes || [];
               const currentSizeObj = availableSizes.find(s => s.size === selectedSize);
-              const activePrice = currentSizeObj?.price || product.price;
-              const activeDiscountPrice = currentSizeObj?.discount_price || product.discount_price;
+              const activePrice = (currentSizeObj && currentSizeObj.price !== null && currentSizeObj.price !== undefined) ? currentSizeObj.price : product.price;
+              const activeDiscountPrice = (currentSizeObj && currentSizeObj.discount_price !== null && currentSizeObj.discount_price !== undefined) ? currentSizeObj.discount_price : product.discount_price;
               return (
                 <div className="flex items-center gap-3 mb-4">
                   <p className="text-2xl font-bold text-gray-900">
@@ -383,8 +383,8 @@ const ProductDetail = () => {
                 ? selectedColorObj.sizes 
                 : product.sizes || [];
               const currentSizeObj = availableSizes.find(s => s.size === selectedSize);
-              const activePrice = currentSizeObj?.price || product.price;
-              const activeDiscountPrice = currentSizeObj?.discount_price || product.discount_price;
+              const activePrice = (currentSizeObj && currentSizeObj.price !== null && currentSizeObj.price !== undefined) ? currentSizeObj.price : product.price;
+              const activeDiscountPrice = (currentSizeObj && currentSizeObj.discount_price !== null && currentSizeObj.discount_price !== undefined) ? currentSizeObj.discount_price : product.discount_price;
               return (
                 <p className="text-2xl font-bold text-gray-900 mb-4">
                   <span className="text-sm text-gray-500 align-top mr-1">₹</span>

@@ -435,6 +435,7 @@ const AdminDashboard = () => {
       if (editingBanner.subtitle) formData.append('subtitle', editingBanner.subtitle);
       if (editingBanner.description) formData.append('description', editingBanner.description);
       if (editingBanner.product_id) formData.append('product_id', editingBanner.product_id);
+      if (editingBanner.product_size_id) formData.append('product_size_id', editingBanner.product_size_id);
       if (editingBanner.discount_price !== undefined && editingBanner.discount_price !== '') formData.append('discount_price', editingBanner.discount_price);
       formData.append('is_active', editingBanner.is_active ?? true);
       
@@ -919,7 +920,7 @@ const AdminDashboard = () => {
                     >
                       <option value="">-- No Product Linked --</option>
                       {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} - ₹{p.price}</option>
+                        <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
                     </select>
                     <p className="text-xs text-gray-500 mt-1">If a product is linked, clicking the offer will automatically apply a discount / add it to cart.</p>
@@ -950,7 +951,7 @@ const AdminDashboard = () => {
                               });
                            }
                            return allSizes.map(s => (
-                             <option key={s.id} value={s.id}>{s.size} (₹{s.price || p.price})</option>
+                             <option key={s.id} value={s.id}>{s.size}</option>
                            ));
                         })()}
                       </select>
@@ -1418,8 +1419,8 @@ const AdminDashboard = () => {
                     <p className="text-xs text-gray-500 mt-1">Number of days to add to the order date to calculate estimated delivery.</p>
                   </div>
                   
-                  {/* Delivery Settings UI based on mockup */}
-                  <div className="mt-8 bg-gray-900 rounded-xl p-6 text-white border border-gray-800">
+                  {/* Delivery Settings UI */}
+                  <div className="mt-8 bg-white rounded-xl p-6 text-gray-900 border border-gray-200 shadow-sm">
                     <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
                       <Truck className="text-orange-500 w-5 h-5" />
                       Delivery Settings
@@ -1427,66 +1428,66 @@ const AdminDashboard = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Delivery Radius (KM)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Delivery Radius (KM)</label>
                         <input 
                           type="number" 
                           step="0.01"
                           min="0"
                           value={settings.delivery_radius_km || ''} 
                           onChange={e => setSettings({...settings, delivery_radius_km: e.target.value})} 
-                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
                           placeholder="10.00" 
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Delivery Fee (₹)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Delivery Fee (₹)</label>
                         <input 
                           type="number" 
                           step="0.01"
                           min="0"
                           value={settings.delivery_fee || ''} 
                           onChange={e => setSettings({...settings, delivery_fee: e.target.value})} 
-                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
                           placeholder="40.00" 
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Min. Order Amount (₹)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Min. Order Amount (₹)</label>
                         <input 
                           type="number" 
                           step="0.01"
                           min="0"
                           value={settings.min_order_amount || ''} 
                           onChange={e => setSettings({...settings, min_order_amount: e.target.value})} 
-                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
                           placeholder="99.00" 
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">Free Delivery Above (₹)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">Free Delivery Above (₹)</label>
                         <input 
                           type="number" 
                           step="0.01"
                           min="0"
                           value={settings.free_delivery_above || ''} 
                           onChange={e => setSettings({...settings, free_delivery_above: e.target.value})} 
-                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
                           placeholder="499.00" 
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1 tracking-wider uppercase">GST Percentage (%)</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">GST Percentage (%)</label>
                         <input 
                           type="number" 
                           step="0.01"
                           min="0"
                           value={settings.gst_percentage || ''} 
                           onChange={e => setSettings({...settings, gst_percentage: e.target.value})} 
-                          className="w-full p-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-orange-500 focus:outline-none" 
+                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
                           placeholder="5.00" 
                         />
                       </div>
