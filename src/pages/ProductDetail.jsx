@@ -83,10 +83,11 @@ const ProductDetail = () => {
       });
       
     // Fetch delivery setting
-    api.get('/api/settings/')
+    api.get('/settings/')
       .then(res => {
         if (res.data?.settings?.delivery_days) {
-          setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
+          const rawDays = res.data.settings.delivery_days;
+          setDeliveryDays(isNaN(Number(rawDays)) ? rawDays : parseInt(rawDays, 10));
         }
       })
       .catch(err => console.error("Error fetching settings:", err));
@@ -403,11 +404,11 @@ const ProductDetail = () => {
                 {displayLocation ? `Deliver to ${displayLocation}` : 'Select delivery location'}
               </button>
               <div className="text-gray-800">
-                Delivery: <span className="font-bold text-gray-900">{(() => {
+                Delivery: <span className="font-bold text-gray-900">{typeof deliveryDays === 'number' ? (() => {
                   const est = new Date();
                   est.setDate(est.getDate() + deliveryDays);
                   return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
-                })()}</span>
+                })() : deliveryDays}</span>
               </div>
             </div>
 

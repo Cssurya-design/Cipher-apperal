@@ -31,16 +31,18 @@ const Cart = () => {
   useEffect(() => {
     document.title = "Shopping Cart | Cipher Apparel";
     // Fetch delivery setting
-    api.get('/api/settings/')
+    api.get('/settings/')
       .then(res => {
         if (res.data?.settings) {
           const s = res.data.settings;
           setSettings({
-            delivery_days: parseInt(s.delivery_days, 10) || 5,
+            delivery_days: isNaN(Number(s.delivery_days)) ? s.delivery_days : parseInt(s.delivery_days, 10),
+            delivery_radius_km: parseFloat(s.delivery_radius_km) || 10,
             delivery_fee: parseFloat(s.delivery_fee) || 40,
+            min_order_amount: parseFloat(s.min_order_amount) || 99,
             free_delivery_above: parseFloat(s.free_delivery_above) || 499,
             gst_percentage: s.gst_percentage !== undefined && s.gst_percentage !== null && s.gst_percentage !== '' && !isNaN(parseFloat(s.gst_percentage)) ? parseFloat(s.gst_percentage) : 5,
-            gst_enabled: String(s.gst_enabled).toLowerCase() !== 'false'
+            gst_enabled: s.gst_enabled === 'True' || s.gst_enabled === 'true' || s.gst_enabled === true
           });
         }
       })
@@ -196,11 +198,11 @@ const Cart = () => {
                 : 'Select a delivery location'}
             </span>
             <span className="text-xs font-semibold text-blue-900 mt-0.5 block">
-              Estimated Delivery: {(() => {
+              Estimated Delivery: {typeof settings.delivery_days === 'number' ? (() => {
                 const est = new Date();
                 est.setDate(est.getDate() + settings.delivery_days);
                 return est.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
-              })()}
+              })() : settings.delivery_days}
             </span>
           </div>
           <button

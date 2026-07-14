@@ -68,7 +68,7 @@ const Dashboard = () => {
           setLoading(false);
         });
       // Fetch delivery days setting
-      api.get('/api/settings/')
+      api.get('/settings/')
         .then(res => {
           if (res.data?.settings?.delivery_days) {
             setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);

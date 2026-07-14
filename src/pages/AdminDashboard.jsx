@@ -1409,12 +1409,11 @@ const AdminDashboard = () => {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Estimated Delivery Days</label>
                     <input 
-                      type="number" 
-                      min="1"
+                      type="text" 
                       value={settings.delivery_days || ''} 
                       onChange={e => setSettings({...settings, delivery_days: e.target.value})} 
                       className="w-full p-2 border border-gray-200 rounded" 
-                      placeholder="e.g. 5" 
+                      placeholder="e.g. 5 or '3-5 days'" 
                     />
                     <p className="text-xs text-gray-500 mt-1">Number of days to add to the order date to calculate estimated delivery.</p>
                   </div>

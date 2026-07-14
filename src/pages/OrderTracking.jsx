@@ -41,7 +41,7 @@ const OrderTracking = () => {
     fetchOrder();
     
     // Fetch delivery setting
-    api.get('/api/settings/')
+    api.get('/settings/')
       .then(res => {
         if (res.data?.settings?.delivery_days) {
           setDeliveryDays(parseInt(res.data.settings.delivery_days, 10) || 5);
