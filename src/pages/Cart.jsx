@@ -24,7 +24,8 @@ const Cart = () => {
     delivery_days: 5,
     delivery_fee: 40,
     free_delivery_above: 499,
-    gst_percentage: 5
+    gst_percentage: 5,
+    gst_enabled: true
   });
 
   useEffect(() => {
@@ -38,7 +39,8 @@ const Cart = () => {
             delivery_days: parseInt(s.delivery_days, 10) || 5,
             delivery_fee: parseFloat(s.delivery_fee) || 40,
             free_delivery_above: parseFloat(s.free_delivery_above) || 499,
-            gst_percentage: s.gst_percentage !== undefined && s.gst_percentage !== null && s.gst_percentage !== '' && !isNaN(parseFloat(s.gst_percentage)) ? parseFloat(s.gst_percentage) : 5
+            gst_percentage: s.gst_percentage !== undefined && s.gst_percentage !== null && s.gst_percentage !== '' && !isNaN(parseFloat(s.gst_percentage)) ? parseFloat(s.gst_percentage) : 5,
+            gst_enabled: s.gst_enabled !== 'false' && s.gst_enabled !== false
           });
         }
       })
@@ -63,7 +65,7 @@ const Cart = () => {
 
   // Derived Total
   const subTotalAfterDiscount = appliedCoupon ? cartTotal * (1 - appliedCoupon.discount_percentage / 100) : cartTotal;
-  const gstAmount = subTotalAfterDiscount * (settings.gst_percentage / 100);
+  const gstAmount = settings.gst_enabled ? subTotalAfterDiscount * (settings.gst_percentage / 100) : 0;
   let deliveryCharge = 0;
   if (cartTotal > 0 && subTotalAfterDiscount < settings.free_delivery_above) {
     deliveryCharge = settings.delivery_fee;
@@ -111,7 +113,7 @@ const Cart = () => {
         coupon_code: appliedCoupon ? appliedCoupon.code : '',
         delivery_fee: deliveryCharge,
         gst_amount: gstAmount,
-        gst_percentage: settings.gst_percentage
+        gst_percentage: settings.gst_enabled ? settings.gst_percentage : 0
       });
       const createdOrderIds = res.data.orders?.map(o => o.id) || [];
       const groupId = res.data.group_id;
@@ -310,7 +312,7 @@ const Cart = () => {
                 <span>Subtotal ({cart.reduce((s, i) => s + i.quantity, 0)} items)</span>
                 <span>₹{cartTotal.toFixed(2)}</span>
               </div>
-              {settings.gst_percentage > 0 && (
+              {settings.gst_enabled && settings.gst_percentage > 0 && (
                 <div className="flex justify-between text-gray-600 text-sm">
                   <span>GST ({settings.gst_percentage}%)</span>
                   <span>₹{gstAmount.toFixed(2)}</span>

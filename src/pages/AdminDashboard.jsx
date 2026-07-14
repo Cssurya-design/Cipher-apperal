@@ -1455,17 +1455,30 @@ const AdminDashboard = () => {
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">GST Percentage (%)</label>
-                        <input 
-                          type="number" 
-                          step="0.01"
-                          min="0"
-                          value={settings.gst_percentage !== undefined && settings.gst_percentage !== null ? settings.gst_percentage : ''} 
-                          onChange={e => setSettings({...settings, gst_percentage: e.target.value})} 
-                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
-                          placeholder="5.00" 
-                        />
+                      <div className="col-span-2 sm:col-span-1">
+                        <label className="flex items-center gap-2 cursor-pointer mb-2">
+                          <input 
+                            type="checkbox"
+                            checked={settings.gst_enabled !== false && settings.gst_enabled !== 'false'}
+                            onChange={e => setSettings({...settings, gst_enabled: e.target.checked})}
+                            className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
+                          />
+                          <span className="text-sm font-semibold text-gray-700">Enable GST</span>
+                        </label>
+                        {settings.gst_enabled !== false && settings.gst_enabled !== 'false' && (
+                          <>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1 tracking-wider uppercase">GST Percentage (%)</label>
+                            <input 
+                              type="number" 
+                              step="0.01"
+                              min="0"
+                              value={settings.gst_percentage !== undefined && settings.gst_percentage !== null ? settings.gst_percentage : ''} 
+                              onChange={e => setSettings({...settings, gst_percentage: e.target.value})} 
+                              className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
+                              placeholder="5.00" 
+                            />
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
