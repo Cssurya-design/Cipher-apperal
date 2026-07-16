@@ -641,7 +641,7 @@ const AdminDashboard = () => {
             {/* Orders Table */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm whitespace-nowrap">
+                <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
                   <thead className="bg-gray-50 text-gray-600 font-semibold border-b border-gray-100">
                     <tr>
                       <th className="px-6 py-4">Order ID & Date</th>
@@ -691,7 +691,7 @@ const AdminDashboard = () => {
                               value={order.payment_status}
                               onChange={(e) => updateOrder(order.group_id, 'payment_status', e.target.value)}
                               disabled={updatingId === order.group_id}
-                              className={`text-xs font-bold rounded-lg px-2 py-1.5 border focus:outline-none ${
+                              className={`text-xs font-bold rounded-lg px-2 py-1.5 border focus:outline-none min-w-[120px] ${
                                 order.payment_status === 'Verified' ? 'bg-green-50 border-green-200 text-green-700' :
                                 order.payment_status === 'Failed' ? 'bg-red-50 border-red-200 text-red-700' :
                                 'bg-orange-50 border-orange-200 text-orange-700'
@@ -708,7 +708,7 @@ const AdminDashboard = () => {
                             value={order.status}
                             onChange={(e) => updateOrder(order.group_id, 'status', e.target.value)}
                             disabled={updatingId === order.group_id}
-                            className="text-xs font-bold rounded-lg px-3 py-1.5 border border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-primary"
+                            className="text-xs font-bold rounded-lg px-3 py-1.5 border border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-primary min-w-[120px]"
                           >
                             <option value="placed">Placed</option>
                             <option value="processing">Processing</option>
@@ -1020,7 +1020,7 @@ const AdminDashboard = () => {
                     <input type="number" min="1" required value={editingCoupon.max_uses} onChange={e => setEditingCoupon({...editingCoupon, max_uses: e.target.value})} className="w-full p-2 border rounded" />
                     <p className="text-xs text-gray-500 mt-1">E.g., 100 means this coupon can be applied a total of 100 times across all customers.</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold mb-1">Valid From (Optional)</label>
                       <input type="datetime-local" value={formatDateTimeLocal(editingCoupon.valid_from)} onChange={e => setEditingCoupon({...editingCoupon, valid_from: e.target.value})} className="w-full p-2 border rounded" />
@@ -1058,7 +1058,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse min-w-[600px]">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-100">
                         <th className="p-4 font-semibold text-gray-600 text-sm">Code</th>
@@ -1135,7 +1135,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse min-w-[400px]">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-100">
                         <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
@@ -1292,8 +1292,9 @@ const AdminDashboard = () => {
                           </div>
                           
                           {colorObj.sizes?.length > 0 && (
-                            <div className="space-y-2 mt-3">
-                              <div className="grid grid-cols-4 gap-4 px-2 mb-1">
+                            <div className="space-y-2 mt-3 overflow-x-auto pb-2">
+                              <div className="min-w-[500px]">
+                                <div className="grid grid-cols-4 gap-4 px-2 mb-1">
                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Size</span>
                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</span>
                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Price (₹)</span>
@@ -1317,8 +1318,9 @@ const AdminDashboard = () => {
                                     newColors[idx].sizes[sIdx].discount_price = e.target.value;
                                     setEditingProduct({ ...editingProduct, colors: newColors });
                                   }} className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm" />
-                                </div>
-                              ))}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -1354,7 +1356,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-100">
                         <th className="p-4 font-semibold text-gray-600 text-sm w-16">Image</th>
@@ -1554,7 +1556,7 @@ const AdminDashboard = () => {
               {/* Payment Info */}
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2 border-b pb-1">Payment Info</h4>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm break-words">
                   <p className="text-gray-500">Total Price</p>
                   <p className="font-bold text-gray-900">₹{selectedOrder.total_price}</p>
                   {parseFloat(selectedOrder.gst_amount) > 0 && (
@@ -1613,7 +1615,7 @@ const AdminDashboard = () => {
             
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[600px]">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
                       <th className="p-4 font-semibold text-gray-600 text-sm">Product Name</th>
@@ -1722,7 +1724,7 @@ const AdminDashboard = () => {
             
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
                       <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
