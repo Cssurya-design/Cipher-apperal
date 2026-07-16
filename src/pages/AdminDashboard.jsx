@@ -1613,41 +1613,37 @@ const AdminDashboard = () => {
               </button>
             </div>
             
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="w-full">
-                <table className="w-full text-left border-collapse block md:table">
-                  <thead className="hidden md:table-header-group">
-                    <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Product Name</th>
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Global Stock</th>
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Size Breakdown</th>
-                      <th className="p-4 font-semibold text-gray-600 text-sm text-right">Action</th>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden pb-10">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
+                  <thead className="bg-gray-50 text-gray-600 font-semibold border-b border-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 w-[35%]">Product Name</th>
+                      <th className="px-6 py-4 w-[15%]">Global Stock</th>
+                      <th className="px-6 py-4 w-[35%]">Size Breakdown</th>
+                      <th className="px-6 py-4 text-right w-[15%]">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="block md:table-row-group divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100">
                     {productsLoading ? (
-                      <tr className="block md:table-row"><td colSpan="4" className="block md:table-cell p-8 text-center text-gray-500">Loading stock...</td></tr>
+                      <tr><td colSpan="4" className="p-8 text-center text-gray-500">Loading stock...</td></tr>
                     ) : products.length === 0 ? (
-                      <tr className="block md:table-row"><td colSpan="4" className="block md:table-cell p-8 text-center text-gray-500">No products found.</td></tr>
+                      <tr><td colSpan="4" className="p-8 text-center text-gray-500">No products found.</td></tr>
                     ) : (
                       products.map(product => (
-                        <tr key={product.id} className="block md:table-row hover:bg-gray-50/50 p-4 md:p-0">
-                          <td className="block md:table-cell md:p-4 pb-3 md:pb-4 border-b md:border-0 border-gray-100">
+                        <tr key={product.id} className="hover:bg-gray-50/50">
+                          <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <img src={getImageUrl(product.image, 'products')} alt={product.name} className="h-12 w-12 md:h-10 md:w-10 object-cover rounded-lg shadow-sm" />
-                              <span className="font-semibold text-gray-900 text-base md:text-sm">{product.name}</span>
+                              <img src={getImageUrl(product.image, 'products')} alt={product.name} className="h-10 w-10 object-cover rounded-lg shadow-sm" />
+                              <span className="font-semibold text-gray-900">{product.name}</span>
                             </div>
                           </td>
-                          <td className="block md:table-cell md:p-4 py-3 md:py-4 border-b md:border-0 border-gray-100">
-                            <div className="flex justify-between items-center md:block">
-                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Global Stock</span>
-                              <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${product.stock > 0 ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
-                                {product.stock}
-                              </span>
-                            </div>
+                          <td className="px-6 py-4">
+                            <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${product.stock > 0 ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                              {product.stock}
+                            </span>
                           </td>
-                          <td className="block md:table-cell md:p-4 py-3 md:py-4">
-                            <div className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider mb-2 mt-1">Size Breakdown</div>
+                          <td className="px-6 py-4">
                             {(() => {
                                let allSizes = [];
                                if (product.sizes && product.sizes.length > 0) {
@@ -1685,7 +1681,11 @@ const AdminDashboard = () => {
                                             </span>
                                             
                                             {/* Tooltip */}
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] p-3">
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] p-3">
+                                              {/* Triangle */}
+                                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-b-gray-200">
+                                                <div className="absolute top-[1px] left-1/2 -translate-x-1/2 border-[5px] border-transparent border-b-white"></div>
+                                              </div>
                                               <div className="font-bold text-gray-800 uppercase tracking-wide mb-2 border-b border-gray-100 pb-1 text-center truncate">
                                                 {color !== 'Default' ? color : 'All Sizes'}
                                               </div>
@@ -1697,10 +1697,6 @@ const AdminDashboard = () => {
                                                   </div>
                                                 ))}
                                               </div>
-                                              {/* Triangle */}
-                                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-gray-200">
-                                                <div className="absolute bottom-[1px] left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-white"></div>
-                                              </div>
                                             </div>
                                           </div>
                                         ))}
@@ -1710,13 +1706,13 @@ const AdminDashboard = () => {
                                return <span className="text-gray-400 text-xs italic">No variants</span>;
                             })()}
                           </td>
-                          <td className="block md:table-cell md:p-4 pt-3 md:pt-4 text-left md:text-right border-t md:border-0 border-gray-100 mt-2 md:mt-0">
+                          <td className="px-6 py-4 text-right">
                             <button
                               onClick={() => {
                                 setEditingProduct(product);
                                 setActiveTab('products');
                               }}
-                              className="w-full md:w-auto text-primary hover:text-primary-dark font-medium text-sm border border-primary hover:bg-primary/5 px-4 py-2.5 md:px-3 md:py-1.5 rounded-lg transition-colors"
+                              className="text-primary hover:text-primary-dark font-medium border border-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors"
                             >
                               Edit Stock
                             </button>
@@ -1743,23 +1739,23 @@ const AdminDashboard = () => {
             </div>
             
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="w-full">
-                <table className="w-full text-left border-collapse block md:table">
-                  <thead className="hidden md:table-header-group">
-                    <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="p-4 font-semibold text-gray-600 text-sm">User</th>
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Joined</th>
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Status</th>
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Location</th>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
+                  <thead className="bg-gray-50 text-gray-600 font-semibold border-b border-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 w-[35%]">User</th>
+                      <th className="px-6 py-4 w-[20%]">Joined</th>
+                      <th className="px-6 py-4 w-[15%]">Status</th>
+                      <th className="px-6 py-4 w-[30%]">Location</th>
                     </tr>
                   </thead>
-                  <tbody className="block md:table-row-group divide-y divide-gray-100">
-                    {usersList.length === 0 ? (
-                      <tr className="block md:table-row"><td colSpan="4" className="block md:table-cell p-8 text-center text-gray-500">No users found.</td></tr>
+                  <tbody className="divide-y divide-gray-100">
+                    {usersLoading ? (
+                      <tr><td colSpan="4" className="p-8 text-center text-gray-500">Loading users...</td></tr>
                     ) : (
                       usersList.map(u => (
-                        <tr key={u.id} className="block md:table-row hover:bg-gray-50/50 transition-colors p-4 md:p-0">
-                          <td className="block md:table-cell md:p-4 pb-3 md:pb-4 border-b md:border-0 border-gray-100">
+                        <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg flex-shrink-0">
                                 {u.name ? u.name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
@@ -1773,27 +1769,18 @@ const AdminDashboard = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="block md:table-cell md:p-4 py-2 md:py-4">
-                            <div className="flex justify-between items-center md:block">
-                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Joined</span>
-                              <span className="text-gray-600 font-medium text-sm">{u.date_joined}</span>
-                            </div>
+                          <td className="px-6 py-4">
+                            <span className="text-gray-600 font-medium">{u.date_joined}</span>
                           </td>
-                          <td className="block md:table-cell md:p-4 py-2 md:py-4">
-                            <div className="flex justify-between items-center md:block">
-                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Status</span>
-                              <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${u.is_active ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
-                                {u.is_active ? 'Active' : 'Inactive'}
-                              </span>
-                            </div>
+                          <td className="px-6 py-4">
+                            <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${u.is_active ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                              {u.is_active ? 'Active' : 'Inactive'}
+                            </span>
                           </td>
-                          <td className="block md:table-cell md:p-4 py-2 md:py-4">
-                            <div className="flex justify-between items-center md:block">
-                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Location</span>
-                              <span className="text-sm text-gray-600 font-medium">
-                                {u.location && u.location.city ? `${u.location.city}, ${u.location.country || ''}` : <span className="italic text-gray-400 font-normal">Not provided</span>}
-                              </span>
-                            </div>
+                          <td className="px-6 py-4">
+                            <span className="text-gray-600 font-medium">
+                              {u.location && u.location.city ? `${u.location.city}, ${u.location.country || ''}` : <span className="italic text-gray-400 font-normal">Not provided</span>}
+                            </span>
                           </td>
                         </tr>
                       ))
