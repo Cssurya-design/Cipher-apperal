@@ -1456,13 +1456,13 @@ const AdminDashboard = () => {
                         />
                       </div>
 
-                      <div className="col-span-2 sm:col-span-1">
+                      <div className="md:col-span-2">
                         <label className="flex items-center gap-2 cursor-pointer mb-2">
                           <input 
                             type="checkbox"
                             checked={String(settings.gst_enabled).toLowerCase() !== 'false'}
                             onChange={e => setSettings({...settings, gst_enabled: e.target.checked})}
-                            className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
+                            className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
                           />
                           <span className="text-sm font-semibold text-gray-700">Enable GST</span>
                         </label>
