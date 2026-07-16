@@ -274,7 +274,12 @@ const Home = () => {
                       {selectedOffer.product ? (
                         <button 
                           onClick={() => {
-                            addToCart(selectedOffer.product);
+                            addToCart(
+                              selectedOffer.product, 
+                              1, 
+                              selectedOffer.product_size || 'XL', 
+                              selectedOffer.product_color || ''
+                            );
                             toast.success(`Discount Applied! ${selectedOffer.product.name} added to cart.`);
                             setSelectedOffer(null);
                             navigate('/cart');
