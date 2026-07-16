@@ -1671,14 +1671,18 @@ const AdminDashboard = () => {
                                       grouped[color].push({...s, size: sizeLabel});
                                   });
                                   return (
-                                      <div className="flex flex-col gap-2">
+                                      <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar max-w-[220px] sm:max-w-[300px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[600px]">
                                         {Object.keys(grouped).map(color => (
-                                          <div key={color} className="flex items-center gap-2">
-                                            {color !== 'Default' && <span className="font-semibold text-[10px] text-gray-500 uppercase tracking-wider w-16 truncate" title={color}>{color}</span>}
-                                            <div className="flex flex-wrap gap-1">
+                                          <div key={color} className="flex flex-col flex-shrink-0 bg-white border border-gray-200 shadow-sm rounded-lg p-2.5 min-w-[150px]">
+                                            {color !== 'Default' ? (
+                                              <span className="font-bold text-xs text-gray-800 uppercase tracking-wide mb-2 truncate border-b border-gray-100 pb-1" title={color}>{color}</span>
+                                            ) : (
+                                              <span className="font-bold text-xs text-gray-500 uppercase tracking-wide mb-2 border-b border-gray-100 pb-1">All Sizes</span>
+                                            )}
+                                            <div className="flex flex-wrap gap-1.5">
                                               {grouped[color].map((s, idx) => (
-                                                <span key={s.id || idx} className={`px-2 py-0.5 rounded border text-xs font-medium ${s.stock > 0 ? 'bg-white border-gray-200 text-gray-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
-                                                  {s.size}: {s.stock}
+                                                <span key={s.id || idx} className={`px-1.5 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 ${s.stock > 0 ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                                                  {s.size}: <span>{s.stock}</span>
                                                 </span>
                                               ))}
                                             </div>
@@ -1727,8 +1731,7 @@ const AdminDashboard = () => {
                 <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Name</th>
-                      <th className="p-4 font-semibold text-gray-600 text-sm">Email</th>
+                      <th className="p-4 font-semibold text-gray-600 text-sm">User</th>
                       <th className="p-4 font-semibold text-gray-600 text-sm">Joined</th>
                       <th className="p-4 font-semibold text-gray-600 text-sm">Status</th>
                       <th className="p-4 font-semibold text-gray-600 text-sm">Location</th>
@@ -1739,17 +1742,29 @@ const AdminDashboard = () => {
                       <tr><td colSpan="5" className="p-8 text-center text-gray-500">No users found.</td></tr>
                     ) : (
                       usersList.map(u => (
-                        <tr key={u.id} className="hover:bg-gray-50/50">
-                          <td className="p-4 font-semibold text-gray-900">{u.name} {u.is_staff ? <span className="ml-2 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full uppercase tracking-wider">Admin</span> : ''}</td>
-                          <td className="p-4 text-gray-600">{u.email}</td>
-                          <td className="p-4 text-gray-500 text-sm">{u.date_joined}</td>
+                        <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
                           <td className="p-4">
-                            <span className={`px-2 py-1 rounded font-semibold text-xs ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg flex-shrink-0">
+                                {u.name ? u.name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-gray-900 flex items-center gap-2">
+                                  {u.name || 'Unknown User'}
+                                  {u.is_staff && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-md uppercase tracking-wider font-bold border border-primary/20">Admin</span>}
+                                </span>
+                                <span className="text-sm text-gray-500">{u.email}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 text-gray-600 font-medium text-sm">{u.date_joined}</td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${u.is_active ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
                               {u.is_active ? 'Active' : 'Inactive'}
                             </span>
                           </td>
-                          <td className="p-4 text-sm text-gray-600">
-                            {u.location ? `${u.location.city || ''}, ${u.location.country || ''}` : <span className="italic text-gray-400">Not provided</span>}
+                          <td className="p-4 text-sm text-gray-600 font-medium">
+                            {u.location && u.location.city ? `${u.location.city}, ${u.location.country || ''}` : <span className="italic text-gray-400 font-normal">Not provided</span>}
                           </td>
                         </tr>
                       ))
