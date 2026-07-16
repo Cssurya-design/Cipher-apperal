@@ -1709,6 +1709,7 @@ const AdminDashboard = () => {
                                }
                                return <span className="text-gray-400 text-xs italic">No variants</span>;
                             })()}
+                          </td>
                           <td className="block md:table-cell md:p-4 pt-3 md:pt-4 text-left md:text-right border-t md:border-0 border-gray-100 mt-2 md:mt-0">
                             <button
                               onClick={() => {
