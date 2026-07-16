@@ -1423,7 +1423,7 @@ const AdminDashboard = () => {
                   {/* Delivery Settings UI */}
                   <div className="mt-8 bg-white rounded-xl p-6 text-gray-900 border border-gray-200 shadow-sm">
                     <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                      <Truck className="text-orange-500 w-5 h-5" />
+                      <Truck className="text-primary w-5 h-5" />
                       Delivery Settings
                     </h3>
                     
@@ -1437,7 +1437,7 @@ const AdminDashboard = () => {
                           min="0"
                           value={settings.delivery_fee || ''} 
                           onChange={e => setSettings({...settings, delivery_fee: e.target.value})} 
-                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
+                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-primary focus:outline-none" 
                           placeholder="40.00" 
                         />
                       </div>
@@ -1451,7 +1451,7 @@ const AdminDashboard = () => {
                           min="0"
                           value={settings.free_delivery_above || ''} 
                           onChange={e => setSettings({...settings, free_delivery_above: e.target.value})} 
-                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
+                          className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-primary focus:outline-none" 
                           placeholder="499.00" 
                         />
                       </div>
@@ -1475,7 +1475,7 @@ const AdminDashboard = () => {
                               min="0"
                               value={settings.gst_percentage !== undefined && settings.gst_percentage !== null ? settings.gst_percentage : ''} 
                               onChange={e => setSettings({...settings, gst_percentage: e.target.value})} 
-                              className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-orange-500 focus:outline-none" 
+                              className="w-full p-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:border-primary focus:outline-none" 
                               placeholder="5.00" 
                             />
                           </>
