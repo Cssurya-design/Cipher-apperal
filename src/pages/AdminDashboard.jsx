@@ -1614,9 +1614,9 @@ const AdminDashboard = () => {
             </div>
             
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[600px]">
-                  <thead>
+              <div className="w-full">
+                <table className="w-full text-left border-collapse block md:table">
+                  <thead className="hidden md:table-header-group">
                     <tr className="bg-gray-50 border-b border-gray-100">
                       <th className="p-4 font-semibold text-gray-600 text-sm">Product Name</th>
                       <th className="p-4 font-semibold text-gray-600 text-sm">Global Stock</th>
@@ -1624,24 +1624,30 @@ const AdminDashboard = () => {
                       <th className="p-4 font-semibold text-gray-600 text-sm text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="block md:table-row-group divide-y divide-gray-100">
                     {productsLoading ? (
-                      <tr><td colSpan="4" className="p-8 text-center text-gray-500">Loading stock...</td></tr>
+                      <tr className="block md:table-row"><td colSpan="4" className="block md:table-cell p-8 text-center text-gray-500">Loading stock...</td></tr>
                     ) : products.length === 0 ? (
-                      <tr><td colSpan="4" className="p-8 text-center text-gray-500">No products found.</td></tr>
+                      <tr className="block md:table-row"><td colSpan="4" className="block md:table-cell p-8 text-center text-gray-500">No products found.</td></tr>
                     ) : (
                       products.map(product => (
-                        <tr key={product.id} className="hover:bg-gray-50/50">
-                          <td className="p-4 flex items-center gap-3">
-                            <img src={getImageUrl(product.image, 'products')} alt={product.name} className="h-10 w-10 object-cover rounded shadow-sm" />
-                            <span className="font-semibold text-gray-900">{product.name}</span>
+                        <tr key={product.id} className="block md:table-row hover:bg-gray-50/50 p-4 md:p-0">
+                          <td className="block md:table-cell md:p-4 pb-3 md:pb-4 border-b md:border-0 border-gray-100">
+                            <div className="flex items-center gap-3">
+                              <img src={getImageUrl(product.image, 'products')} alt={product.name} className="h-12 w-12 md:h-10 md:w-10 object-cover rounded-lg shadow-sm" />
+                              <span className="font-semibold text-gray-900 text-base md:text-sm">{product.name}</span>
+                            </div>
                           </td>
-                          <td className="p-4">
-                            <span className={`px-2 py-1 rounded font-semibold text-xs ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {product.stock}
-                            </span>
+                          <td className="block md:table-cell md:p-4 py-3 md:py-4 border-b md:border-0 border-gray-100">
+                            <div className="flex justify-between items-center md:block">
+                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Global Stock</span>
+                              <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${product.stock > 0 ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                                {product.stock}
+                              </span>
+                            </div>
                           </td>
-                          <td className="p-4">
+                          <td className="block md:table-cell md:p-4 py-3 md:py-4">
+                            <div className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider mb-2 mt-1">Size Breakdown</div>
                             {(() => {
                                let allSizes = [];
                                if (product.sizes && product.sizes.length > 0) {
@@ -1671,20 +1677,30 @@ const AdminDashboard = () => {
                                       grouped[color].push({...s, size: sizeLabel});
                                   });
                                   return (
-                                      <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar max-w-[220px] sm:max-w-[300px] md:max-w-[350px] lg:max-w-[450px] xl:max-w-[600px]">
+                                      <div className="flex flex-wrap gap-2">
                                         {Object.keys(grouped).map(color => (
-                                          <div key={color} className="flex flex-col flex-shrink-0 bg-white border border-gray-200 shadow-sm rounded-lg p-2.5 min-w-[150px]">
-                                            {color !== 'Default' ? (
-                                              <span className="font-bold text-xs text-gray-800 uppercase tracking-wide mb-2 truncate border-b border-gray-100 pb-1" title={color}>{color}</span>
-                                            ) : (
-                                              <span className="font-bold text-xs text-gray-500 uppercase tracking-wide mb-2 border-b border-gray-100 pb-1">All Sizes</span>
-                                            )}
-                                            <div className="flex flex-wrap gap-1.5">
-                                              {grouped[color].map((s, idx) => (
-                                                <span key={s.id || idx} className={`px-1.5 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 ${s.stock > 0 ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                                                  {s.size}: <span>{s.stock}</span>
-                                                </span>
-                                              ))}
+                                          <div key={color} className="relative group cursor-pointer">
+                                            <span className="inline-block px-3 py-1.5 bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold rounded-full shadow-sm group-hover:bg-primary/5 group-hover:border-primary group-hover:text-primary transition-all truncate max-w-[120px]" title={color}>
+                                              {color !== 'Default' ? color : 'All Sizes'}
+                                            </span>
+                                            
+                                            {/* Tooltip */}
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] p-3">
+                                              <div className="font-bold text-gray-800 uppercase tracking-wide mb-2 border-b border-gray-100 pb-1 text-center truncate">
+                                                {color !== 'Default' ? color : 'All Sizes'}
+                                              </div>
+                                              <div className="flex flex-col gap-1.5">
+                                                {grouped[color].map((s, idx) => (
+                                                  <div key={s.id || idx} className="flex justify-between items-center bg-gray-50 rounded-lg px-2 py-1.5 border border-gray-100 text-[11px]">
+                                                    <span className="font-bold text-gray-700">{s.size}</span>
+                                                    <span className={`font-bold ${s.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>{s.stock}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                              {/* Triangle */}
+                                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-gray-200">
+                                                <div className="absolute bottom-[1px] left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-white"></div>
+                                              </div>
                                             </div>
                                           </div>
                                         ))}
@@ -1693,14 +1709,13 @@ const AdminDashboard = () => {
                                }
                                return <span className="text-gray-400 text-xs italic">No variants</span>;
                             })()}
-                          </td>
-                          <td className="p-4 text-right">
+                          <td className="block md:table-cell md:p-4 pt-3 md:pt-4 text-left md:text-right border-t md:border-0 border-gray-100 mt-2 md:mt-0">
                             <button
                               onClick={() => {
                                 setEditingProduct(product);
                                 setActiveTab('products');
                               }}
-                              className="text-primary hover:text-primary-dark font-medium text-sm border border-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors"
+                              className="w-full md:w-auto text-primary hover:text-primary-dark font-medium text-sm border border-primary hover:bg-primary/5 px-4 py-2.5 md:px-3 md:py-1.5 rounded-lg transition-colors"
                             >
                               Edit Stock
                             </button>
@@ -1727,9 +1742,9 @@ const AdminDashboard = () => {
             </div>
             
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[800px]">
-                  <thead>
+              <div className="w-full">
+                <table className="w-full text-left border-collapse block md:table">
+                  <thead className="hidden md:table-header-group">
                     <tr className="bg-gray-50 border-b border-gray-100">
                       <th className="p-4 font-semibold text-gray-600 text-sm">User</th>
                       <th className="p-4 font-semibold text-gray-600 text-sm">Joined</th>
@@ -1737,13 +1752,13 @@ const AdminDashboard = () => {
                       <th className="p-4 font-semibold text-gray-600 text-sm">Location</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="block md:table-row-group divide-y divide-gray-100">
                     {usersList.length === 0 ? (
-                      <tr><td colSpan="5" className="p-8 text-center text-gray-500">No users found.</td></tr>
+                      <tr className="block md:table-row"><td colSpan="4" className="block md:table-cell p-8 text-center text-gray-500">No users found.</td></tr>
                     ) : (
                       usersList.map(u => (
-                        <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="p-4">
+                        <tr key={u.id} className="block md:table-row hover:bg-gray-50/50 transition-colors p-4 md:p-0">
+                          <td className="block md:table-cell md:p-4 pb-3 md:pb-4 border-b md:border-0 border-gray-100">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg flex-shrink-0">
                                 {u.name ? u.name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
@@ -1757,14 +1772,27 @@ const AdminDashboard = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4 text-gray-600 font-medium text-sm">{u.date_joined}</td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${u.is_active ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
-                              {u.is_active ? 'Active' : 'Inactive'}
-                            </span>
+                          <td className="block md:table-cell md:p-4 py-2 md:py-4">
+                            <div className="flex justify-between items-center md:block">
+                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Joined</span>
+                              <span className="text-gray-600 font-medium text-sm">{u.date_joined}</span>
+                            </div>
                           </td>
-                          <td className="p-4 text-sm text-gray-600 font-medium">
-                            {u.location && u.location.city ? `${u.location.city}, ${u.location.country || ''}` : <span className="italic text-gray-400 font-normal">Not provided</span>}
+                          <td className="block md:table-cell md:p-4 py-2 md:py-4">
+                            <div className="flex justify-between items-center md:block">
+                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Status</span>
+                              <span className={`px-2.5 py-1 rounded-md font-bold text-xs ${u.is_active ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                                {u.is_active ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="block md:table-cell md:p-4 py-2 md:py-4">
+                            <div className="flex justify-between items-center md:block">
+                              <span className="md:hidden font-bold text-gray-500 text-[10px] uppercase tracking-wider">Location</span>
+                              <span className="text-sm text-gray-600 font-medium">
+                                {u.location && u.location.city ? `${u.location.city}, ${u.location.country || ''}` : <span className="italic text-gray-400 font-normal">Not provided</span>}
+                              </span>
+                            </div>
                           </td>
                         </tr>
                       ))
