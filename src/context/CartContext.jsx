@@ -31,8 +31,13 @@ export const CartProvider = ({ children }) => {
       const activeDiscountPrice = sizeObj?.discount_price || product.discount_price;
       const activeImage = selectedColorObj?.image || product.image;
 
+      const basePrice = product.base_price || product.price;
+      const baseDiscountPrice = 'base_discount_price' in product ? product.base_discount_price : product.discount_price;
+
       return [...prev, {
         ...product,
+        base_price: basePrice,
+        base_discount_price: baseDiscountPrice,
         price: activePrice,
         discount_price: activeDiscountPrice,
         image: activeImage,
@@ -81,8 +86,13 @@ export const CartProvider = ({ children }) => {
             const availableSizes = selectedColorObj?.sizes?.length > 0 ? selectedColorObj.sizes : (item.sizes || []);
             const sizeObj = availableSizes.find(s => s.size === newSize);
             
-            const activePrice = sizeObj?.price || item.price;
-            const activeDiscountPrice = sizeObj?.discount_price || item.discount_price;
+            const activePrice = sizeObj?.price || item.base_price || item.price;
+            let activeDiscountPrice;
+            if (sizeObj && sizeObj.discount_price !== undefined && sizeObj.discount_price !== null) {
+              activeDiscountPrice = sizeObj.discount_price;
+            } else {
+              activeDiscountPrice = 'base_discount_price' in item ? item.base_discount_price : item.discount_price;
+            }
             
             return { ...item, size: newSize, price: activePrice, discount_price: activeDiscountPrice };
           }
