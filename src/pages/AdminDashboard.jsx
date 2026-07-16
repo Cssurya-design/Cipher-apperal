@@ -1492,7 +1492,6 @@ const AdminDashboard = () => {
             )}
           </motion.div>
         )}
-      </div>
 
       {/* Order Details Modal */}
       {selectedOrder && (
@@ -1825,6 +1824,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      </div>
       <Footer />
     </div>
   );
